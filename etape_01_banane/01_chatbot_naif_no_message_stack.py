@@ -13,8 +13,17 @@ import openai
 
 load_dotenv()
 
-client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "sk-changeme"))
-MODEL = os.environ.get("MODEL", "gpt-4o-mini")
+q = input("Model ('local' ou 'openai'): ").strip()
+
+if q == "local":
+    # On récupère l'URL du moteur ou on utilise l'IP Windows par défaut
+    local_url = os.environ.get("LOCAL_BASE_URL", "http://192.168.1.66:1235/v1")
+    local_model = os.environ.get("LOCAL_MODEL", "openai/gpt-oss-20b")
+    client = openai.OpenAI(base_url=local_url, api_key="lm-studio")
+    MODEL = local_model
+else:
+    client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "sk-changeme"))
+    MODEL = os.environ.get("MODEL", "gpt-4o-mini")
 
 msgs = [{"role": "system", "content": "Tu es un assistant utile et concis. Réponds en français."}]
 
@@ -31,13 +40,10 @@ try:
         if not q:
             continue
 
-        msgs.append({"role": "user", "content": q})
-
         try:
             response = client.chat.completions.create(model=MODEL, messages=msgs)
             reply = response.choices[0].message.content
             print(f"IA: {reply}\n")
-            msgs.append({"role": "assistant", "content": reply})
 
         except openai.AuthenticationError:
             print("ERREUR: Clé API invalide. Vérifiez OPENAI_API_KEY dans .env\n")

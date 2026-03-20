@@ -15,7 +15,8 @@ CONFIG = {
         "model": "gpt-4o-mini",
     },
     "local": {
-        "base_url": "http://localhost:1234/v1",
+        "base_url": "http://192.168.1.66:1235/v1",
+        #"base_url": "http://localhost:1234/v1",
         "api_key": "lm-studio",
         "model": "mistral-7b-instruct",
     },

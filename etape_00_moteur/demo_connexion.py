@@ -82,11 +82,16 @@ def main():
 
     # Test 2 : LM Studio Local
     print("\n[2/2] Test connexion LOCAL (LM Studio)...")
+    
+    # On récupère l'URL du moteur ou on utilise l'IP Windows par défaut
+    local_url = os.environ.get("LOCAL_BASE_URL", "http://192.168.1.66:1235/v1")
+    local_model = os.environ.get("LOCAL_MODEL", "openai/gpt-oss-20b")
+
     r2 = test_connection(
         name="Local LM Studio",
-        base_url="http://localhost:1234/v1",
+        base_url=local_url,
         api_key="lm-studio",
-        model=os.environ.get("LOCAL_MODEL", "mistral-7b-instruct"),
+        model=local_model,
     )
     print_result(r2)
     results.append(r2)
