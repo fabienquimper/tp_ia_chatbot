@@ -3,17 +3,16 @@
 Limite la fenêtre de contexte pour contrôler les coûts.
 Concept clé : le Context Window
 """
-import os, time
-from dotenv import load_dotenv
+import os, sys, time
 import openai
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, choose_mode, make_client
 
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
-MODEL = os.environ.get("MODEL", "gpt-4o-mini")
+mode = choose_mode()
+client = make_client(mode)
+MODEL = CONFIG[mode]["model"]
 MAX_HISTORY = int(os.environ.get("MAX_HISTORY", "8"))  # 4 paires user+assistant
-
-client = openai.OpenAI(api_key=API_KEY)
 
 SYSTEM = {
     "role": "system",

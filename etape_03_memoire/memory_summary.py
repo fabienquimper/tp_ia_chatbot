@@ -3,18 +3,17 @@
 Quand l'historique dépasse MAX_HISTORY, résume les anciens messages
 avec le LLM et conserve ce résumé comme contexte compressé.
 """
-import os, time
-from dotenv import load_dotenv
+import os, sys, time
 import openai
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, choose_mode, make_client
 
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
-MODEL = os.environ.get("MODEL", "gpt-4o-mini")
+mode = choose_mode()
+client = make_client(mode)
+MODEL = CONFIG[mode]["model"]
 MAX_HISTORY = int(os.environ.get("MAX_HISTORY", "6"))
 SUMMARY_TRIGGER = MAX_HISTORY  # Résume quand on dépasse cette limite
-
-client = openai.OpenAI(api_key=API_KEY)
 
 history = []
 summary = ""  # Résumé compressé des anciens échanges

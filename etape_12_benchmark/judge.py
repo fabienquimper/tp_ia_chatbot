@@ -2,21 +2,20 @@
 Étape 12 — LLM-as-Judge
 Utilise un LLM pour évaluer la qualité des réponses.
 """
-import os
-from dotenv import load_dotenv
-import openai
+import os, sys
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, make_client
 
-JUDGE_MODEL = os.environ.get("JUDGE_MODEL", "gpt-4o-mini")
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
+# Le juge utilise toujours le cloud (nécessite une vraie clé API)
+JUDGE_MODEL = os.environ.get("JUDGE_MODEL", CONFIG["cloud"]["model"])
 
 _judge_client = None
 
 def get_judge_client():
     global _judge_client
     if _judge_client is None:
-        _judge_client = openai.OpenAI(api_key=API_KEY)
+        _judge_client = make_client("cloud")
     return _judge_client
 
 JUDGE_PROMPT = """Tu es un expert en évaluation de réponses de modèles de langage.

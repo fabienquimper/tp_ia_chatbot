@@ -3,30 +3,22 @@
 Refactorisation du chatbot avec LangChain.
 Avantage : swap Cloud/Local en 1 ligne.
 """
-import os
-from dotenv import load_dotenv
+import os, sys
+from langchain_openai import ChatOpenAI
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, choose_mode
 
-MODEL = os.environ.get("MODEL", "gpt-4o-mini")
-MODE = os.environ.get("MODE", "cloud")
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
-LM_URL = os.environ.get("LM_STUDIO_URL", "http://localhost:1234/v1")
+mode = choose_mode()
+cfg = CONFIG[mode]
 
 # ── Choix du LLM (1 ligne pour switcher) ─────────────────────────────────────
-if MODE == "local":
-    from langchain_openai import ChatOpenAI
-    llm = ChatOpenAI(
-        model=MODEL,
-        base_url=LM_URL,
-        api_key="lm-studio",
-        temperature=0.7
-    )
-    print(f"Mode LOCAL : {LM_URL}")
+if cfg["base_url"]:
+    llm = ChatOpenAI(model=cfg["model"], base_url=cfg["base_url"], api_key=cfg["api_key"], temperature=0.7)
+    print(f"Mode LOCAL : {cfg['base_url']}")
 else:
-    from langchain_openai import ChatOpenAI
-    llm = ChatOpenAI(model=MODEL, api_key=API_KEY, temperature=0.7)
-    print(f"Mode CLOUD : {MODEL}")
+    llm = ChatOpenAI(model=cfg["model"], api_key=cfg["api_key"], temperature=0.7)
+    print(f"Mode CLOUD : {cfg['model']}")
 
 # ── Mémoire avec fenêtre glissante ───────────────────────────────────────────
 from langchain.memory import ConversationBufferWindowMemory

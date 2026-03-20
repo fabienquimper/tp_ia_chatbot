@@ -2,19 +2,18 @@
 Étape 04 — Persistance SQLite
 Le chatbot survit au redémarrage. Chaque session est identifiée par un UUID.
 """
-import os, sqlite3, uuid, time
+import os, sys, sqlite3, uuid, time
 from datetime import datetime
-from dotenv import load_dotenv
 import openai
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, choose_mode, make_client
 
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
-MODEL = os.environ.get("MODEL", "gpt-4o-mini")
+mode = choose_mode()
+client = make_client(mode)
+MODEL = CONFIG[mode]["model"]
 DB_PATH = os.environ.get("DB_PATH", "chat.db")
 MAX_HISTORY = 8
-
-client = openai.OpenAI(api_key=API_KEY)
 
 # ── Base de données ──────────────────────────────────────────────────────────
 

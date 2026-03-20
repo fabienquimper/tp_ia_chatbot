@@ -2,22 +2,21 @@
 Étape 05 — RAG avec ChromaDB
 Chatbot qui répond en se basant sur la base de connaissances TechCorp.
 """
-import os, time
+import os, sys, time
 from pathlib import Path
-from dotenv import load_dotenv
 import openai
 import chromadb
 from chromadb.utils import embedding_functions
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, choose_mode, make_client
 
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
-MODEL = os.environ.get("MODEL", "gpt-4o-mini")
+mode = choose_mode()
+client = make_client(mode)
+MODEL = CONFIG[mode]["model"]
 CHROMA_PATH = os.environ.get("CHROMA_PATH", "./chroma_db")
 N_RESULTS = int(os.environ.get("N_RESULTS", "3"))
 COLLECTION_NAME = "techcorp_docs"
-
-client = openai.OpenAI(api_key=API_KEY)
 
 # Connexion ChromaDB
 def load_collection():

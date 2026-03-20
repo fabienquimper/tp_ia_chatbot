@@ -2,20 +2,19 @@
 Étape 04 — Persistance JSON (version simple)
 Alternative simple à SQLite. Montre les limites avec plusieurs utilisateurs.
 """
-import os, json, time
+import os, sys, json, time
 from datetime import datetime
 from pathlib import Path
-from dotenv import load_dotenv
 import openai
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, choose_mode, make_client
 
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
-MODEL = os.environ.get("MODEL", "gpt-4o-mini")
+mode = choose_mode()
+client = make_client(mode)
+MODEL = CONFIG[mode]["model"]
 HISTORY_FILE = os.environ.get("HISTORY_FILE", "historique.json")
 MAX_HISTORY = 8
-
-client = openai.OpenAI(api_key=API_KEY)
 
 def load_history_json(filepath: str) -> list:
     """Charge l'historique depuis le fichier JSON."""

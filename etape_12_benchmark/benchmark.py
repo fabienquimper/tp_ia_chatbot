@@ -2,13 +2,13 @@
 Étape 12 — Benchmark LLM
 Compare plusieurs modèles sur un jeu d'évaluation standardisé.
 """
-import os, time, json
+import os, sys, time, json
 from datetime import datetime
 from pathlib import Path
-from dotenv import load_dotenv
 import openai
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, make_client
 
 try:
     import pandas as pd
@@ -24,35 +24,34 @@ except ImportError:
 
 from judge import judge_with_llm, judge_with_keywords
 
-# ── Configuration ─────────────────────────────────────────────────────────
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
-LM_URL = os.environ.get("LM_STUDIO_URL", "http://localhost:1234/v1")
-USE_LLM_JUDGE = bool(API_KEY and API_KEY != "sk-changeme")
+# ── Configuration depuis etape_00_moteur/config.py ─────────────────────────
+cloud_cfg = CONFIG["cloud"]
+local_cfg = CONFIG["local"]
+USE_LLM_JUDGE = bool(cloud_cfg["api_key"] and cloud_cfg["api_key"] != "sk-changeme")
 
-# Modèles à comparer
+# Modèles à comparer — construits depuis CONFIG
 MODELS = [
     {
-        "name": "gpt-4o-mini",
-        "label": "GPT-4o-mini (Cloud)",
-        "client": openai.OpenAI(api_key=API_KEY) if API_KEY != "sk-changeme" else None,
-        "price_input": 0.00015,   # $/1K tokens
-        "price_output": 0.00060,
+        "name": cloud_cfg["model"],
+        "label": f"{cloud_cfg['model']} (Cloud)",
+        "client": make_client("cloud") if USE_LLM_JUDGE else None,
+        "price_input": cloud_cfg["price_input"],
+        "price_output": cloud_cfg["price_output"],
     },
 ]
 
-# Ajouter le modèle local si LM Studio est configuré
+# Ajouter le modèle local si LM Studio est accessible
 try:
-    local_client = openai.OpenAI(base_url=LM_URL, api_key="lm-studio", timeout=5)
+    local_client = make_client("local")
     local_client.models.list()  # Test de connexion
-    local_model = os.environ.get("MODEL_LOCAL", "mistral-7b-instruct")
     MODELS.append({
-        "name": local_model,
-        "label": f"{local_model} (Local)",
+        "name": local_cfg["model"],
+        "label": f"{local_cfg['model']} (Local)",
         "client": local_client,
-        "price_input": 0.0,
-        "price_output": 0.0,
+        "price_input": local_cfg["price_input"],
+        "price_output": local_cfg["price_output"],
     })
-    print(f"✓ LM Studio disponible : {local_model}")
+    print(f"✓ LM Studio disponible : {local_cfg['model']}")
 except Exception:
     print("⚠ LM Studio non disponible — benchmark cloud uniquement")
 

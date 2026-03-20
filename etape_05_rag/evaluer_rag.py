@@ -2,21 +2,20 @@
 Étape 05 — Évaluation du RAG
 Mesure le Hit Rate et la qualité des réponses sur un jeu de questions.
 """
-import os, json, time
-from dotenv import load_dotenv
+import os, sys, json, time
 import openai
 import chromadb
 from chromadb.utils import embedding_functions
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, choose_mode, make_client
 
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
-MODEL = os.environ.get("MODEL", "gpt-4o-mini")
+mode = choose_mode()
+client = make_client(mode)
+MODEL = CONFIG[mode]["model"]
 CHROMA_PATH = os.environ.get("CHROMA_PATH", "./chroma_db")
 QUESTIONS_FILE = "questions_eval.json"
 COLLECTION_NAME = "techcorp_docs"
-
-client = openai.OpenAI(api_key=API_KEY)
 
 def load_collection():
     chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)

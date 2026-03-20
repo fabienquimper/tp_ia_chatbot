@@ -2,25 +2,27 @@
 Étape 06 — LangChain + RAG
 Combine LangChain avec ChromaDB pour un chatbot RAG production-ready.
 """
-import os
+import os, sys
 from pathlib import Path
-from dotenv import load_dotenv
-
-load_dotenv()
-
-MODEL = os.environ.get("MODEL", "gpt-4o-mini")
-API_KEY = os.environ.get("OPENAI_API_KEY", "sk-changeme")
-CHROMA_PATH = os.environ.get("CHROMA_PATH", "../etape_05_rag/chroma_db")
-COLLECTION_NAME = "techcorp_docs"
-
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.prompts import PromptTemplate
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, choose_mode
+
+mode = choose_mode()
+cfg = CONFIG[mode]
+CHROMA_PATH = os.environ.get("CHROMA_PATH", "../etape_05_rag/chroma_db")
+COLLECTION_NAME = "techcorp_docs"
+
 # ── LLM ──────────────────────────────────────────────────────────────────────
-llm = ChatOpenAI(model=MODEL, api_key=API_KEY, temperature=0.3)
+if cfg["base_url"]:
+    llm = ChatOpenAI(model=cfg["model"], base_url=cfg["base_url"], api_key=cfg["api_key"], temperature=0.3)
+else:
+    llm = ChatOpenAI(model=cfg["model"], api_key=cfg["api_key"], temperature=0.3)
 
 # ── Vector Store ─────────────────────────────────────────────────────────────
 if not Path(CHROMA_PATH).exists():
@@ -28,7 +30,8 @@ if not Path(CHROMA_PATH).exists():
     print("  Lancez d'abord : cd ../etape_05_rag && python indexer.py")
     exit(1)
 
-embeddings = OpenAIEmbeddings(api_key=API_KEY)
+# OpenAIEmbeddings requiert toujours une clé OpenAI (pas de local pour les embeddings)
+embeddings = OpenAIEmbeddings(api_key=CONFIG["cloud"]["api_key"])
 vectorstore = Chroma(
     collection_name=COLLECTION_NAME,
     embedding_function=embeddings,
