@@ -7,23 +7,15 @@ OBSERVATION CLÉS :
 - Si vous redémarrez le script, toute la mémoire disparaît
 - Le LLM lui-même n'a aucune mémoire — c'est NOUS qui gérons l'historique
 """
-import os
-from dotenv import load_dotenv
+import os, sys
 import openai
 
-load_dotenv()
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
+from config import CONFIG, choose_mode, make_client
 
-q = input("Model ('local' ou 'openai'): ").strip()
-
-if q == "local":
-    # On récupère l'URL du moteur ou on utilise l'IP Windows par défaut
-    local_url = os.environ.get("LOCAL_BASE_URL", "http://192.168.1.66:1235/v1")
-    local_model = os.environ.get("LOCAL_MODEL", "openai/gpt-oss-20b")
-    client = openai.OpenAI(base_url=local_url, api_key="lm-studio")
-    MODEL = local_model
-else:
-    client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "sk-changeme"))
-    MODEL = os.environ.get("MODEL", "gpt-4o-mini")
+mode = choose_mode()
+client = make_client(mode)
+MODEL = CONFIG[mode]["model"]
 
 msgs = [{"role": "system", "content": "Tu es un assistant utile et concis. Réponds en français."}]
 
@@ -49,8 +41,8 @@ try:
             msgs.append({"role": "assistant", "content": reply})
 
         except openai.AuthenticationError:
-            print("ERREUR: Clé API invalide. Vérifiez OPENAI_API_KEY dans .env\n")
-            msgs.pop()  # Retirer le message non traité
+            print("ERREUR: Clé API invalide. Vérifiez OPENAI_API_KEY dans etape_00_moteur/.env\n")
+            msgs.pop()
         except openai.APIConnectionError:
             print("ERREUR: Impossible de contacter l'API. Vérifiez votre connexion internet.\n")
             msgs.pop()

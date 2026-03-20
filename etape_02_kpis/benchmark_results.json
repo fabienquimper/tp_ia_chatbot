@@ -1,0 +1,47 @@
+{
+  "local": {
+    "model": "openai/gpt-oss-20b",
+    "results": [
+      {
+        "prompt": "Explique le concept de m\u00e9moire dans les ...",
+        "latency": 11.92,
+        "tps": 5.5,
+        "prompt_tokens": 99,
+        "completion_tokens": 66,
+        "cost_mc": 0.0
+      },
+      {
+        "prompt": "Quelle est la diff\u00e9rence entre GPT-4o et...",
+        "latency": 13.432,
+        "tps": 6.3,
+        "prompt_tokens": 100,
+        "completion_tokens": 85,
+        "cost_mc": 0.0
+      },
+      {
+        "prompt": "Donne-moi 3 avantages du RAG par rapport...",
+        "latency": 24.879,
+        "tps": 6.1,
+        "prompt_tokens": 100,
+        "completion_tokens": 151,
+        "cost_mc": 0.0
+      },
+      {
+        "prompt": "Qu'est-ce que le context window d'un LLM...",
+        "latency": 23.686,
+        "tps": 5.9,
+        "prompt_tokens": 96,
+        "completion_tokens": 139,
+        "cost_mc": 0.0
+      },
+      {
+        "prompt": "Explique TPS (Tokens Per Second) et pour...",
+        "latency": 38.789,
+        "tps": 5.4,
+        "prompt_tokens": 98,
+        "completion_tokens": 211,
+        "cost_mc": 0.0
+      }
+    ]
+  }
+}
