@@ -1,0 +1,82 @@
+TechCorp Solutions — Politiques et Conditions
+
+== Politique de Confidentialité (RGPD) ==
+
+Dernière mise à jour : 1er janvier 2025
+
+TechCorp Solutions (SAS au capital de 150 000 €, siège au 15 rue de la Paix, 75002 Paris, SIRET 823 456 789 00023) s'engage à protéger les données personnelles de ses utilisateurs conformément au Règlement Général sur la Protection des Données (RGPD — UE 2016/679) et à la loi Informatique et Libertés.
+
+Données collectées :
+Nous collectons uniquement les données nécessaires au fonctionnement de nos services : nom, prénom, adresse email professionnelle, numéro de téléphone (optionnel), données de facturation (sans conservation des coordonnées bancaires complètes), logs de connexion et d'utilisation.
+
+Base légale du traitement :
+Le traitement est fondé sur l'exécution du contrat (art. 6.1.b RGPD) pour les données nécessaires à la fourniture du service, et sur notre intérêt légitime (art. 6.1.f) pour les données d'amélioration du service.
+
+Droits des personnes :
+Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement, de portabilité et d'opposition. Pour exercer ces droits, contactez notre Délégué à la Protection des Données (DPO) : dpo@techcorp.fr. Nous répondrons dans un délai de 30 jours maximum.
+
+== Politique de Rétention des Données ==
+
+Comptes gratuits et périodes d'essai :
+Les données sont conservées pendant 2 ans à compter de la dernière activité. Au-delà, elles sont supprimées définitivement ou anonymisées.
+
+Comptes payants (CloudSync Pro, DataVault, APIConnect) :
+Les données sont conservées pendant 7 ans à compter de la clôture du compte, conformément aux obligations légales comptables françaises (Code de commerce, art. L123-22). Cette durée de rétention de 7 ans s'applique également aux données de facturation.
+
+Données de logs et monitoring :
+Conservées 90 jours pour les plans gratuits, 1 an pour les plans payants, puis supprimées automatiquement.
+
+Après la clôture d'un compte, un export complet des données peut être demandé dans les 30 jours suivant la résiliation.
+
+== Politique de Cookies ==
+
+Notre site web (techcorp.fr) et notre portail client utilisent des cookies. Vous pouvez gérer vos préférences via notre bandeau de consentement.
+
+Cookies strictement nécessaires (pas de consentement requis) :
+- Cookie de session (expiration : session)
+- Cookie CSRF (sécurité des formulaires)
+- Préférences de langue et d'accessibilité
+
+Cookies analytiques (consentement requis) :
+- Mesure d'audience anonymisée (Matomo hébergé en France, pas de partage tiers)
+- Durée : 13 mois maximum
+
+Nous n'utilisons aucun cookie publicitaire ni ne partageons vos données avec des régies publicitaires.
+
+== Conditions Générales d'Utilisation ==
+
+En accédant à nos services, vous acceptez les présentes CGU. Nos services sont destinés à un usage professionnel et sont réservés aux personnes majeures agissant au nom d'une entreprise.
+
+Responsabilité : TechCorp Solutions s'engage à maintenir une disponibilité de 99,9 % (SLA). Notre responsabilité contractuelle est limitée au montant des sommes versées au cours des 12 derniers mois précédant le litige.
+
+Résiliation : les abonnements peuvent être résiliés à tout moment depuis l'espace client. La résiliation prend effet à la fin de la période de facturation en cours.
+
+Droit applicable : les présentes CGU sont soumises au droit français. Tout litige sera soumis à la compétence exclusive des tribunaux de Paris.
+
+== Politique d'Utilisation Acceptable ==
+
+Il est interdit d'utiliser nos services pour :
+- Stocker ou transmettre des contenus illicites, diffamatoires ou portant atteinte aux droits de tiers
+- Mener des activités de spam, phishing ou ingénierie sociale
+- Tenter d'accéder sans autorisation à des systèmes tiers via nos API
+- Surcharger intentionnellement nos infrastructures (attaques DoS)
+- Revendre l'accès à nos services sans accord préalable écrit
+
+Toute violation peut entraîner la suspension immédiate du compte sans remboursement.
+
+== Politique de Sécurité ==
+
+TechCorp Solutions applique une politique de sécurité rigoureuse, alignée sur les bonnes pratiques ISO 27001 (certification en cours d'obtention).
+
+Mesures techniques :
+- Chiffrement en transit : TLS 1.2 minimum, TLS 1.3 recommandé
+- Chiffrement au repos : AES-256 pour toutes les données stockées
+- Authentification multi-facteurs (MFA) disponible et recommandée
+- Tests de pénétration annuels réalisés par un prestataire certifié PASSI
+- Surveillance des accès et alertes en temps réel via SIEM interne
+
+Signalement de vulnérabilités :
+Nous encourageons la divulgation responsable. Si vous découvrez une faille de sécurité, contactez security@techcorp.fr. Nous nous engageons à accuser réception sous 48 heures et à corriger les vulnérabilités critiques sous 7 jours ouvrés.
+
+Sous-traitants :
+Nos hébergeurs (OVHcloud et Scaleway) sont des sous-traitants RGPD avec lesquels des DPA (Data Processing Agreements) sont en vigueur. Les données restent exclusivement hébergées en France.

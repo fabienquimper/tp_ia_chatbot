@@ -1,0 +1,8 @@
+# Prompts de benchmark — Étape 02
+# Ces prompts testent différents types de réponses (longueur, complexité)
+
+1. Explique le concept de mémoire dans les chatbots en 2 phrases.
+2. Quelle est la différence entre GPT-4o et GPT-4o-mini ?
+3. Donne-moi 3 avantages du RAG par rapport au fine-tuning.
+4. Qu'est-ce que le context window d'un LLM ?
+5. Explique TPS (Tokens Per Second) et pourquoi c'est important en production.

@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  chatbot:
+    build: .
+    container_name: chatbot_api
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-changeme}
+      - MODEL=${MODEL:-gpt-4o-mini}
+      - DB_PATH=/app/data/chat.db
+      - MAX_HISTORY=8
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

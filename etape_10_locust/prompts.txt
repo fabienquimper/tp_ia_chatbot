@@ -1,0 +1,59 @@
+# Catégorie: Intelligence Artificielle
+Qu'est-ce que le RAG (Retrieval-Augmented Generation) ?
+Explique le concept de tokenisation en 2 phrases.
+Quelle est la différence entre GPT-3 et GPT-4 ?
+Comment fonctionne l'attention dans les transformers ?
+Qu'est-ce qu'un embedding vectoriel ?
+Explique le fine-tuning d'un LLM en termes simples.
+Qu'est-ce que le prompt engineering ?
+Comment mesurer la latence d'un LLM ?
+Qu'est-ce que TPS (Tokens Per Second) ?
+Explique la window memory pour un chatbot.
+
+# Catégorie: Python & Développement
+Comment créer une API REST avec FastAPI ?
+Explique la différence entre list et tuple en Python.
+Qu'est-ce qu'un décorateur Python ?
+Comment utiliser async/await en Python ?
+Explique le concept de context manager.
+Qu'est-ce que Pydantic et pourquoi l'utiliser ?
+Comment fonctionne SQLite avec Python ?
+Explique les f-strings Python.
+Qu'est-ce que pip et comment l'utiliser ?
+Comment gérer les exceptions en Python ?
+
+# Catégorie: DevOps & Infrastructure
+Qu'est-ce que Docker et pourquoi l'utiliser ?
+Explique la différence entre Docker et Docker Compose.
+Qu'est-ce qu'un conteneur vs une VM ?
+Comment fonctionne Prometheus ?
+Qu'est-ce que Grafana ?
+Explique le concept de health check.
+Qu'est-ce qu'un load balancer ?
+Qu'est-ce que le reverse proxy ?
+Explique CI/CD en 2 phrases.
+Qu'est-ce que Kubernetes en termes simples ?
+
+# Catégorie: Sécurité
+Qu'est-ce que le prompt injection ?
+Explique JWT (JSON Web Token).
+Qu'est-ce que le rate limiting ?
+Pourquoi le CORS est-il important ?
+Qu'est-ce que bcrypt ?
+Explique OAuth2 simplement.
+Qu'est-ce que le XSS (Cross-Site Scripting) ?
+Comment protéger une API REST ?
+Qu'est-ce qu'un API key vs un JWT ?
+Explique le principe du moindre privilège.
+
+# Catégorie: Bases de données
+Quelle est la différence entre SQL et NoSQL ?
+Explique les transactions SQL.
+Qu'est-ce qu'un index de base de données ?
+Quelle est la différence entre SQLite et PostgreSQL ?
+Qu'est-ce qu'une base de données vectorielle ?
+Explique ChromaDB en 2 phrases.
+Qu'est-ce que le sharding de base de données ?
+Explique la réplication de base de données.
+Qu'est-ce que ACID en base de données ?
+Quelle est la différence entre ORM et SQL brut ?

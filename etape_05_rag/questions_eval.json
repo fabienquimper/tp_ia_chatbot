@@ -1,0 +1,62 @@
+[
+  {
+    "id": "q001",
+    "question": "Quel est le prix de CloudSync Pro ?",
+    "expected_keywords": ["49", "mois", "cloud"],
+    "category": "pricing"
+  },
+  {
+    "id": "q002",
+    "question": "Comment contacter le support TechCorp ?",
+    "expected_keywords": ["support@techcorp.fr", "01 23"],
+    "category": "support"
+  },
+  {
+    "id": "q003",
+    "question": "Qui est le CEO de TechCorp ?",
+    "expected_keywords": ["Marie Dupont", "CEO"],
+    "category": "company"
+  },
+  {
+    "id": "q004",
+    "question": "Quel est le SLA garanti ?",
+    "expected_keywords": ["99.9", "uptime"],
+    "category": "sla"
+  },
+  {
+    "id": "q005",
+    "question": "Quelles sont les limites de taux de l'API ?",
+    "expected_keywords": ["1000", "heure", "rate"],
+    "category": "technique"
+  },
+  {
+    "id": "q006",
+    "question": "Combien de temps les données sont-elles conservées ?",
+    "expected_keywords": ["2 ans", "7 ans", "rétention"],
+    "category": "rgpd"
+  },
+  {
+    "id": "q007",
+    "question": "Où sont les bureaux de TechCorp ?",
+    "expected_keywords": ["Paris", "Lyon", "Bordeaux"],
+    "category": "company"
+  },
+  {
+    "id": "q008",
+    "question": "Comment s'authentifier avec l'API ?",
+    "expected_keywords": ["Bearer", "token", "API key"],
+    "category": "technique"
+  },
+  {
+    "id": "q009",
+    "question": "Quel est le produit le plus cher ?",
+    "expected_keywords": ["APIConnect", "199"],
+    "category": "pricing"
+  },
+  {
+    "id": "q010",
+    "question": "Quelle est la politique de remboursement ?",
+    "expected_keywords": ["30 jours", "remboursement"],
+    "category": "support"
+  }
+]

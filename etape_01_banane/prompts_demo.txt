@@ -1,0 +1,82 @@
+=== DÉMONSTRATION DU PROBLÈME D'AMNÉSIE ===
+
+Ce fichier montre deux sessions de conversation pour illustrer pourquoi
+on appelle ce problème "le problème de la banane" :
+si vous demandez à un chatbot naïf "qu'est-ce que je t'ai dit au début ?",
+il peut répondre "une banane" ... ou n'importe quoi d'autre lors du prochain lancement.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+--- Session 1 (normale — historique en mémoire pendant l'exécution) ---
+
+Vous: Je m'appelle Jean et j'adore programmer en Python.
+IA: Bonjour Jean ! C'est super que vous aimiez Python, c'est un excellent langage
+    de programmation. Que puis-je faire pour vous aujourd'hui ?
+
+Vous: Quel est mon prénom ?
+IA: Vous m'avez dit que vous vous appelez Jean !
+
+Vous: Quel est mon langage de programmation préféré ?
+IA: Vous m'avez dit que vous adorez Python, Jean !
+
+Vous: Donne-moi un projet sympa à faire en Python ce week-end.
+IA: Voici quelques idées de projets Python pour le week-end, Jean :
+    1. Un scraper web pour collecter des données qui vous intéressent
+    2. Un bot Discord ou Telegram
+    3. Un jeu de texte en console (pendu, quiz, etc.)
+    4. Un analyseur de vos dépenses personnelles en CSV
+    5. Un générateur de mots de passe sécurisé
+
+Vous: Merci, je vais faire le bot Telegram !
+IA: Excellent choix Jean ! Les bots Telegram sont très amusants à créer.
+    Vous aurez besoin de la bibliothèque python-telegram-bot...
+
+CONSTAT SESSION 1 : Tout fonctionne, le chatbot "se souvient" de votre prénom
+et de vos préférences — MAIS seulement parce que l'historique est en mémoire RAM.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+--- Session 2 (après redémarrage du script — PROBLÈME D'AMNÉSIE) ---
+
+[Le script a été arrêté et relancé. L'historique en mémoire est PERDU.]
+
+Vous: Quel est mon prénom ?
+IA: Je suis désolé, je ne connais pas votre prénom. Vous ne me l'avez pas encore dit !
+    Comment puis-je vous appeler ?
+
+Vous: Quel est mon langage de programmation préféré ?
+IA: Je n'ai aucune information sur vos préférences en matière de programmation.
+    Vous ne m'avez pas encore dit quel langage vous aimez. Lequel est-ce ?
+
+Vous: Pourtant je te l'ai dit il y a 5 minutes !
+IA: Je comprends votre frustration, mais je dois vous informer que je n'ai pas
+    accès aux conversations précédentes. Chaque nouvelle session repart de zéro.
+    Je n'ai aucune mémoire persistante entre les conversations.
+
+CONSTAT SESSION 2 : Le LLM est STATELESS. Il ne se souvient de rien entre
+les sessions. La "mémoire" de la session 1 était une ILLUSION gérée par NOUS
+(la liste `msgs` en Python). Dès qu'on redémarre, tout disparaît.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+--- Session 3 (illustration de la banane) ---
+
+Vous: Au début de notre conversation, je t'ai dit que j'aimais les bananes.
+IA: Je suis désolé, je n'ai aucune trace d'une conversation précédente entre nous.
+    Cette session vient de commencer ! Aimez-vous vraiment les bananes ?
+
+C'est le "problème de la banane" : vous pouvez dire n'importe quoi
+en début de session, mais si vous redémarrez, c'est comme si ça n'avait
+jamais existé.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SOLUTIONS (abordées dans les étapes suivantes) :
+
+1. Étape 03 — Fenêtre glissante : garder les N derniers messages en RAM
+2. Étape 04 — Persistance SQLite : sauvegarder l'historique sur disque
+3. Étape 05 — RAG : accéder à une base de connaissances externe
+
+LA LEÇON FONDAMENTALE :
+Le LLM est un ORACLE stateless. Lui envoyer l'historique à chaque appel,
+c'est comme lui donner la mémoire. C'est NOTRE responsabilité de la gérer.

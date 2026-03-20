@@ -1,0 +1,101 @@
+TechCorp Solutions — Documentation Entreprise
+
+== Présentation Générale ==
+
+TechCorp Solutions est une entreprise française de logiciels SaaS fondée en 2018 à Paris. Spécialisée dans les solutions de synchronisation de données, de stockage sécurisé et d'intégration d'API pour les entreprises, TechCorp Solutions compte aujourd'hui 150 employés répartis sur trois sites en France. Notre mission est de simplifier la gestion des données d'entreprise grâce à des outils cloud performants, sécurisés et faciles à intégrer.
+
+Depuis sa création, TechCorp Solutions a accompagné plus de 2 000 entreprises clientes, allant des PME aux grands groupes industriels. Notre taux de satisfaction client atteint 94 % selon notre dernière enquête annuelle.
+
+== Nos Produits ==
+
+--- CloudSync Pro ---
+CloudSync Pro est notre solution de synchronisation de données en temps réel entre vos systèmes internes et le cloud. Elle prend en charge les bases de données MySQL, PostgreSQL, MongoDB et Microsoft SQL Server.
+
+Prix : 49 € par mois (facturation mensuelle) ou 470 € par an (soit 2 mois offerts).
+Inclus : synchronisation jusqu'à 5 sources de données, 50 Go de stockage temporaire, support email, tableau de bord en temps réel, historique de 30 jours.
+Options : sources supplémentaires à 9 € / mois chacune.
+
+--- DataVault ---
+DataVault est notre solution de stockage sécurisé et d'archivage longue durée. Les données sont chiffrées en AES-256 et stockées dans nos datacenters certifiés ISO 27001 (certification en cours de renouvellement).
+
+Prix : 99 € par mois ou 950 € par an.
+Inclus : 500 Go de stockage, chiffrement de bout en bout, snapshots quotidiens, rétention 7 ans (plans payants), accès multi-utilisateurs (jusqu'à 10 comptes), conformité RGPD.
+Options : stockage supplémentaire à 0,15 € / Go / mois.
+
+--- APIConnect ---
+APIConnect est notre plateforme d'intégration d'API permettant de connecter vos applications métier à des services tiers sans code. Compatible avec plus de 300 connecteurs natifs (Salesforce, HubSpot, Slack, Google Workspace, SAP, etc.).
+
+Prix : 199 € par mois ou 1 900 € par an.
+Inclus : connecteurs illimités, 100 000 appels API / mois inclus, monitoring des flux, alertes en cas d'erreur, support prioritaire, SLA 99,9 %.
+Options : appels supplémentaires à 0,002 € / appel au-delà du quota.
+
+== Support Client ==
+
+Notre équipe de support est disponible du lundi au vendredi de 09h à 18h (heure de Paris).
+
+Adresse email : support@techcorp.fr
+Téléphone : 01 23 45 67 89
+Portail client : https://support.techcorp.fr
+Chat en ligne : disponible sur le portail client aux heures ouvrées
+
+Responsable du support : Sophie Bernard
+Temps de réponse moyen : 2 heures (email), immédiat (chat en ligne aux heures ouvrées)
+
+Pour les clients APIConnect (plan Premium), un support téléphonique prioritaire est disponible 24h/24 et 7j/7.
+
+== Foire Aux Questions (FAQ) ==
+
+Q : Comment installer CloudSync Pro ?
+R : Téléchargez l'agent depuis votre espace client, lancez l'installateur, puis configurez vos sources de données depuis l'interface web. Un guide de démarrage rapide est disponible dans la documentation en ligne.
+
+Q : Comment est facturé mon abonnement ?
+R : La facturation est mensuelle ou annuelle selon votre choix. Les paiements sont prélevés automatiquement par carte bancaire ou virement SEPA. Une facture est émise le 1er de chaque mois.
+
+Q : Quel est le SLA garanti ?
+R : Nous garantissons un uptime de 99,9 % sur tous nos services. Cela correspond à moins de 9 heures d'interruption par an. En cas de dépassement, nous appliquons un crédit de service selon nos conditions générales.
+
+Q : Quelle est la politique de remboursement ?
+R : Vous disposez de 30 jours après la souscription pour demander un remboursement intégral, sans justification. Au-delà de 30 jours, aucun remboursement n'est accordé pour les périodes déjà consommées.
+
+Q : Quelles intégrations sont disponibles nativement ?
+R : Nos produits s'intègrent nativement avec Google Workspace, Microsoft 365, Salesforce, HubSpot, Slack, Zapier, Make (ex-Integromat), AWS, Azure et GCP.
+
+Q : Puis-je essayer avant d'acheter ?
+R : Oui, une période d'essai gratuite de 14 jours est disponible pour chaque produit, sans carte bancaire requise.
+
+== Équipe de Direction ==
+
+PDG (CEO) : Marie Dupont — Fondatrice de TechCorp Solutions, ancienne directrice technique chez Capgemini. Diplômée de l'École Polytechnique.
+
+Directeur Technique (CTO) : Jean Martin — Responsable de l'architecture technique et de la R&D. Ex-ingénieur chez OVHcloud. Expert en systèmes distribués et sécurité cloud.
+
+Directrice Commerciale (CCO) : Isabelle Leroy — En charge des ventes et des partenariats stratégiques. Ancienne responsable grands comptes chez Salesforce France.
+
+Responsable Support : Sophie Bernard — Gère une équipe de 12 ingénieurs support. Certifiée ITIL v4.
+
+Directeur Financier (CFO) : Thomas Roux — Supervise les finances et la conformité réglementaire. Expert-comptable diplômé.
+
+== Bureaux ==
+
+Siège social (Paris) :
+15 rue de la Paix, 75002 Paris
+Tél : 01 23 45 67 89
+Accès : Métro ligne 3 et 7 — Station Opéra
+
+Bureau de Lyon :
+8 place Bellecour, 69002 Lyon
+Tél : 04 56 78 90 12
+Équipes : commerciaux et support régional Sud-Est
+
+Bureau de Bordeaux :
+3 allée de Tourny, 33000 Bordeaux
+Tél : 05 34 56 78 90
+Équipes : développement produit et R&D
+
+== Certifications et Conformité ==
+
+TechCorp Solutions est engagée dans une démarche de conformité rigoureuse :
+- Conformité RGPD (depuis mai 2018)
+- Certification ISO 27001 en cours (audit prévu Q3 2026)
+- Hébergement exclusivement en France (datacenters OVHcloud et Scaleway)
+- Politique de divulgation responsable des vulnérabilités (CVD)

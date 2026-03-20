@@ -1,0 +1,20 @@
+{"id": "q001", "question": "Qu'est-ce que le RAG ?", "expected_keywords": ["retrieval", "augmented", "génération", "base de connaissances", "documents"], "category": "ia", "difficulty": "facile"}
+{"id": "q002", "question": "Explique la différence entre fine-tuning et RAG.", "expected_keywords": ["fine-tuning", "paramètres", "RAG", "retrieval", "coût"], "category": "ia", "difficulty": "moyen"}
+{"id": "q003", "question": "Qu'est-ce qu'un token dans le contexte des LLM ?", "expected_keywords": ["token", "mot", "sous-mot", "vocabulaire"], "category": "ia", "difficulty": "facile"}
+{"id": "q004", "question": "Qu'est-ce que le context window d'un LLM ?", "expected_keywords": ["contexte", "tokens", "fenêtre", "limite"], "category": "ia", "difficulty": "facile"}
+{"id": "q005", "question": "Explique le concept d'attention dans les transformers.", "expected_keywords": ["attention", "transformer", "poids", "séquence"], "category": "ia", "difficulty": "difficile"}
+{"id": "q006", "question": "Qu'est-ce qu'un embedding vectoriel ?", "expected_keywords": ["vecteur", "représentation", "espace", "sémantique"], "category": "ia", "difficulty": "moyen"}
+{"id": "q007", "question": "Comment fonctionne le prompt engineering ?", "expected_keywords": ["prompt", "instruction", "contexte", "réponse"], "category": "ia", "difficulty": "facile"}
+{"id": "q008", "question": "Qu'est-ce que ChromaDB ?", "expected_keywords": ["base de données", "vectorielle", "embeddings", "recherche"], "category": "outils", "difficulty": "moyen"}
+{"id": "q009", "question": "Explique la différence entre SQLite et PostgreSQL.", "expected_keywords": ["sqlite", "postgresql", "fichier", "serveur", "concurrent"], "category": "db", "difficulty": "moyen"}
+{"id": "q010", "question": "Qu'est-ce que Docker et pourquoi l'utiliser ?", "expected_keywords": ["conteneur", "isolation", "portabilité", "image"], "category": "devops", "difficulty": "facile"}
+{"id": "q011", "question": "Explique le concept de rate limiting.", "expected_keywords": ["limite", "requêtes", "abus", "protection"], "category": "securite", "difficulty": "facile"}
+{"id": "q012", "question": "Qu'est-ce que JWT (JSON Web Token) ?", "expected_keywords": ["token", "authentification", "signature", "payload"], "category": "securite", "difficulty": "moyen"}
+{"id": "q013", "question": "Explique le prompt injection et comment s'en protéger.", "expected_keywords": ["injection", "prompt", "attaque", "validation", "filtre"], "category": "securite", "difficulty": "moyen"}
+{"id": "q014", "question": "Qu'est-ce que Prometheus et Grafana ?", "expected_keywords": ["prometheus", "métriques", "grafana", "dashboard", "monitoring"], "category": "devops", "difficulty": "moyen"}
+{"id": "q015", "question": "Qu'est-ce que TPS (Tokens Per Second) et comment le mesurer ?", "expected_keywords": ["tokens", "seconde", "latence", "performance"], "category": "kpi", "difficulty": "facile"}
+{"id": "q016", "question": "Explique la différence entre test unitaire et test E2E.", "expected_keywords": ["unitaire", "e2e", "intégration", "mock", "isolé"], "category": "tests", "difficulty": "moyen"}
+{"id": "q017", "question": "Qu'est-ce que FastAPI et ses avantages ?", "expected_keywords": ["fastapi", "async", "pydantic", "swagger", "python"], "category": "dev", "difficulty": "facile"}
+{"id": "q018", "question": "Comment fonctionne la window memory dans un chatbot ?", "expected_keywords": ["fenêtre", "historique", "messages", "tronque", "coût"], "category": "ia", "difficulty": "moyen"}
+{"id": "q019", "question": "Qu'est-ce que le CORS et pourquoi est-il important ?", "expected_keywords": ["cors", "origines", "navigateur", "sécurité", "cross-origin"], "category": "securite", "difficulty": "moyen"}
+{"id": "q020", "question": "Explique le concept de LLM-as-Judge.", "expected_keywords": ["llm", "juge", "évaluation", "qualité", "score"], "category": "ia", "difficulty": "difficile"}
