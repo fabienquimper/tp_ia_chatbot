@@ -29,6 +29,13 @@ CONFIG = {
         "price_input": 0.0,   # gratuit (local)
         "price_output": 0.0,
     },
+    "local_mistral3": {
+        "base_url": os.environ.get("LOCAL_BASE_URL", "http://localhost:1234/v1"),
+        "api_key": "lm-studio",
+        "model": "mistralai/ministral-3-3b",
+        "price_input": 0.0,   # gratuit (local)
+        "price_output": 0.0,
+    },
 }
 
 
