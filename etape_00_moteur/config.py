@@ -32,6 +32,16 @@ CONFIG = {
 }
 
 
+def clean_reply(text: str) -> str:
+    """Supprime les tokens de contrôle internes qui fuient dans certains modèles locaux.
+    Ex: <|channel|>commentary...<|message|>réponse → réponse"""
+    import re
+    # Retire tout bloc <|...|> et son contenu jusqu'au dernier <|...|>
+    cleaned = re.sub(r"<\|[^|]*\|>[^<]*", "", text)
+    # Si le nettoyage a retiré tout le texte, retourner l'original
+    return cleaned.strip() or text.strip()
+
+
 def list_configs() -> list[str]:
     """Retourne la liste des noms de configs disponibles."""
     return list(CONFIG.keys())

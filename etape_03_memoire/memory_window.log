@@ -1,0 +1,81 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_03_memoire# python memory_window.py 
+Configs disponibles :
+  1. cloud — modèle : gpt-4o-mini ← défaut
+  2. local — modèle : openai/gpt-oss-20b
+Choisissez (numéro ou nom, Entrée = cloud) : 2
+=== Window Memory — Étape 03 ===
+Modèle : openai/gpt-oss-20b | Fenêtre : 8 messages (4 échanges)
+
+Commandes : 'fenetre' (voir contexte actuel), 'reset' (vider), 'quit'
+
+Vous: Fabien est formateur. Julien est maçon. JPP c'est ChatGPT (toi!). Marc est au chômage. Jean-Louis est boulanger.
+IA: - Fabien : formateur  
+- Julien : maçon  
+- JPP (ChatGPT) : assistant IA  
+- Marc : au chômage  
+- Jean‑Louis : boulanger
+  [contexte: 1/8 msgs | 140→57 tokens | 19.86s]
+
+Vous: fenetre
+
+  Contexte actuel : 2/8 messages d'historique
+  Tokens estimés  : ~94
+  Messages en mémoire :
+    [Vous] Fabien est formateur. Julien est maçon. JPP c'est ChatGPT (t...
+    [IA] - Fabien : formateur  
+- Julien : maçon  
+- JPP (ChatGPT) : ...
+
+Vous: Comment s'appelle l'assistant IA?
+IA: L’assistant IA s’appelle **JPP** (ChatGPT).
+  [contexte: 3/8 msgs | 195→38 tokens | 9.17s]
+
+Vous: Et le formateur s'appelle comment? Marie est osthéopathe.
+IA: The user asks "Et le formateur s'appelle comment?" They previously said Fabien is formateur. So answer Fabien. Also mention conversation topics list? The instruction says if asked what you remember, list subjects. Not requested. Just respond.Le formateur s’appelle **Fabien**.
+  [contexte: 5/8 msgs | 235→89 tokens | 16.36s]
+
+Vous: fenetre
+
+  Contexte actuel : 6/8 messages d'historique
+  Tokens estimés  : ~196
+  Messages en mémoire :
+    [Vous] Fabien est formateur. Julien est maçon. JPP c'est ChatGPT (t...
+    [IA] - Fabien : formateur  
+- Julien : maçon  
+- JPP (ChatGPT) : ...
+    [Vous] Comment s'appelle l'assistant IA?
+    [IA] L’assistant IA s’appelle **JPP** (ChatGPT).
+    [Vous] Et le formateur s'appelle comment? Marie est osthéopathe.
+    [IA] The user asks "Et le formateur s'appelle comment?" They prev...
+
+Vous: Commment s'appelle l'osthéopathe?
+IA: L’ostéopathe s’appelle **Marie**.
+  [contexte: 7/8 msgs | 316→26 tokens | 7.88s]
+
+Vous: Jean-Louis est chasseur. Fabien est jardinier aussi.
+  ⚠  1 message(s) ancien(s) oublié(s) (hors fenêtre)
+IA: - Jean‑Louis : **chasseur**  
+- Fabien : **formateur et jardinier**
+  [contexte: 8/8 msgs | 317→62 tokens | 14.91s]
+
+Vous: fenetre
+
+  Contexte actuel : 8/8 messages d'historique
+  Tokens estimés  : ~184
+  Messages en mémoire :
+    [Vous] Comment s'appelle l'assistant IA?
+    [IA] L’assistant IA s’appelle **JPP** (ChatGPT).
+    [Vous] Et le formateur s'appelle comment? Marie est osthéopathe.
+    [IA] The user asks "Et le formateur s'appelle comment?" They prev...
+    [Vous] Commment s'appelle l'osthéopathe?
+    [IA] L’ostéopathe s’appelle **Marie**.
+    [Vous] Jean-Louis est chasseur. Fabien est jardinier aussi.
+    [IA] - Jean‑Louis : **chasseur**  
+- Fabien : **formateur et jard...
+
+Vous: Quel est le métier de Julien?
+  ⚠  3 message(s) ancien(s) oublié(s) (hors fenêtre)
+IA: Je n’ai pas d’information sur un personnage nommé Julien, donc je ne connais pas son métier.
+  [contexte: 8/8 msgs | 300→46 tokens | 12.84s]
+
+Vous: 

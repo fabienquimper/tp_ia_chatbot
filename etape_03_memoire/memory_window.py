@@ -7,7 +7,7 @@ import os, sys, time
 import openai
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
-from config import CONFIG, choose_mode, make_client
+from config import CONFIG, choose_mode, make_client, clean_reply
 
 mode = choose_mode()
 client = make_client(mode)
@@ -86,7 +86,7 @@ try:
             continue
 
         latency = time.time() - start
-        reply = response.choices[0].message.content
+        reply = clean_reply(response.choices[0].message.content)
         tokens_in = response.usage.prompt_tokens
         tokens_out = response.usage.completion_tokens
 
