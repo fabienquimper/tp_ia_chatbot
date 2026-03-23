@@ -51,6 +51,8 @@ bash test_api.sh
 
 # Health check
 curl http://localhost:8000/health
+
+# {"status":"ok","model":"gpt-4o-mini","uptime_seconds":331,"version":"1.0.0"}
 ```
 
 ## Exercice
@@ -59,5 +61,11 @@ curl http://localhost:8000/health
 3. Testez `/chat` avec votre nom
 4. Testez `/chat` avec "Comment je m'appelle ?"
 5. Vérifiez `/history/{session_id}`
+
+`
+Exemple http://localhost:8000/history/default
+{"session_id":"default","messages":[{"role":"user","content":"Je m'appelle Fabien. "},{"role":"assistant","content":"Bonjour Fabien, comment puis-je vous aider aujourd'hui ?"},{"role":"user","content":"Comment est-ce que je m'appelle?"},{"role":"assistant","content":"Vous vous appelez Fabien."}],"count":4}
+`
+
 6. Buildez et lancez avec Docker
 7. Ajoutez un endpoint `DELETE /history/{session_id}`

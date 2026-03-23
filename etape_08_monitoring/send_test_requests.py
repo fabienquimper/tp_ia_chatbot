@@ -41,7 +41,7 @@ for i in range(NB_REQUESTS):
         response = httpx.post(
             f"{BASE_URL}/chat",
             json={"message": question, "session_id": session},
-            timeout=30
+            timeout=120
         )
         elapsed = time.time() - start
 
