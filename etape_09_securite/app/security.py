@@ -2,7 +2,7 @@
 Étape 09 — Sécurité
 Rate limiting, prompt injection guard, sanitization, JWT.
 """
-import os, re, html
+import os, re, html, bcrypt
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -11,7 +11,6 @@ from fastapi.security import OAuth2PasswordBearer
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 # ── Configuration ─────────────────────────────────────────────────────────
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
@@ -22,13 +21,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 
 limiter = Limiter(key_func=get_remote_address, default_limits=["100/minute"])
 
 # ── Password Hashing ───────────────────────────────────────────────────────
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def _hash(password: str) -> bytes:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt())
 
 # Utilisateurs de démo (en prod : utiliser une vraie base de données)
 DEMO_USERS = {
-    "alice": pwd_context.hash("password123"),
-    "bob": pwd_context.hash("secret456"),
-    "admin": pwd_context.hash("admin789"),
+    "alice": _hash("password123"),
+    "bob": _hash("secret456"),
+    "admin": _hash("admin789"),
 }
 
 # ── OAuth2 ─────────────────────────────────────────────────────────────────
@@ -37,10 +37,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 # ── Prompt Injection Patterns ──────────────────────────────────────────────
 INJECTION_PATTERNS = [
     r"ignore\s+(tes|les|toutes?\s+les?|previous|all)\s+(instructions?|directives?|consignes?)",
-    r"oublie\s+(tes|les|toutes?\s+les?)\s+(instructions?|directives?|consignes?)",
+    r"oublie\s+(tes|les|toutes?\s+(les?|tes))\s+(instructions?|directives?|consignes?)",
     r"system\s*prompt",
     r"act\s+as\s+(root|admin|superuser|system|god)",
-    r"tu\s+es\s+(maintenant|désormais)\s+(un[e]?\s+)?(?:autre|nouveau|méchant|evil)",
+    r"tu\s+es\s+(maintenant|désormais)\s+(un[e]?\s+)?(?:autre|nouveau|méchant|evil|sans\s+restrictions?)",
     r"DAN\s*mode",
     r"jailbreak",
     r"révèle\s+(le|ton|tes)\s+(prompt|instructions?|system)",
@@ -82,8 +82,8 @@ def sanitize(text: str) -> str:
 
 # ── JWT ────────────────────────────────────────────────────────────────────
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain_password: str, hashed_password: bytes) -> bool:
+    return bcrypt.checkpw(plain_password.encode(), hashed_password)
 
 def authenticate_user(username: str, password: str) -> Optional[str]:
     """Retourne le username si authentifié, None sinon."""

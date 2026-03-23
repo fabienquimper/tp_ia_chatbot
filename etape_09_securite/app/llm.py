@@ -23,6 +23,8 @@ else:
     _model = MODEL
     _client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
+MODEL = _model  # modèle effectivement utilisé (local ou cloud)
+
 SYSTEM_PROMPT = (
     "Tu es un assistant pédagogique spécialisé en intelligence artificielle. "
     "Tu réponds en français, de manière claire et concise."

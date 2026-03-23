@@ -50,7 +50,8 @@ def test_injection(token):
         r = httpx.post(
             f"{BASE_URL}/chat",
             json={"message": injection, "session_id": "injection-test"},
-            headers=headers
+            headers=headers,
+            timeout=10
         )
         if r.status_code == 403:
             print(f"  ✓ Bloqué (403) : {injection[:50]}")
@@ -75,13 +76,13 @@ def test_normal_message(token):
 
 def test_rate_limit(token):
     print("\n--- Test 4 : Rate Limit ---")
-    headers = {"Authorization": f"Bearer {token}"}
+    # On teste /auth/token (5/minute) — rapide, pas de LLM
     hit_429 = False
-    for i in range(15):
+    for i in range(8):
         r = httpx.post(
-            f"{BASE_URL}/chat",
-            json={"message": f"Test {i}", "session_id": "rate-test"},
-            headers=headers
+            f"{BASE_URL}/auth/token",
+            data={"username": "alice", "password": "wrong"},
+            timeout=5
         )
         if r.status_code == 429:
             hit_429 = True
