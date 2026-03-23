@@ -77,3 +77,12 @@ etape_00_moteur/
 - Ne commitez JAMAIS votre fichier `.env` (il contient votre clé API)
 - Le fichier `.env.example` sert de documentation — il peut être commité
 - `config.py` est réutilisé par les étapes suivantes via `sys.path`
+
+# Info réseau
+
+Pour récupérer l'IP local sous Ubuntu: `ip a` ou `hostname -I`.
+Si problème de firewall `sudo ufw allow 1234`
+
+Vérifier que LM Studio écoute bien partout:
+
+ss -tulnp | grep 1234 (on doit voir 0.0.0.0:1234, si on voit 127.0.0.1:1234 ça veut dire que c'est encore bloqué en local)

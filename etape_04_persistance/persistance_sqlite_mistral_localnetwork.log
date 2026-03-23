@@ -1,0 +1,137 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_04_persistance# python persistance_sqlite.py 
+Configs disponibles :
+  1. cloud — modèle : gpt-4o-mini ← défaut
+  2. local — modèle : openai/gpt-oss-20b
+  3. local_mistral3 — modèle : mistralai/ministral-3-3b
+  4. reseau_ministral14b — modèle : mistralai/ministral-3-14b-reasoning
+  5. reseau_gpt_oss_20b — modèle : gpt-oss-20b
+Choisissez (numéro ou nom, Entrée = cloud) : 4
+
+=== Chatbot Persistant — Étape 04 (SQLite) ===
+
+
+Nouvelle session créée : 1757ee9c...
+
+Session : 1757ee9c... | 0 messages en mémoire
+Commandes : 'sessions' (lister), 'session <id>' (changer), 'quit'
+
+Vous: Fabien est formateur. Julien est maçon. JPP c'est ChatGPT (toi!). Marc est au chômage. Jean-Louis est boulanger.
+IA: Voici les métiers associés à chaque prénom :
+
+- **Fabien** : Formateur
+- **Julien** : Maçon
+- **JPP (ChatGPT)** : Assistant IA (moi !)
+- **Marc** : Chômage (sans activité professionnelle)
+- **Jean-Louis** : Boulanger
+
+Si tu veux d'autres informations ou des précisions, n'hésite pas !
+  [2 msgs sauvegardés | 8.66s]
+
+Vous: Le planning complexe d'uajourd'hui 10h: réunion projet 11h RDV médecin. 12h30 déjuener avec toute l'équipe projet sauf Pierre. 14h visite sur le terrain. 16h30 : récupérer les enfants.
+IA: Voici ton planning pour aujourd’hui, résumé de manière claire et concise :
+
+- **10h** : Réunion projet
+- **11h** : RDV médecin
+- **12h30** : Déjeuner avec l’équipe projet (sauf Pierre)
+- **14h** : Visite sur le terrain
+- **16h30** : Récupérer les enfants
+
+Si tu veux des ajustements ou des rappels, fais-moi signe !
+  [4 msgs sauvegardés | 4.99s]
+
+Vous: Qui est maçon?
+IA: Le maçon est **Julien**.
+  [6 msgs sauvegardés | 0.52s]
+
+Vous: exit
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_04_persistance# 
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_04_persistance# 
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_04_persistance# python persistance_sqlite.py 
+Configs disponibles :
+  1. cloud — modèle : gpt-4o-mini ← défaut
+  2. local — modèle : openai/gpt-oss-20b
+  3. local_mistral3 — modèle : mistralai/ministral-3-3b
+  4. reseau_ministral14b — modèle : mistralai/ministral-3-14b-reasoning
+  5. reseau_gpt_oss_20b — modèle : gpt-oss-20b
+Choisissez (numéro ou nom, Entrée = cloud) : 4
+
+=== Chatbot Persistant — Étape 04 (SQLite) ===
+
+Sessions existantes :
+  [1] 1757ee9c... | 3 messages | dernière: 2026-03-23 11:23:44
+  [N] Nouvelle session
+
+Choisissez une session (numéro ou N) : 1
+
+Session : 1757ee9c... | 6 messages en mémoire
+Commandes : 'sessions' (lister), 'session <id>' (changer), 'quit'
+
+Vous: Le planning complexe d'uajourd'hui 10h: réunion projet 11h RDV médecin. 12h30 déjuener avec toute l'équipe projet sauf Pierre. 14h visite sur le terrain. 16h3                          
+IA: Il semble que ta phrase soit incomplète. Peux-tu préciser ce que tu souhaites dire ? Je suis là pour t'aider ! 😊
+
+*(Exemple : "Je veux le planning de Julien" ou "Qui est en chômage ?")*
+  [8 msgs sauvegardés | 7.32s]
+
+Vous: La visite de terrain a lieu quand?
+IA: La **visite sur le terrain** a lieu à **14h**.
+  [10 msgs sauvegardés | 0.99s]
+
+Vous: Quel est le métier de Julien?
+IA: Julien est **maçon**.
+
+Si tu as besoin d'autres informations, n'hésite pas ! 😊
+  [12 msgs sauvegardés | 1.43s]
+
+Vous: Samedi pour organiser la fête de famille il faut: 8h marché pour les légumes. 10h30: aller chez le boucher , 11h30: récupérer les gateaux à la boulangereie et retour à 13h à la maison pour préparer le repas et commencer à accueillir les hôtes autour de 16h30. 30 personnes de prévus dont le maçon.
+IA: Voici un résumé clair et concis pour organiser la fête de famille :
+
+### **Planning du samedi**
+- **8h** : Marché (achat des légumes)
+- **10h30** : Boucher (commande ou achats)
+- **11h30** : Boulangerie (récupération des gâteaux)
+- **13h** : Retour à la maison → Préparation du repas
+- **16h30** : Accueil des invités
+
+### **Détails importants**
+- **Nombre d’invités** : 30 personnes (dont le maçon Julien).
+- **Prévoir** :
+  - Nourriture, boissons, décoration.
+  - Vérifier les allergies ou régimes spécifiques.
+
+Besoin d’ajuster quelque chose ? Dis-le-moi ! 😊
+  [14 msgs sauvegardés | 8.44s]
+
+Vous: Je récupère quand la viande pour la fête de famille?
+IA: Tu récupères la **viande chez le boucher à 10h30** pour la fête de famille.
+  [16 msgs sauvegardés | 1.55s]
+
+Vous: exit
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_04_persistance# 
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_04_persistance# 
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_04_persistance# python persistance_sqlite.py 
+Configs disponibles :
+  1. cloud — modèle : gpt-4o-mini ← défaut
+  2. local — modèle : openai/gpt-oss-20b
+  3. local_mistral3 — modèle : mistralai/ministral-3-3b
+  4. reseau_ministral14b — modèle : mistralai/ministral-3-14b-reasoning
+  5. reseau_gpt_oss_20b — modèle : gpt-oss-20b
+Choisissez (numéro ou nom, Entrée = cloud) : 4
+
+=== Chatbot Persistant — Étape 04 (SQLite) ===
+
+Sessions existantes :
+  [1] 1757ee9c... | 8 messages | dernière: 2026-03-23 11:55:48
+  [N] Nouvelle session
+
+Choisissez une session (numéro ou N) : 1
+
+Session : 1757ee9c... | 16 messages en mémoire
+Commandes : 'sessions' (lister), 'session <id>' (changer), 'quit'
+
+Vous: Je récupère quand la viande pour la fête de famille?
+IA: La viande est à récupérer **à 10h30 chez le boucher**.
+
+Prévois un sac isotherme si nécessaire ! 😊
+  [18 msgs sauvegardés | 4.43s]
+
+Vous: 

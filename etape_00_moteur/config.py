@@ -36,6 +36,22 @@ CONFIG = {
         "price_input": 0.0,   # gratuit (local)
         "price_output": 0.0,
     },
+    "reseau_ministral14b": {
+        "base_url": "http://192.168.1.141:1234/v1",
+        "api_key": "lm-studio",
+        "model": "mistralai/ministral-3-14b-reasoning",
+        "price_input": 0.0,   # gratuit (réseau local)
+        "price_output": 0.0,
+        "timeout": 120,       # modèle lourd sur réseau — timeout généreux
+    },
+    "reseau_gpt_oss_20b": {
+        "base_url": "http://192.168.1.141:1234/v1",
+        "api_key": "lm-studio",
+        "model": "gpt-oss-20b",
+        "price_input": 0.0,   # gratuit (réseau local)
+        "price_output": 0.0,
+        "timeout": 120,       # modèle lourd sur réseau — timeout généreux
+    },
 }
 
 
@@ -82,9 +98,10 @@ def make_client(mode: str) -> openai.OpenAI:
     if mode not in CONFIG:
         raise ValueError(f"Mode inconnu : '{mode}'. Disponibles : {list_configs()}")
     cfg = CONFIG[mode]
+    timeout = cfg.get("timeout", 30)
     if cfg["base_url"]:
-        return openai.OpenAI(base_url=cfg["base_url"], api_key=cfg["api_key"])
-    return openai.OpenAI(api_key=cfg["api_key"])
+        return openai.OpenAI(base_url=cfg["base_url"], api_key=cfg["api_key"], timeout=timeout)
+    return openai.OpenAI(api_key=cfg["api_key"], timeout=timeout)
 
 
 def get_client(mode: str = None) -> openai.OpenAI:
