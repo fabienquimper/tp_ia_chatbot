@@ -1,0 +1,237 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_03_memoire# python memory_summary.py 
+Configs disponibles :
+  1. cloud — modèle : gpt-4o-mini ← défaut
+  2. local — modèle : openai/gpt-oss-20b
+  3. local_mistral3 — modèle : mistralai/ministral-3-3b
+Choisissez (numéro ou nom, Entrée = cloud) : 3
+=== Memory with Summarization — Étape 03 (avancé) ===
+Modèle : mistralai/ministral-3-3b | Max avant résumé : 6 messages
+
+Commandes : 'resume' (voir le résumé actuel), 'quit'
+
+Vous: Fabien est formateur. Julien est maçon. JPP c'est ChatGPT (toi!). Marc est au chômage. Jean-Louis est boulanger.
+IA: Voici les informations synthétisées :
+
+- **Formateurs** : Fabien
+- **Maçons** : Julien
+- **Boulangers** : Jean-Louis
+- **Chômeurs** : Marc
+
+*(JPP = ChatGPT, toi-même !)* 😊
+  [historique: 2 msgs | résumé: non | 9.39s]
+
+Vous: resume
+  Pas encore de résumé (historique court).
+
+Vous: Comment s'appelle l'assistant IA?
+IA: Je suis **ChatGPT**, un modèle d'OpenAI. 😊
+  [historique: 4 msgs | résumé: non | 2.39s]
+
+Vous: Et quel est ton prénom?         
+IA: Je n’ai pas de nom propre – je suis simplement **ChatGPT**, une intelligence artificielle développée par OpenAI.
+
+*(Mais si tu veux, on peut imaginer des prénoms pour les IA !)* 😄
+  [historique: 6 msgs | résumé: non | 6.73s]
+
+Vous: Et le formateur s'appelle comment? Marie est osthéopathe.
+  [Résumé en cours de 4 messages...]
+  [Résumé créé : **Résumé concis (100 mots max) :**
+L’assistant a identifié les métiers des inter...]
+
+IA: D'après nos échanges précédents, le formateur s’appelle **Fabien**.
+
+Voici la liste claire des métiers mentionnés :
+- **Fabien** (formateur)
+- **Julien** (maçon)
+- **Jean-Louis** (boulanger)
+- **Marc** (au chômage)
+- **Marie** (ostéopathe).
+  [historique: 4 msgs | résumé: oui | 10.89s]
+
+Vous: resume
+
+  Résumé actuel :
+  **Résumé concis (100 mots max) :**
+L’assistant a identifié les métiers des interlocuteurs :
+- **Fabien** (formateur), **Julien** (maçon), **Jean-Louis** (boulanger).
+- **Marc**, au chômage.
+Un échange initial sur l’identité de l’IA (*ChatGPT*) a clarifié son rôle.
+
+Préférences implicites : clarification des rôles professionnels et contextuels.
+
+Vous: L'IA s'appelle JPP.
+IA: D'accord ! Voici la mise à jour avec ton prénom :
+
+- **Fabien** (formateur)
+- **Julien** (maçon)
+- **Jean-Louis** (boulanger)
+- **Marc** (au chômage)
+- **Marie** (ostéopathe)
+- **JPP** (ton IA ! 😊)
+
+Besoin d’autres précisions ?
+  [historique: 6 msgs | résumé: oui | 10.56s]
+
+Vous: Comment s'appelle l'IA?
+  [Résumé en cours de 4 messages...]
+  [Résumé créé : **Résumé concis (≤100 mots) :**
+L’utilisateur évoque des métiers et un contexte ...]
+
+IA: Ah, c’est bien JPP ! 👋
+
+*(Petit rappel : JPP = ton IA – comme un surnom rigolo pour marquer la différence avec les autres assistants.)*
+
+Tu veux que je t’aide sur :
+- **Les métiers** (ex : comment Marc pourrait se reconvertir) ?
+- **Un projet perso/professionnel** ?
+Ou autre chose ? 😊
+  [historique: 4 msgs | résumé: oui | 11.18s]
+
+Vous: Le planning complexe d'uajourd'hui 10h: réunion projet 11h RDV médecin. 12h30 déjuener avec toute l'équipe projet sauf Pierre. 14h visite sur le terrain. 16h30 : récupérer les enfants.
+IA: Voici ton **planning optimisé** pour aujourd’hui, avec des astuces et un peu de malin :
+
+---
+### **📅 Ton agenda (JPP mode "productivité")**
+- **10h** → Réunion projet *(profite du café pour noter 3 points clés à actionner après)*
+- **11h** → RDV médecin *(prévois des vêtements confortables + un carnet pour tes notes)*
+- **12h30** → Déjeuner avec l’équipe *(saisis les idées de recettes healthy à préparer pour la semaine !)*
+- **14h** → Visite terrain *(prépare une checklist : outils, photos à envoyer plus tard)*
+- **16h30** → Récupérer les enfants *(si possible, fais-le en mode "multi-tâche" : écoute un podcast ou un épisode audio pendant)*
+
+---
+### **💡 Conseils JPP :**
+- **Réunion projet** : Envoie un mail à l’équipe avec 2 questions pour lancer la discussion (*ex : "Quel est le blocage majeur de ce projet ?"*).
+- **RDV médecin** : Si tu as des médicaments, vérifie les interactions avec tes autres traitements.
+- **Visite terrain** : Prends une appli type *Google Keep* pour noter les détails techniques (photos + mots-clés).
+
+---
+### **😄 Bonus humoristique :**
+*"Si Pierre ne vient pas déjeuner, c’est qu’il a déjà oublié ton prénom… ou qu’il est en train de cuisiner des pâtes carbonara. 🍝"*
+
+Tu veux que je t’aide à prioriser une tâche ? Ou un rappel pour demain ?
+  [historique: 6 msgs | résumé: oui | 49.19s]
+
+Vous: resume
+
+  Résumé actuel :
+  **Résumé concis (≤100 mots) :**
+L’utilisateur évoque des métiers et un contexte professionnel :
+- **Formateur** : Fabien.
+- **Spécialistes** : Marie (ostéopathie), Julien (maçon), Jean-Louis (boulanger).
+- **Situation personnelle** : Marc au chômage.
+
+Préférences/ton : Humour léger ("imaginer des prénoms pour IA"). Pas de demande spécifique récente.
+
+Vous: Quel est le métier de Fabien?
+  [Résumé en cours de 4 messages...]
+  [Résumé créé : **Résumé concis (≤100 mots)** :
+
+L’utilisateur a demandé à identifier son IA, qu...]
+
+IA: D'après ton historique, **Fabien** est mentionné comme étant un *formateur*.
+
+*(Si tu veux des précisions sur son rôle précis – pédagogie, technique, ou autre domaine – fais-le-moi savoir !)* 😊
+
+*Petit bonus JPP :*
+*"Et si Fabien était aussi un super-héros ? Il formerait les héros du quotidien à devenir des géants de la formation… comme lui !"* 🎭
+  [historique: 4 msgs | résumé: oui | 17.05s]
+
+Vous: resume
+
+  Résumé actuel :
+  **Résumé concis (≤100 mots)** :
+
+L’utilisateur a demandé à identifier son IA, qui s’appelle **JPP**, un surnom humoristique pour distinguer ses assistants. Il évoque brièvement une liste de profils (Fabien, Julien, Jean-Louis, Marc, Marie) et pose des questions générales sur les métiers ou reconversions professionnelles.
+
+**Points clés** :
+- JPP est son IA personnalisée.
+- Intérêt pour la **reconversion professionnelle** (ex : Marc au chômage).
+- Ouverture à d’autres projets perso/professionnels.
+
+Vous: A quelle heure il faut chercher les enfants?
+IA: D’après ton planning, tu dois récupérer tes enfants **à 16h30**.
+
+*Conseil JPP :*
+- Si possible, prévois un peu d’avance (15h45) pour éviter le stress.
+- Vérifie aussi si une autre personne peut t’aider à les chercher (ex : partenaire, voisin).
+
+*"Et si tu es en retard ? Les enfants ont toujours des surprises… ou des devoirs à faire !"* 😉
+  [historique: 6 msgs | résumé: oui | 18.79s]
+
+Vous: resume
+
+  Résumé actuel :
+  **Résumé concis (≤100 mots)** :
+
+L’utilisateur a demandé à identifier son IA, qui s’appelle **JPP**, un surnom humoristique pour distinguer ses assistants. Il évoque brièvement une liste de profils (Fabien, Julien, Jean-Louis, Marc, Marie) et pose des questions générales sur les métiers ou reconversions professionnelles.
+
+**Points clés** :
+- JPP est son IA personnalisée.
+- Intérêt pour la **reconversion professionnelle** (ex : Marc au chômage).
+- Ouverture à d’autres projets perso/professionnels.
+
+Vous: Ce soir ma famille a prévu un boeuf bourguignon.
+  [Résumé en cours de 4 messages...]
+  [Résumé créé : **Résumé concis (≤100 mots) :**
+L’utilisateur partage son **planning complexe** ...]
+
+IA: Super idée pour ce soir ! Voici quelques conseils **JPP** pour réussir ton **boeuf bourguignon** sans stress :
+
+- **Préparation à l’avance** :
+  - Couper le bœuf en morceaux (épaule ou joue) et le faire revenir à la poêle (10 min) avant de le passer au four.
+  - Préparer les légumes (carottes, oignons, champignons) et les faire revenir avec un peu d’huile d’olive.
+
+- **À l’heure** :
+  - Déglacer le vin rouge (Bourgogne bien sûr !), ajouter la sauce tomate, les herbes (thym, laurier) et laisser mijoter à feu doux **3h max** (ou au four si tu es pressé).
+  - Ajouter des morceaux de bœuf en fin de cuisson pour qu’ils soient tendres.
+
+- **Astuce JPP** :
+  - Utilise un **thermomètre de cuisine** pour vérifier la température interne du bœuf (63°C minimum).
+  - Serve avec des pommes de terre vapeur ou une purée maison pour équilibrer.
+
+*"Bon appétit, et que ce soit un repas qui réchauffe les cœurs… et pas juste le plat !"* 🍷😊
+
+Tu veux des recettes précises ou des variantes ?
+  [historique: 4 msgs | résumé: oui | 37.30s]
+
+Vous: A quelle heure est la visite terrain? C'est quoi le repas de ce soir?
+IA: **Visite terrain** : **14h** (départ depuis ton lieu prévu).
+
+---
+**Repas ce soir** :
+- **Boeuf bourguignon** (prêt à point, idéalement servi avec des pommes de terre vapeur ou une purée).
+- *Option JPP* : Accompagne-le d’une salade verte aux noix et vinaigrette citronnée pour équilibrer.
+
+---
+**Checklist rapide** :
+✅ Vêtements chauds (visite en extérieur ?)
+✅ Sac à dos léger (outils si nécessaire, eau)
+✅ Préparation déjeuner healthy (ex : wrap ou salade) pour éviter les pauses stressantes.
+
+*"Et n’oublie pas ton Fabien… il a peut-être des tips secrets sur le terrain !"* 😉
+  [historique: 6 msgs | résumé: oui | 27.86s]
+
+Vous: resume
+
+  Résumé actuel :
+  **Résumé concis (≤100 mots) :**
+L’utilisateur partage son **planning complexe** :
+- Réunion projet (10h), RDV médecin (11h), déjeuner avec l’équipe (12h30 sauf Pierre), visite terrain (14h), récupération enfants (16h30).
+**Préférences** : optimisation temps, checklist pour chaque activité.
+L’assistant propose des **astuces pratiques** (noter 3 points clés, vêtements confortables, préparation déjeuner healthy, outils pour la visite terrain) et un rappel sur **Fabien**, formateur.
+
+Vous: Quel est le métier de Marie?
+  [Résumé en cours de 4 messages...]
+  [Résumé créé : **Résumé concis (≤100 mots) :**
+L’utilisateur a demandé **l’heure idéale pour ré...]
+
+IA: Je ne connais pas le nom **Marie** dans notre conversation précédente ni dans les informations disponibles jusqu'à présent.
+
+Si tu fais référence à une personne spécifique (collega, membre d’une équipe ou autre), vérifie :
+- Son nom exact dans ton contexte (ex : "Marie Dupont" vs "Mme Martin").
+- Une mention dans tes notes personnelles ou un rappel de ton planning.
+
+Sinon, je peux t’aider sur **autres sujets** liés à ton agenda ! 😊
+  [historique: 4 msgs | résumé: oui | 14.97s]
+
+Vous: 
