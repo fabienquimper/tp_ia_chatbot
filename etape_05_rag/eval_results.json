@@ -1,0 +1,197 @@
+{
+  "hit_rate": 90.0,
+  "results": [
+    {
+      "question": "Quel est le prix de CloudSync Pro ?",
+      "answer": "Le prix de CloudSync Pro est de **49 € par mois** (facturation mensuelle) ou **470 € par an** (soit 2 mois offerts).",
+      "sources": [
+        "entreprise.txt",
+        "entreprise.txt",
+        "entreprise.txt"
+      ],
+      "expected_keywords": [
+        "49",
+        "mois",
+        "cloud"
+      ],
+      "found_keywords": [
+        "49",
+        "mois",
+        "cloud"
+      ],
+      "hit": true,
+      "category": "pricing"
+    },
+    {
+      "question": "Comment contacter le support TechCorp ?",
+      "answer": "Vous pouvez contacter le support TechCorp Solutions de plusieurs manières :\n\n1. **Email** : support@techcorp.fr\n   - Temps de réponse moyen : 2 heures\n\n2. **Téléphone** :\n   - Pour les clients APIConnect (plan Premium) : support téléphonique prioritaire disponible 24h/24 et 7j/7.\n   - Numéro : 01 23 45 67 89\n   - Pour les autres clients, le support téléphonique est disponible aux heures ouvrées via le portail client.\n\n3. **Portail client** :\n   - Adresse : [https://support.techcorp.fr](https://support.techcorp.fr)\n   - Chat en ligne disponible aux heures ouvrées.\n   - Responsable du support : Sophie Bernard\n\nSi vous êtes un client Premium, précisez-le pour bénéficier d'un support prioritaire.",
+      "sources": [
+        "politique.txt",
+        "entreprise.txt",
+        "entreprise.txt"
+      ],
+      "expected_keywords": [
+        "support@techcorp.fr",
+        "01 23"
+      ],
+      "found_keywords": [
+        "support@techcorp.fr",
+        "01 23"
+      ],
+      "hit": true,
+      "category": "support"
+    },
+    {
+      "question": "Qui est le CEO de TechCorp ?",
+      "answer": "NON_TROUVE",
+      "sources": [
+        "politique.txt",
+        "entreprise.txt",
+        "politique.txt"
+      ],
+      "expected_keywords": [
+        "Marie Dupont",
+        "CEO"
+      ],
+      "found_keywords": [],
+      "hit": false,
+      "category": "company"
+    },
+    {
+      "question": "Quel est le SLA garanti ?",
+      "answer": "Nous garantissons un uptime de 99,9 % sur tous nos services. Cela correspond à moins de 9 heures d'interruption par an. En cas de dépassement, nous appliquons un crédit de service selon nos conditions générales.",
+      "sources": [
+        "entreprise.txt",
+        "entreprise.txt",
+        "politique.txt"
+      ],
+      "expected_keywords": [
+        "99.9",
+        "uptime"
+      ],
+      "found_keywords": [
+        "uptime"
+      ],
+      "hit": true,
+      "category": "sla"
+    },
+    {
+      "question": "Quelles sont les limites de taux de l'API ?",
+      "answer": "Les limites de taux de l'API sont les suivantes :\n\n**Plan payant (CloudSync Pro, DataVault, APIConnect) :**\n- **10 000 requêtes par heure**\n- **100 000 requêtes par jour**\n\nEn cas de dépassement, l'API retourne le code **429 (Too Many Requests)**. Les headers de réponse indiquent la limite et le temps de réinitialisation :\n- `X-RateLimit-Limit: 1000`\n- `X-RateLimit-Remaining: 0`\n- `X-RateLimit-Reset: [timestamp]`\n\nSi vous avez dépassé la limite, vous recevrez une réponse comme celle-ci :\n```json\n{\n  \"error\": {\n    \"code\": \"RATE_LIMIT_EXCEEDED\",\n    \"message\": \"Vous avez dépassé la limite de 1000 requêtes/heure.\",\n    \"retry_after\": [temps_avant_reessai_en_secondes]\n  }\n}\n```",
+      "sources": [
+        "technique.txt",
+        "entreprise.txt",
+        "technique.txt"
+      ],
+      "expected_keywords": [
+        "1000",
+        "heure",
+        "rate"
+      ],
+      "found_keywords": [
+        "1000",
+        "heure",
+        "rate"
+      ],
+      "hit": true,
+      "category": "technique"
+    },
+    {
+      "question": "Combien de temps les données sont-elles conservées ?",
+      "answer": "Pour les comptes gratuits et les périodes d'essai, les données sont conservées pendant **2 ans** à compter de la dernière activité. Au-delà, elles sont supprimées définitivement ou anonymisées.\n\nPour les comptes payants (CloudSync Pro, DataVault, APIConnect), les données sont conservées pendant **7 ans** à compter de la clôture du compte, conformément aux obligations légales comptables françaises.",
+      "sources": [
+        "politique.txt",
+        "politique.txt",
+        "politique.txt"
+      ],
+      "expected_keywords": [
+        "2 ans",
+        "7 ans",
+        "rétention"
+      ],
+      "found_keywords": [
+        "2 ans",
+        "7 ans"
+      ],
+      "hit": true,
+      "category": "rgpd"
+    },
+    {
+      "question": "Où sont les bureaux de TechCorp ?",
+      "answer": "Les bureaux de TechCorp Solutions sont situés au 15 rue de la Paix, 75002 Paris, France.",
+      "sources": [
+        "politique.txt",
+        "politique.txt",
+        "entreprise.txt"
+      ],
+      "expected_keywords": [
+        "Paris",
+        "Lyon",
+        "Bordeaux"
+      ],
+      "found_keywords": [
+        "paris"
+      ],
+      "hit": true,
+      "category": "company"
+    },
+    {
+      "question": "Comment s'authentifier avec l'API ?",
+      "answer": "Pour vous authentifier avec l'API TechCorp Solutions, vous avez deux options principales :\n\n### 1. **Clé API (API Key) - Recommandée pour les intégrations serveur-à-serveur**\n   - **Étapes** :\n     1. Générez une clé API depuis votre espace client (section *Paramètres > API Keys*).\n     2. Passez-la dans l'en-tête HTTP :\n        ```\n        X-API-Key: tc_live_xxxxxxxxxxxxxxxxxxxxxxxx\n        ```\n   - **Caractéristiques** :\n     - La clé n'expire pas, mais peut être révoquée à tout moment.\n     - Utilisez cette méthode pour des intégrations automatiques (ex : scripts, applications backend).\n\n---\n\n### 2. **Token JWT (Bearer Token) - Recommandé pour les utilisateurs finaux ou applications mobiles**\n   - **Étapes** :\n     1. Appelez l'endpoint d'authentification avec vos identifiants :\n        ```http\n        POST /api/v1/auth/token\n        Content-Type: application/json\n\n        {\n          \"email\": \"utilisateur@entreprise.com\",\n          \"password\": \"votre_mot_de_passe\"\n        }\n        ```\n     2. Récupérez le token dans la réponse :\n        ```json\n        {\n          \"access_token\": \"eyJhbGciOiJIUzI1NiIs...\",\n          \"token_type\": \"Bearer\",\n          \"expires_in\": 86400\n        }\n        ```\n     3. Utilisez le token dans les requêtes suivantes :\n        ```\n        Authorization: Bearer eyJhbGciOiJIUzI1NiIs...\n        ```\n   - **Caractéristiques** :\n     - Le token est valide **24 heures**.\n     - Idéal pour des applications où l'utilisateur se connecte manuellement (ex : web, mobile).\n\n---\n\n### Remarques importantes :\n- **Format de réponse** : Toutes les réponses sont en JSON (`Content-Type: application/json`).\n- **Sécurité** : Les clés API et tokens doivent être protégés. Évitez de les exposer dans des environnements non sécurisés.\n- **Erreurs** : Utilisez les codes HTTP standard (ex : `401 Unauthorized` si l'authentification échoue).\n\nSi vous avez besoin d'autres détails, précisez votre cas d'usage !",
+      "sources": [
+        "technique.txt",
+        "technique.txt",
+        "technique.txt"
+      ],
+      "expected_keywords": [
+        "Bearer",
+        "token",
+        "API key"
+      ],
+      "found_keywords": [
+        "bearer",
+        "token",
+        "api key"
+      ],
+      "hit": true,
+      "category": "technique"
+    },
+    {
+      "question": "Quel est le produit le plus cher ?",
+      "answer": "Le produit le plus cher est l'offre **Équipe de Direction** à **1 900 € par an** (ou 199 € par mois).\n\nSi vous souhaitez des détails supplémentaires, précisez votre demande.",
+      "sources": [
+        "entreprise.txt",
+        "entreprise.txt",
+        "entreprise.txt"
+      ],
+      "expected_keywords": [
+        "APIConnect",
+        "199"
+      ],
+      "found_keywords": [
+        "199"
+      ],
+      "hit": true,
+      "category": "pricing"
+    },
+    {
+      "question": "Quelle est la politique de remboursement ?",
+      "answer": "Vous disposez de **30 jours** après la souscription pour demander un **remboursement intégral**, sans justification. Au-delà de 30 jours, aucun remboursement n'est accordé pour les périodes déjà consommées.\n\n*(Source : Politique de remboursement du contexte TechCorp.)*",
+      "sources": [
+        "entreprise.txt",
+        "politique.txt",
+        "politique.txt"
+      ],
+      "expected_keywords": [
+        "30 jours",
+        "remboursement"
+      ],
+      "found_keywords": [
+        "30 jours",
+        "remboursement"
+      ],
+      "hit": true,
+      "category": "support"
+    }
+  ]
+}

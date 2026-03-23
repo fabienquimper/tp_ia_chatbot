@@ -1,0 +1,57 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_05_rag# python evaluer_rag.py 
+Configs disponibles :
+  1. cloud — modèle : gpt-4o-mini ← défaut
+  2. local — modèle : openai/gpt-oss-20b
+  3. local_mistral3 — modèle : mistralai/ministral-3-3b
+  4. reseau_ministral14b — modèle : mistralai/ministral-3-14b-reasoning
+  5. reseau_gpt_oss_20b — modèle : gpt-oss-20b
+Choisissez (numéro ou nom, Entrée = cloud) : 4
+=== Évaluation du RAG — Étape 05 ===
+
+[1/10] Quel est le prix de CloudSync Pro ?
+  ✓ Mots-clés trouvés: ['49', 'mois', 'cloud']
+  Sources: ['entreprise.txt', 'entreprise.txt', 'entreprise.txt']
+[2/10] Comment contacter le support TechCorp ?
+  ✓ Mots-clés trouvés: ['support@techcorp.fr', '01 23']
+  Sources: ['politique.txt', 'entreprise.txt', 'entreprise.txt']
+[3/10] Qui est le CEO de TechCorp ?
+  ✗ Mots-clés trouvés: []
+  Sources: ['politique.txt', 'entreprise.txt', 'politique.txt']
+[4/10] Quel est le SLA garanti ?
+  ✓ Mots-clés trouvés: ['uptime']
+  Sources: ['entreprise.txt', 'entreprise.txt', 'politique.txt']
+[5/10] Quelles sont les limites de taux de l'API ?
+  ✓ Mots-clés trouvés: ['1000', 'heure', 'rate']
+  Sources: ['technique.txt', 'entreprise.txt', 'technique.txt']
+[6/10] Combien de temps les données sont-elles conservées ?
+  ✓ Mots-clés trouvés: ['2 ans', '7 ans']
+  Sources: ['politique.txt', 'politique.txt', 'politique.txt']
+[7/10] Où sont les bureaux de TechCorp ?
+  ✓ Mots-clés trouvés: ['paris']
+  Sources: ['politique.txt', 'politique.txt', 'entreprise.txt']
+[8/10] Comment s'authentifier avec l'API ?
+  ✓ Mots-clés trouvés: ['bearer', 'token', 'api key']
+  Sources: ['technique.txt', 'technique.txt', 'technique.txt']
+[9/10] Quel est le produit le plus cher ?
+  ✓ Mots-clés trouvés: ['199']
+  Sources: ['entreprise.txt', 'entreprise.txt', 'entreprise.txt']
+[10/10] Quelle est la politique de remboursement ?
+  ✓ Mots-clés trouvés: ['30 jours', 'remboursement']
+  Sources: ['entreprise.txt', 'politique.txt', 'politique.txt']
+
+==================================================
+RÉSULTATS :
+  Hit Rate : 9/10 = 90.0%
+  Objectif : > 80%
+  Statut   : ✓ ATTEINT
+
+Par catégorie :
+  pricing         : 2/2 = 100%
+  support         : 2/2 = 100%
+  company         : 1/2 = 50%
+  sla             : 1/1 = 100%
+  technique       : 2/2 = 100%
+  rgpd            : 1/1 = 100%
+
+Résultats sauvegardés dans eval_results.json
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_05_rag# 

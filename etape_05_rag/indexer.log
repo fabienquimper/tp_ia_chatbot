@@ -1,0 +1,20 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_05_rag# python indexer.py 
+
+Chargement des documents depuis data...
+  entreprise.txt → 15 chunks
+  politique.txt → 13 chunks
+  technique.txt → 17 chunks
+
+Indexation de 45 chunks...
+/root/.cache/chroma/onnx_models/all-MiniLM-L6-v2/onnx.tar.gz: 100%|███████████████████████████████████████████████████████████| 79.3M/79.3M [00:07<00:00, 11.5MiB/s]
+  Lot 1/1 indexé
+
+✓ 45 chunks indexés dans './chroma_db'
+  Collection : techcorp_docs
+
+Test de recherche 'prix abonnement' :
+  [entreprise.txt] Prix : 99 € par mois ou 950 € par an.
+Inclus : 500 Go de stockage, chiffrement de bout en bout, snap...
+  [entreprise.txt] Prix : 199 € par mois ou 1 900 € par an.
+Inclus : connecteurs illimités, 100 000 appels API / mois i...
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_05_rag# 

@@ -1,0 +1,41 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_05_rag# python rag_chromadb.py
+Configs disponibles :
+  1. cloud — modèle : gpt-4o-mini ← défaut
+  2. local — modèle : openai/gpt-oss-20b
+  3. local_mistral3 — modèle : mistralai/ministral-3-3b
+  4. reseau_ministral14b — modèle : mistralai/ministral-3-14b-reasoning
+  5. reseau_gpt_oss_20b — modèle : gpt-oss-20b
+Choisissez (numéro ou nom, Entrée = cloud) : 3
+=== RAG Chatbot — TechCorp Solutions (Étape 05) ===
+Base vectorielle : ./chroma_db | 45 chunks indexés
+Modèle : mistralai/ministral-3-3b | Documents récupérés : 3
+
+Je suis l'assistant TechCorp. Comment puis-je vous aider ?
+Commandes : 'contexte' (voir le dernier contexte RAG), 'quit'
+
+Vous: Quel est le prix de CloudSync Pro ?
+IA: Le prix de **CloudSync Pro** est de :
+- **49 € par mois** (facturation mensuelle).
+- **470 € par an** (soit **2 mois offerts**, soit **35 €/mois net**).
+
+Inclus dans ce tarif : jusqu’à 5 sources de données, 50 Go de stockage temporaire et support email.
+  [Sources: entreprise.txt | Récup: 0.65s | LLM: 25.10s]
+
+Vous: Comment contacter le support TechCorp ?
+IA: Pour contacter le support de **TechCorp Solutions**, voici les options disponibles :
+
+- **Email** :
+  Adresse : **support@techcorp.fr**
+  Temps de réponse moyen : **2 heures**.
+
+- **Chat en ligne** :
+  Disponible sur le **[portail client](https://support.techcorp.fr)** aux **heures ouvrées**.
+  Réponse immédiate possible.
+
+- **Support téléphonique prioritaire (APIConnect Premium)** :
+  **Disponible 24h/24 et 7j/7** pour les clients du plan **Premium**.
+
+*Contact officiel : Sophie Bernard, responsable support.*
+  [Sources: entreprise.txt, politique.txt | Récup: 0.26s | LLM: 21.28s]
+
+Vous: 

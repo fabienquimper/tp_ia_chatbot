@@ -1,2 +1,4 @@
 venv/
 .env
+etape_05_rag/chroma_db/
+**/avis/
