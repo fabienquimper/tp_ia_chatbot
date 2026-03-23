@@ -4,11 +4,12 @@ Combine LangChain avec ChromaDB pour un chatbot RAG production-ready.
 """
 import os, sys
 from pathlib import Path
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langchain_chroma import Chroma
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferWindowMemory
-from langchain.prompts import PromptTemplate
+import chromadb
+from chromadb.utils import embedding_functions
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, AIMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.output_parsers import StrOutputParser
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
 from config import CONFIG, choose_mode
@@ -30,51 +31,38 @@ if not Path(CHROMA_PATH).exists():
     print("  Lancez d'abord : cd ../etape_05_rag && python indexer.py")
     exit(1)
 
-# OpenAIEmbeddings requiert toujours une clé OpenAI (pas de local pour les embeddings)
-embeddings = OpenAIEmbeddings(api_key=CONFIG["cloud"]["api_key"])
-vectorstore = Chroma(
-    collection_name=COLLECTION_NAME,
-    embedding_function=embeddings,
-    persist_directory=CHROMA_PATH
-)
-retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+# Même fonction d'embedding que l'indexeur (all-MiniLM-L6-v2, 100% local)
+ef = embedding_functions.DefaultEmbeddingFunction()
+chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
+collection = chroma_client.get_collection(COLLECTION_NAME, embedding_function=ef)
+
+def retrieve(query: str, k: int = 3):
+    results = collection.query(query_texts=[query], n_results=k)
+    docs = [{"content": c, "source": m.get("source", "?")}
+            for c, m in zip(results["documents"][0], results["metadatas"][0])]
+    return docs
 
 # ── Mémoire ──────────────────────────────────────────────────────────────────
-memory = ConversationBufferWindowMemory(
-    k=3,
-    memory_key="chat_history",
-    return_messages=True,
-    output_key="answer"
-)
+K = 3  # 3 échanges (6 messages)
+history: list = []
 
 # ── Prompt ───────────────────────────────────────────────────────────────────
-QA_PROMPT = PromptTemplate(
-    template="""Tu es l'assistant virtuel de TechCorp Solutions.
+prompt = ChatPromptTemplate.from_messages([
+    ("system", """Tu es l'assistant virtuel de TechCorp Solutions.
 Réponds UNIQUEMENT en te basant sur le contexte fourni.
 Si la réponse n'est pas dans le contexte, dis "Je n'ai pas cette information."
 Réponds en français, de façon concise et professionnelle.
 
-Contexte : {context}
+Contexte : {context}"""),
+    MessagesPlaceholder(variable_name="history"),
+    ("human", "{question}"),
+])
 
-Historique : {chat_history}
-
-Question : {question}
-Réponse :""",
-    input_variables=["context", "chat_history", "question"]
-)
-
-# ── Chain ─────────────────────────────────────────────────────────────────────
-rag_chain = ConversationalRetrievalChain.from_llm(
-    llm=llm,
-    retriever=retriever,
-    memory=memory,
-    combine_docs_chain_kwargs={"prompt": QA_PROMPT},
-    return_source_documents=True,
-    verbose=False
-)
+# ── Chain LCEL ────────────────────────────────────────────────────────────────
+chain = prompt | llm | StrOutputParser()
 
 print("=== LangChain RAG — TechCorp (Étape 06) ===")
-print(f"Modèle : {MODEL} | Base : {CHROMA_PATH}")
+print(f"Modèle : {cfg['model']} | Base : {CHROMA_PATH}")
 print("Comment puis-je vous aider ?\n")
 
 try:
@@ -88,16 +76,26 @@ try:
             continue
 
         try:
-            result = rag_chain({"question": q})
-            reply = result["answer"]
-            source_docs = result.get("source_documents", [])
-            sources = list(set(d.metadata.get("source", "?") for d in source_docs))
+            # Récupération des documents pertinents (local, sans OpenAI)
+            docs = retrieve(q)
+            context = "\n\n".join(d["content"] for d in docs)
+            sources = list(set(d["source"] for d in docs))
+
+            # Appel LLM via LCEL
+            reply = chain.invoke({"context": context, "history": history, "question": q})
 
             print(f"IA: {reply}")
             if sources:
                 print(f"  [Sources: {', '.join(sources)}]\n")
             else:
                 print()
+
+            # Mise à jour de la mémoire
+            history.append(HumanMessage(content=q))
+            history.append(AIMessage(content=reply))
+            if len(history) > K * 2:
+                history = history[-K * 2:]
+
         except Exception as e:
             print(f"  ✗ Erreur : {e}\n")
 

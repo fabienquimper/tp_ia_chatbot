@@ -1,0 +1,58 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_06_langchain# python chatbot_langchain.py 
+Configs disponibles :
+  1. cloud — modèle : gpt-4o-mini ← défaut
+  2. local — modèle : openai/gpt-oss-20b
+  3. local_mistral3 — modèle : mistralai/ministral-3-3b
+  4. reseau_ministral14b — modèle : mistralai/ministral-3-14b-reasoning
+  5. reseau_gpt_oss_20b — modèle : gpt-oss-20b
+Choisissez (numéro ou nom, Entrée = cloud) : 4
+Mode LOCAL : http://192.168.1.141:1234/v1
+
+=== Chatbot LangChain — Étape 06 ===
+Mémoire : 4 échanges (ConversationBufferWindowMemory)
+Commandes : 'memoire' (voir historique), 'reset' (vider), 'quit'
+
+Vous: Fabien est formateur. Julien est maçon. JPP c'est ChatGPT (toi!). Marc est au chômage. Jean-Louis est boulanger.
+IA: Voici les informations que tu as fournies de manière concise :
+
+- **Fabien** : Formateur
+- **Julien** : Maçon
+- **JPP/ChatGPT** : Assistant IA (moi !)
+- **Marc** : Chômage
+- **Jean-Louis** : Boulanger
+
+Besoin d'autres détails ou d'une reformulation ? 😊
+
+Vous: Et le formateur s'appelle comment? 
+IA: D'après les informations que tu as partagées, le formateur s'appelle **Fabien**.
+
+Vous: Marie est osthéopathe.
+IA: Voici la liste mise à jour avec ton ajout :
+
+- **Fabien** : Formateur
+- **Julien** : Maçon
+- **JPP/ChatGPT** : Assistant IA (moi !)
+- **Marc** : Chômage
+- **Jean-Louis** : Boulanger
+- **Marie** : Ostéopathe
+
+Besoin d autre chose ? 😊
+
+Vous: Jean-Louis est chasseur. Fabien est jardinier aussi.
+IA: Voici les métiers mis à jour :
+
+- **Fabien** : Formateur, jardinier
+- **Julien** : Maçon
+- **JPP/ChatGPT** : Assistant IA (moi !)
+- **Marc** : Chômage
+- **Jean-Louis** : Chasseur (remplace boulanger)
+- **Marie** : Ostéopathe
+
+Correction apportée pour Jean-Louis. 😊
+
+Vous: Comment s'appelle l'assistant IA?
+IA: L'assistant IA s'appelle **JPP**. C'est aussi le nom que tu utilises pour désigner ChatGPT (moi !).
+
+Tu veux d'autres précisions ? 😊
+
+Vous: 
