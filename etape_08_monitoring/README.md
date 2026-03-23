@@ -54,3 +54,9 @@ process_memory_bytes / 1024 / 1024
 3. Ouvrez Prometheus : vérifiez que les métriques sont scraped
 4. Ouvrez Grafana : créez un dashboard avec latence P95 et RPS
 5. Bonus : ajoutez une alerte si latence P95 > 5s
+
+
+# Grafana exemple
+
+![alt text](image.png)
+![alt text](image-1.png)
