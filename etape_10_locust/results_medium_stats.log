@@ -1,0 +1,29 @@
+
+=== Analyse des résultats : results_medium_stats.csv ===
+
+──────────────────────────────────────────────────
+RÉSUMÉ GLOBAL
+──────────────────────────────────────────────────
+  Requêtes totales  : 32
+  Échecs            : 6 (18.8%)
+  RPS               : 0.1 req/s
+  Latence moyenne   : 118689 ms
+  Latence P50       : 101000 ms
+  Latence P95       : 277000 ms ✗ > 5s
+  Latence P99       : 293000 ms
+──────────────────────────────────────────────────
+
+ÉVALUATION :
+  ✗ Taux d'échec < 1%
+  ✗ Latence P50 < 2s
+  ✗ Latence P95 < 5s
+  ✗ RPS > 5
+
+✗ CERTAINS OBJECTIFS NON ATTEINTS
+
+PAR ENDPOINT :
+  Endpoint                  Req    Err    Avg(ms)    P95(ms)
+  ────────────────────────────────────────────────────────────
+  /chat                      13      2     136519     293000
+  /health                    11      3     104641     277000
+  /history                    8      1     109029     276000

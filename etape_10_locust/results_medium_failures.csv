@@ -1,0 +1,4 @@
+Method,Name,Error,Occurrences
+POST,/chat,CatchResponseError('HTTP 0'),2
+GET,/history,CatchResponseError('HTTP 0'),1
+GET,/health,CatchResponseError('HTTP 0'),3

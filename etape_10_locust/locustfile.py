@@ -32,12 +32,14 @@ class ChatUser(HttpUser):
     - Consulte son historique occasionnellement
     """
     wait_time = between(1, 3)  # Pause réaliste entre les actions
+    
 
     def on_start(self):
         """Initialise la session de l'utilisateur."""
         self.session_id = f"locust-{uuid.uuid4().hex[:8]}"
         self.message_count = 0
-
+        network_timeout = 60.0
+        connection_timeout = 10.0
     @task(5)  # Tâche principale (poids 5 = 5x plus fréquente)
     def send_message(self):
         """Envoie un message aléatoire."""

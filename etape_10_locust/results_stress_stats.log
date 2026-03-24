@@ -1,0 +1,53 @@
+
+=== Analyse des résultats : results_stress_stats.csv ===
+
+──────────────────────────────────────────────────
+RÉSUMÉ GLOBAL
+──────────────────────────────────────────────────
+  Requêtes totales  : 87
+  Échecs            : 21 (24.1%)
+  RPS               : 0.2 req/s
+  Latence moyenne   : 100806 ms
+  Latence P50       : 44000 ms
+  Latence P95       : 477000 ms ✗ > 5s
+  Latence P99       : 550000 ms
+──────────────────────────────────────────────────
+
+ÉVALUATION :
+  ✗ Taux d'échec < 1%
+  ✗ Latence P50 < 2s
+  ✗ Latence P95 < 5s
+  ✗ RPS > 5
+
+✗ CERTAINS OBJECTIFS NON ATTEINTS
+
+PAR ENDPOINT :
+  Endpoint                  Req    Err    Avg(ms)    P95(ms)
+  ────────────────────────────────────────────────────────────
+  /chat                      44     10     107643     429000
+  /health                    27      9      83208     477000
+  /history                   16      2     111701     550000
+
+
+
+
+Pourquoi ces résultats
+Latences énormes (~100s en moyenne) → le chatbot appelle un LLM externe (Claude API) à chaque /chat, et sous charge les requêtes s'accumulent en queue. Le serveur Flask (mono-thread par défaut) traite une requête à la fois.
+
+24% d'échecs → timeout côté Locust ou erreurs 5xx parce que le serveur est saturé / les appels API LLM dépassent un délai limite.
+
+/health échoue aussi (9/27 erreurs) → preuve que le serveur Flask est complètement bloqué par les requêtes /chat en attente.
+
+0.2 RPS → le serveur ne traite que 1 requête toutes les 5 secondes en pratique.
+
+Causes racines probables
+Flask en mode dev (single-threaded, single-worker)
+Pas d'async sur les appels LLM → chaque requête bloque le thread
+Pas de timeout côté application sur les appels API
+Pas de rate limiting / queue pour absorber les pics
+Ce qu'il faudrait pour passer les objectifs
+Passer à gunicorn avec plusieurs workers (--workers 4)
+Ou utiliser async avec Flask + asyncio / migrer vers FastAPI
+Mettre un timeout strict sur les appels LLM (ex: 10s)
+Éventuellement un cache pour les réponses fréquentes
+En résumé : le serveur s'effondre dès qu'il reçoit plusieurs requêtes simultanées car il est mono-thread et bloqué par les appels LLM.
