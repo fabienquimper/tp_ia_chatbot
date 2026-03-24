@@ -22,12 +22,20 @@ CONFIG = {
         "price_input": 0.00015,   # $/1K tokens
         "price_output": 0.00060,
     },
-    "local": {
+    "local_mistral": {
         "base_url": os.environ.get("LOCAL_BASE_URL", "http://localhost:1234/v1"),
         "api_key": "lm-studio",
         "model": os.environ.get("LOCAL_MODEL", "mistral-7b-instruct"),
         "price_input": 0.0,   # gratuit (local)
         "price_output": 0.0,
+    },
+    "force_localhost_gpt_oss_20b": {
+        "base_url": "http://192.168.1.66:1235/v1",  # Windows host depuis WSL2 (LM Studio port 1235)
+        "api_key": "lm-studio",
+        "model": "openai/gpt-oss-20b",
+        "price_input": 0.0,
+        "price_output": 0.0,
+        "timeout": 120,  # MSI sans GPU dédié = lent, timeout généreux
     },
     "local_mistral3": {
         "base_url": os.environ.get("LOCAL_BASE_URL", "http://localhost:1234/v1"),
@@ -47,7 +55,7 @@ CONFIG = {
     "reseau_gpt_oss_20b": {
         "base_url": "http://192.168.1.141:1234/v1",
         "api_key": "lm-studio",
-        "model": "gpt-oss-20b",
+        "model": "openai/gpt-oss-20b",
         "price_input": 0.0,   # gratuit (réseau local)
         "price_output": 0.0,
         "timeout": 120,       # modèle lourd sur réseau — timeout généreux

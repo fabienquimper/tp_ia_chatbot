@@ -26,34 +26,63 @@ from judge import judge_with_llm, judge_with_keywords
 
 # ── Configuration depuis etape_00_moteur/config.py ─────────────────────────
 cloud_cfg = CONFIG["cloud"]
-local_cfg = CONFIG["local"]
-USE_LLM_JUDGE = bool(cloud_cfg["api_key"] and cloud_cfg["api_key"] != "sk-changeme")
+# USE_LLM_JUDGE=True si clé cloud valide OU si un juge local sera choisi par l'utilisateur
+_cloud_key_valid = bool(cloud_cfg["api_key"] and cloud_cfg["api_key"] != "sk-changeme")
+USE_LLM_JUDGE = True  # sera toujours vrai : le juge local sera choisi interactivement
 
-# Modèles à comparer — construits depuis CONFIG
-MODELS = [
-    {
-        "name": cloud_cfg["model"],
-        "label": f"{cloud_cfg['model']} (Cloud)",
-        "client": make_client("cloud") if USE_LLM_JUDGE else None,
-        "price_input": cloud_cfg["price_input"],
-        "price_output": cloud_cfg["price_output"],
-    },
-]
+def build_model_entry(mode: str) -> dict | None:
+    """Construit une entrée MODELS depuis une config, None si inaccessible."""
+    cfg = CONFIG[mode]
+    try:
+        client = make_client(mode)
+        client.models.list()
+    except Exception as e:
+        print(f"  ⚠ '{mode}' inaccessible : {e}")
+        return None
+    return {
+        "name": cfg["model"],
+        "label": f"{cfg['model']} ({mode})",
+        "client": client,
+        "price_input": cfg["price_input"],
+        "price_output": cfg["price_output"],
+        "timeout": cfg.get("timeout", 120),
+    }
 
-# Ajouter le modèle local si LM Studio est accessible
-try:
-    local_client = make_client("local")
-    local_client.models.list()  # Test de connexion
-    MODELS.append({
-        "name": local_cfg["model"],
-        "label": f"{local_cfg['model']} (Local)",
-        "client": local_client,
-        "price_input": local_cfg["price_input"],
-        "price_output": local_cfg["price_output"],
-    })
-    print(f"✓ LM Studio disponible : {local_cfg['model']}")
-except Exception:
-    print("⚠ LM Studio non disponible — benchmark cloud uniquement")
+def choose_models() -> tuple[list, str]:
+    """Sélection interactive de 2 modèles à comparer + choix du juge.
+    Retourne (models, judge_mode)."""
+    from config import choose_mode
+    models = []
+    modes = []
+    for i in (1, 2):
+        print(f"\n── Modèle {i} à comparer ──")
+        mode = choose_mode()
+        modes.append(mode)
+        entry = build_model_entry(mode)
+        if entry:
+            entry["mode"] = mode
+            models.append(entry)
+            print(f"  ✓ Modèle {i} : {entry['label']}")
+        else:
+            print(f"  ✗ Modèle {i} ignoré (inaccessible)")
+
+    # Choix du juge parmi les modèles sélectionnés
+    judge_mode = modes[0]
+    if len(models) >= 2:
+        print(f"\n── Quel modèle sera le juge ? ──")
+        for i, m in enumerate(models, 1):
+            print(f"  {i}. {m['label']}")
+        choice = input(f"Choisissez (1 ou 2, Entrée = 1) : ").strip()
+        if choice == "2":
+            judge_mode = models[1]["mode"]
+        else:
+            judge_mode = models[0]["mode"]
+        print(f"  ✓ Juge : {models[0 if judge_mode == models[0]['mode'] else 1]['label']}")
+
+    return models, judge_mode
+
+MODELS, _judge_mode = choose_models()
+os.environ["JUDGE_MODE"] = _judge_mode
 
 EVAL_FILE = "eval_set.jsonl"
 RESULTS_DIR = Path("results")
@@ -68,7 +97,7 @@ def load_eval_set(filepath: str) -> list:
                 questions.append(json.loads(line))
     return questions
 
-def call_model(client, model_name: str, question: str) -> tuple[str, float, int, int]:
+def call_model(client, model_name: str, question: str, timeout: int = 30) -> tuple[str, float, int, int]:
     """
     Appelle un modèle et retourne (réponse, latence, tokens_in, tokens_out).
     """
@@ -84,7 +113,7 @@ def call_model(client, model_name: str, question: str) -> tuple[str, float, int,
                 {"role": "user", "content": question}
             ],
             max_tokens=300,
-            timeout=30
+            timeout=timeout
         )
         latency = time.time() - start
         answer = response.choices[0].message.content
@@ -121,7 +150,7 @@ def run_benchmark():
             print(f"  [{i+1:2d}/{len(questions)}] {question[:60]}...", end="", flush=True)
 
             answer, latency, tokens_in, tokens_out = call_model(
-                model_cfg["client"], model_cfg["name"], question
+                model_cfg["client"], model_cfg["name"], question, model_cfg["timeout"]
             )
             cost = calc_cost(model_cfg, tokens_in, tokens_out)
             total_cost += cost
@@ -197,6 +226,11 @@ def print_summary(results: list):
     for model, model_results in models.items():
         valid = [r for r in model_results if not r["answer"].startswith("ERREUR")]
         if not valid:
+            # Modèle avec 100% d'erreurs (timeouts) — apparaît quand même dans le tableau
+            summary_rows.append([
+                model, "N/A", "timeout", "timeout", "$0.0000",
+                f"0/{len(model_results)}"
+            ])
             continue
         avg_score = sum(r["score"] for r in valid) / len(valid)
         avg_latency = sum(r["latency"] for r in valid) / len(valid)
@@ -224,11 +258,14 @@ def print_summary(results: list):
 
     print(f"\n{'═'*70}")
     print("RECOMMANDATION :")
-    if len(summary_rows) > 1:
-        best_quality = max(summary_rows, key=lambda x: float(x[1].split("/")[0]))
-        best_cost = min(summary_rows, key=lambda x: float(x[4].replace("$", "")))
+    scored = [r for r in summary_rows if r[1] != "N/A"]
+    if len(scored) > 1:
+        best_quality = max(scored, key=lambda x: float(x[1].split("/")[0]))
+        best_cost = min(scored, key=lambda x: float(x[4].replace("$", "")))
         print(f"  Meilleure qualité : {best_quality[0]}")
         print(f"  Meilleur coût     : {best_cost[0]}")
+    elif len(scored) == 1:
+        print(f"  Seul modèle fonctionnel : {scored[0][0]}")
     print(f"{'═'*70}\n")
 
 if __name__ == "__main__":

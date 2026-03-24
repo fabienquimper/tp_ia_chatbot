@@ -7,15 +7,18 @@ import os, sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "etape_00_moteur"))
 from config import CONFIG, make_client
 
-# Le juge utilise toujours le cloud (nécessite une vraie clé API)
-JUDGE_MODEL = os.environ.get("JUDGE_MODEL", CONFIG["cloud"]["model"])
+# Le juge utilise le cloud par défaut, ou un modèle local si JUDGE_MODE est défini
+JUDGE_MODE = os.environ.get("JUDGE_MODE", "cloud")
+if JUDGE_MODE not in CONFIG:
+    JUDGE_MODE = "cloud"
+JUDGE_MODEL = os.environ.get("JUDGE_MODEL", CONFIG[JUDGE_MODE]["model"])
 
 _judge_client = None
 
 def get_judge_client():
     global _judge_client
     if _judge_client is None:
-        _judge_client = make_client("cloud")
+        _judge_client = make_client(JUDGE_MODE)
     return _judge_client
 
 JUDGE_PROMPT = """Tu es un expert en évaluation de réponses de modèles de langage.
