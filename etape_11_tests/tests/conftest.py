@@ -18,7 +18,7 @@ def use_temp_db(tmp_path):
 @pytest.fixture
 def mock_llm():
     """Mock du LLM pour éviter les vrais appels API."""
-    with patch("app.llm.get_reply") as mock:
+    with patch("app.main.get_reply") as mock:
         mock.return_value = ("Réponse de test du LLM mocké.", 15)
         yield mock
 

@@ -1,0 +1,47 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_11_tests# pytest tests/test_unit.py
+==================================================== test session starts =====================================================
+platform linux -- Python 3.12.3, pytest-9.0.2, pluggy-1.6.0 -- /mnt/c/git/ai/tp_ia_chatbot/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /mnt/c/git/ai/tp_ia_chatbot/etape_11_tests
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.7.22, locust-2.43.3, asyncio-1.3.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function       
+collected 21 items
+
+tests/test_unit.py::TestSanitize::test_message_normal_passe PASSED                                                     [  4%]
+tests/test_unit.py::TestSanitize::test_message_vide_bloque PASSED                                                      [  9%]
+tests/test_unit.py::TestSanitize::test_message_espaces_bloque PASSED                                                   [ 14%]
+tests/test_unit.py::TestSanitize::test_message_trop_long_bloque PASSED                                                 [ 19%]
+tests/test_unit.py::TestSanitize::test_injection_ignore_instructions PASSED                                            [ 23%] 
+tests/test_unit.py::TestSanitize::test_injection_system_prompt PASSED                                                  [ 28%] 
+tests/test_unit.py::TestSanitize::test_injection_jailbreak PASSED                                                      [ 33%]
+tests/test_unit.py::TestSanitize::test_injection_act_as_root PASSED                                                    [ 38%]
+tests/test_unit.py::TestSanitize::test_injection_xss_script PASSED                                                     [ 42%]
+tests/test_unit.py::TestSanitize::test_echappement_html PASSED                                                         [ 47%]
+tests/test_unit.py::TestSanitize::test_message_avec_apostrophe PASSED                                                  [ 52%]
+tests/test_unit.py::TestSanitize::test_message_question_longue_passe PASSED                                            [ 57%] 
+tests/test_unit.py::TestDatabase::test_save_and_load_message PASSED                                                    [ 61%]
+tests/test_unit.py::TestDatabase::test_sessions_isolees PASSED                                                         [ 66%]
+tests/test_unit.py::TestDatabase::test_limite_historique PASSED                                                        [ 71%]
+tests/test_unit.py::TestDatabase::test_count_messages PASSED                                                           [ 76%] 
+tests/test_unit.py::TestDatabase::test_session_vide PASSED                                                             [ 80%]
+tests/test_unit.py::TestModels::test_chat_request_valide PASSED                                                        [ 85%]
+tests/test_unit.py::TestModels::test_chat_request_session_defaut PASSED                                                [ 90%]
+tests/test_unit.py::TestModels::test_chat_request_message_vide_invalide PASSED                                         [ 95%]
+tests/test_unit.py::TestModels::test_message_item PASSED                                                               [100%]
+
+======================================================= tests coverage =======================================================
+______________________________________ coverage: platform linux, python 3.12.3-final-0 _______________________________________
+
+Name              Stmts   Miss  Cover   Missing
+-----------------------------------------------
+app/__init__.py       0      0   100%
+app/database.py      34      0   100%
+app/llm.py           25     25     0%   1-33
+app/main.py          31     31     0%   1-39
+app/models.py        22      0   100%
+app/security.py      14      0   100%
+-----------------------------------------------
+TOTAL               126     56    56%
+===================================================== 21 passed in 1.26s =====================================================
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_11_tests# 

@@ -1,0 +1,42 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_11_tests# pytest tests/test_integration.py
+==================================================== test session starts =====================================================platform linux -- Python 3.12.3, pytest-9.0.2, pluggy-1.6.0 -- /mnt/c/git/ai/tp_ia_chatbot/venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /mnt/c/git/ai/tp_ia_chatbot/etape_11_tests
+configfile: pytest.ini
+plugins: anyio-4.12.1, langsmith-0.7.22, locust-2.43.3, asyncio-1.3.0, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 17 items
+
+tests/test_integration.py::TestHealth::test_health_retourne_200 PASSED                                                                      [  5%]
+tests/test_integration.py::TestHealth::test_health_contient_status_ok PASSED                                                                [ 11%]
+tests/test_integration.py::TestHealth::test_health_contient_model PASSED                                                                    [ 17%]
+tests/test_integration.py::TestHealth::test_health_contient_uptime PASSED                                                                   [ 23%]
+tests/test_integration.py::TestChat::test_chat_retourne_200 PASSED                                                                          [ 29%]
+tests/test_integration.py::TestChat::test_chat_contient_reply PASSED                                                                        [ 35%]
+tests/test_integration.py::TestChat::test_chat_contient_session_id PASSED                                                                   [ 41%]
+tests/test_integration.py::TestChat::test_chat_contient_latency PASSED                                                                      [ 47%]
+tests/test_integration.py::TestChat::test_chat_contient_tokens PASSED                                                                       [ 52%]
+tests/test_integration.py::TestChat::test_chat_sauvegarde_dans_historique PASSED                                                            [ 58%]
+tests/test_integration.py::TestChat::test_chat_message_vide_refuse PASSED                                                                   [ 64%]
+tests/test_integration.py::TestChat::test_chat_session_defaut PASSED                                                                        [ 70%]
+tests/test_integration.py::TestHistory::test_history_session_vide PASSED                                                                    [ 76%]
+tests/test_integration.py::TestHistory::test_history_apres_chat PASSED                                                                      [ 82%]
+tests/test_integration.py::TestHistory::test_history_contient_roles PASSED                                                                  [ 88%]
+tests/test_integration.py::TestHistory::test_history_sessions_isolees PASSED                                                                [ 94%]
+tests/test_integration.py::TestLLMMock::test_llm_est_mocke PASSED                                                                           [100%]
+
+================================================================= tests coverage ==================================================================
+_________________________________________________ coverage: platform linux, python 3.12.3-final-0 _________________________________________________
+
+Name              Stmts   Miss  Cover   Missing
+-----------------------------------------------
+app/__init__.py       0      0   100%
+app/database.py      34      4    88%   54-59
+app/llm.py           25      8    68%   23-24, 28-33
+app/main.py          31      3    90%   17, 29-30
+app/models.py        22      0   100%
+app/security.py      14     14     0%   1-26
+-----------------------------------------------
+TOTAL               126     29    77%
+=============================================================== 17 passed in 14.25s ===============================================================
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_11_tests# 
