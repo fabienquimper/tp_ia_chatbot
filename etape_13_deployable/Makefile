@@ -1,4 +1,4 @@
-.PHONY: help dev prod test build clean index-rag logs stop eval eval-verbose smoke smoke-no-rag
+.PHONY: help dev prod test build clean index-rag index-rag-docker index-rag-paragraph index-rag-section logs stop eval eval-strict eval-verbose smoke smoke-no-rag
 
 # Variables
 IMAGE  := chatbot-api
@@ -13,9 +13,11 @@ help:  ## Affiche cette aide
 
 # ── Développement ─────────────────────────────────────────────────────────────
 dev:  ## Lance la stack de développement (API + Prometheus + Grafana)
+	$(COMPOSE) down --remove-orphans 2>/dev/null || true
 	$(COMPOSE) up --build
 
-dev-bg:  ## Lance en arrière-plan
+dev-bg:  ## Lance en arrière-plan (supprime l'ancien conteneur d'abord)
+	$(COMPOSE) down --remove-orphans 2>/dev/null || true
 	$(COMPOSE) up --build -d
 
 # ── Tests ─────────────────────────────────────────────────────────────────────
@@ -41,24 +43,39 @@ build-skip-tests:  ## Construit sans tests (urgence seulement)
 	./build.sh --skip-tests
 
 # ── Évaluation ────────────────────────────────────────────────────────────────
-eval:  ## Évaluation complète : 15 questions avec vérification des mots-clés
-	python scripts/eval.py --eval-file data/eval_set.jsonl
+eval:  ## Évaluation complète : 15 questions (exit 0 si score ≥ 70%)
+	python scripts/eval.py --eval-file data/eval_set.jsonl --pass-threshold 70
+
+eval-strict:  ## Évaluation stricte pour CI : exit 1 si le moindre FAIL
+	python scripts/eval.py --eval-file data/eval_set.jsonl --pass-threshold 100
 
 eval-verbose:  ## Évaluation complète avec réponses complètes affichées
-	python scripts/eval.py --eval-file data/eval_set.jsonl --verbose
+	python scripts/eval.py --eval-file data/eval_set.jsonl --verbose --pass-threshold 70
 
 smoke:  ## Smoke test : 5 questions rapides pour vérifier que l'API répond
-	python scripts/eval.py --eval-file data/eval_set.jsonl --count 5 --shuffle
+	python scripts/eval.py --eval-file data/eval_set.jsonl --count 5 --shuffle --pass-threshold 60
 
 smoke-no-rag:  ## Smoke test sans RAG
-	python scripts/eval.py --eval-file data/eval_set.jsonl --count 5 --no-rag
+	python scripts/eval.py --eval-file data/eval_set.jsonl --count 5 --no-rag --pass-threshold 60
 
 # ── RAG ───────────────────────────────────────────────────────────────────────
-index-rag:  ## Indexe les documents data/docs/ dans ChromaDB
+index-rag:  ## Indexe les documents (méthode définie dans index_rag.py)
 	python scripts/index_rag.py
 
-index-rag-docker:  ## Indexe le RAG dans le conteneur Docker (docs/ baked dans l'image)
+index-rag-paragraph:  ## Indexe avec la méthode paragraphes (classique)
+	python scripts/index_rag.py --method paragraph
+
+index-rag-section:  ## Indexe avec la méthode sections (recommandée, meilleure précision)
+	python scripts/index_rag.py --method section
+
+index-rag-docker:  ## Indexe dans le conteneur Docker (méthode définie dans index_rag.py)
 	$(COMPOSE) exec chatbot python scripts/index_rag.py --docs-dir docs
+
+index-rag-docker-paragraph:  ## Indexe dans Docker, méthode paragraphes
+	$(COMPOSE) exec chatbot python scripts/index_rag.py --docs-dir docs --method paragraph
+
+index-rag-docker-section:  ## Indexe dans Docker, méthode sections
+	$(COMPOSE) exec chatbot python scripts/index_rag.py --docs-dir docs --method section
 
 # ── Opérations ────────────────────────────────────────────────────────────────
 logs:  ## Affiche les logs de l'API

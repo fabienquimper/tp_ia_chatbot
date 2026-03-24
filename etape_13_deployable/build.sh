@@ -19,6 +19,7 @@ ENV="dev"
 IMAGE_NAME="${IMAGE_NAME:-chatbot-api}"
 IMAGE_TAG="${IMAGE_TAG:-$(git rev-parse --short HEAD 2>/dev/null || echo 'latest')}"
 REGISTRY="${REGISTRY:-}"
+COMPOSE=$(docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
 
 for arg in "$@"; do
     case $arg in
@@ -105,7 +106,8 @@ if [ "$ENV" = "prod" ]; then
     COMPOSE_FILE="docker-compose.prod.yml"
 fi
 
-docker compose -f "$COMPOSE_FILE" up -d --build
+$COMPOSE down --remove-orphans 2>/dev/null || true
+$COMPOSE -f "$COMPOSE_FILE" up -d --build
 
 # Attente health check
 info "En attente du health check..."

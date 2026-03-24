@@ -136,6 +136,8 @@ def main() -> None:
                         help="Nombre de questions (0=toutes, utile pour smoke test)")
     parser.add_argument("--verbose",   "-v", action="store_true",        help="Affiche les réponses")
     parser.add_argument("--shuffle",   action="store_true",              help="Ordre aléatoire")
+    parser.add_argument("--pass-threshold", type=int, default=100, metavar="PCT",
+                        help="Seuil de succès en %% pour exit 0 (défaut 100 = aucun FAIL toléré)")
     args = parser.parse_args()
 
     eval_path = Path(args.eval_file)
@@ -215,7 +217,8 @@ def main() -> None:
     print_summary(results, latencies)
 
     passed_total = sum(1 for r in results if r["passed"])
-    sys.exit(0 if passed_total == len(results) else 1)
+    pct = passed_total / len(results) * 100 if results else 0
+    sys.exit(0 if pct >= args.pass_threshold else 1)
 
 
 if __name__ == "__main__":

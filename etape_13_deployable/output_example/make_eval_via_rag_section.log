@@ -1,0 +1,57 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable# make eval
+python scripts/eval.py --eval-file data/eval_set.jsonl
+
+═════════════════════════════════════════════════════════════════
+  Évaluation Chatbot — 15 questions
+═════════════════════════════════════════════════════════════════
+  URL    : http://localhost:8000
+  RAG    : activé
+  Fichier: data/eval_set.jsonl
+─────────────────────────────────────────────────────────────────
+
+  ✓ Authentification OK
+
+  [PASS] q001 Quel est le prix de CloudSync Pro ?                   5.03s [RAG 5src]
+  [PASS] q002 Comment contacter le support TechCorp ?               8.45s [RAG 5src]
+  [PASS] q003 Qui est le CEO de TechCorp ?                          3.36s [RAG 5src]
+  [PASS] q004 Quel est le SLA garanti par TechCorp ?                3.89s [RAG 5src]
+  [PASS] q005 Quelles sont les limites de taux de l'API TechCorp ? 10.88s [RAG 5src]
+  [PASS] q006 Combien de temps les données clients sont-elles cons  5.94s [RAG 5src]
+  [PART] q007 Où sont les bureaux de TechCorp en France ?           6.43s [RAG 5src]
+         → Les bureaux français de TechCorp Solutions se situent à :
+
+| Ville | Adresse |
+|-------|---------|
+| **Paris**
+         ✓ Paris
+         ✗ manquants : Lyon
+  [FAIL] q008 Comment s'authentifier avec l'API TechCorp ?          2.81s [RAG 5src]
+         → Will answer that not present.La documentation fournie ne décrit pas le mécanisme d’authentification pour l’API
+         ✗ manquants : Bearer, token
+  [PASS] q009 Quel est le produit le plus cher de TechCorp ?        3.29s [RAG 5src]
+  [PASS] q010 Dans quel délai TechCorp répond à une demande RGPD ?  3.16s [RAG 5src]
+  ⏳ Rate limit — attente 62s...
+  [PASS] q011 Quels formats d'export propose l'API TechCorp ?       6.61s [RAG 5src]
+  [PASS] q012 TechCorp est-elle certifiée ISO 27001 ?               3.12s [RAG 5src]
+  [FAIL] q013 Quel langage utilise le SDK TechCorp ?                2.57s [RAG 5src]
+         → La documentation fournie ne mentionne aucun détail concernant le(s) langage(s) utilisé(s) par le SDK de TechCo
+         ✗ manquants : Python, JavaScript
+  [PASS] q014 Quand a été fondée TechCorp ?                         2.33s [RAG 5src]
+  [PASS] q015 Quelle est l'adresse email du support technique Tech  3.30s [RAG 5src]
+
+═════════════════════════════════════════════════════════════════
+  Résultat : 12/15 PASS (80%)   1 PARTIEL   2 FAIL
+  Latence  : moy=4.75s  min=2.33s  max=10.88s
+
+  Catégorie            Pass  Score
+  company             2/3  ████████░░ 83%
+  pricing             2/2  ██████████ 100%
+  rgpd                2/2  ██████████ 100%
+  securite            1/1  ██████████ 100%
+  sla                 1/1  ██████████ 100%
+  support             2/2  ██████████ 100%
+  technique           2/4  █████░░░░░ 50%
+═════════════════════════════════════════════════════════════════
+
+make: *** [Makefile:47: eval] Error 1
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable#

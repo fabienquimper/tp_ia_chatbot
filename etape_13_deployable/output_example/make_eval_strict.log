@@ -1,0 +1,47 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable# make eval-strict
+python scripts/eval.py --eval-file data/eval_set.jsonl --pass-threshold 100
+
+═════════════════════════════════════════════════════════════════
+  Évaluation Chatbot — 15 questions
+═════════════════════════════════════════════════════════════════
+  URL    : http://localhost:8000
+  RAG    : activé
+  Fichier: data/eval_set.jsonl
+─────────────────────────────────────────────────────────────────
+
+  ✓ Authentification OK
+
+  [PASS] q001 Quel est le prix de CloudSync Pro ?                   4.65s [RAG 5src]
+  [PASS] q002 Comment contacter le support TechCorp ?               8.71s [RAG 5src]
+  [PASS] q003 Qui est le CEO de TechCorp ?                          3.13s [RAG 5src]
+  [ERR ] q004 Quel est le SLA garanti par TechCorp ?               timed out
+  [ERR ] q005 Quelles sont les limites de taux de l'API TechCorp ? timed out
+  [ERR ] q006 Combien de temps les données clients sont-elles cons timed out
+  [ERR ] q007 Où sont les bureaux de TechCorp en France ?          timed out
+  [ERR ] q008 Comment s'authentifier avec l'API TechCorp ?         timed out
+  [ERR ] q009 Quel est le produit le plus cher de TechCorp ?       timed out
+  [PASS] q010 Dans quel délai TechCorp répond à une demande RGPD ?  3.15s [RAG 5src]
+  [PASS] q011 Quels formats d'export propose l'API TechCorp ?       6.41s [RAG 5src]
+  [PASS] q012 TechCorp est-elle certifiée ISO 27001 ?               4.52s [RAG 5src]
+  [FAIL] q013 Quel langage utilise le SDK TechCorp ?                3.00s [RAG 5src]
+         → Je n’ai pas d’information sur le ou les langages utilisés par le SDK de TechCorp dans la documentation fournie
+         ✗ manquants : Python, JavaScript
+  [PASS] q014 Quand a été fondée TechCorp ?                         2.33s [RAG 5src]
+  [PASS] q015 Quelle est l'adresse email du support technique Tech  3.44s [RAG 5src]
+
+═════════════════════════════════════════════════════════════════
+  Résultat : 8/15 PASS (53%)   0 PARTIEL   7 FAIL
+  Latence  : moy=4.37s  min=2.33s  max=8.71s
+
+  Catégorie            Pass  Score
+  company             2/3  ██████░░░░ 67%
+  pricing             1/2  █████░░░░░ 50%
+  rgpd                1/2  █████░░░░░ 50%
+  securite            1/1  ██████████ 100%
+  sla                 0/1  ░░░░░░░░░░ 0%
+  support             2/2  ██████████ 100%
+  technique           1/4  ██░░░░░░░░ 25%
+═════════════════════════════════════════════════════════════════
+
+make: *** [Makefile:50: eval-strict] Error 1
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable#

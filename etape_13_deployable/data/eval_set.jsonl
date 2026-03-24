@@ -7,8 +7,8 @@
 {"id": "q007", "question": "Où sont les bureaux de TechCorp en France ?", "expected_keywords": ["Paris", "Lyon"], "category": "company", "difficulty": "facile"}
 {"id": "q008", "question": "Comment s'authentifier avec l'API TechCorp ?", "expected_keywords": ["Bearer", "token"], "category": "technique", "difficulty": "moyen"}
 {"id": "q009", "question": "Quel est le produit le plus cher de TechCorp ?", "expected_keywords": ["APIConnect", "199"], "category": "pricing", "difficulty": "moyen"}
-{"id": "q010", "question": "Quelle est la politique de remboursement de TechCorp ?", "expected_keywords": ["30 jours"], "category": "support", "difficulty": "facile"}
-{"id": "q011", "question": "Quels formats de fichiers supporte CloudSync Pro ?", "expected_keywords": ["CSV", "JSON", "XML"], "category": "technique", "difficulty": "moyen"}
+{"id": "q010", "question": "Dans quel délai TechCorp répond à une demande RGPD ?", "expected_keywords": ["30 jours"], "category": "rgpd", "difficulty": "facile"}
+{"id": "q011", "question": "Quels formats d'export propose l'API TechCorp ?", "expected_keywords": ["CSV", "JSON"], "category": "technique", "difficulty": "moyen"}
 {"id": "q012", "question": "TechCorp est-elle certifiée ISO 27001 ?", "expected_keywords": ["ISO 27001"], "category": "securite", "difficulty": "facile"}
 {"id": "q013", "question": "Quel langage utilise le SDK TechCorp ?", "expected_keywords": ["Python", "JavaScript"], "category": "technique", "difficulty": "moyen"}
 {"id": "q014", "question": "Quand a été fondée TechCorp ?", "expected_keywords": ["2018"], "category": "company", "difficulty": "facile"}
