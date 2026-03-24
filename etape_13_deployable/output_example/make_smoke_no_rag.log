@@ -1,0 +1,36 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable# make smoke-no-rag
+python scripts/eval.py --eval-file data/eval_set.jsonl --count 5 --no-rag
+
+═════════════════════════════════════════════════════════════════
+  Évaluation Chatbot — 5 questions
+═════════════════════════════════════════════════════════════════
+  URL    : http://localhost:8000
+  RAG    : désactivé
+  Fichier: data/eval_set.jsonl
+─────────────────────────────────────────────────────────────────
+
+  ✓ Authentification OK
+
+  [PASS] q001 Quel est le prix de CloudSync Pro ?                   3.20s [no-RAG]
+  [PASS] q002 Comment contacter le support TechCorp ?               6.92s [no-RAG]
+  [FAIL] q003 Qui est le CEO de TechCorp ?                          1.74s [no-RAG]
+         → Je n’ai pas cette information dans ma base documentaire.
+         ✗ manquants : Marie Dupont
+  [PASS] q004 Quel est le SLA garanti par TechCorp ?                3.16s [no-RAG]
+  [FAIL] q005 Quelles sont les limites de taux de l'API TechCorp ?  2.33s [no-RAG]
+         → Je n’ai pas cette information dans ma base documentaire.
+         ✗ manquants : rate, limite
+
+═════════════════════════════════════════════════════════════════
+  Résultat : 3/5 PASS (60%)   0 PARTIEL   2 FAIL
+  Latence  : moy=3.47s  min=1.74s  max=6.92s
+
+  Catégorie            Pass  Score
+  company             0/1  ░░░░░░░░░░ 0%
+  pricing             1/1  ██████████ 100%
+  sla                 1/1  ██████████ 100%
+  support             1/1  ██████████ 100%
+  technique           0/1  ░░░░░░░░░░ 0%
+═════════════════════════════════════════════════════════════════
+
+make: *** [Makefile:54: smoke-no-rag] Error 1

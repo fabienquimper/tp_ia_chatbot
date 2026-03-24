@@ -1,0 +1,53 @@
+groups:
+  - name: chatbot_alerts
+    rules:
+
+      - alert: ChatbotDown
+        expr: up{job="chatbot-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Chatbot API indisponible"
+          description: "L'API chatbot ne répond plus depuis 1 minute."
+
+      - alert: HighErrorRate
+        expr: |
+          rate(chat_errors_total[5m]) /
+          rate(chat_requests_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taux d'erreur élevé (>10%)"
+          description: "Plus de 10% des requêtes échouent sur les 5 dernières minutes."
+
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95,
+            rate(chat_latency_seconds_bucket[5m])
+          ) > 5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Latence P95 > 5s"
+          description: "Le 95e percentile de latence dépasse 5 secondes."
+
+      - alert: HighMemoryUsage
+        expr: process_memory_bytes > 500 * 1024 * 1024
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Consommation mémoire > 500MB"
+          description: "Le processus chatbot consomme plus de 500MB depuis 10 minutes."
+
+      - alert: PromptInjectionAttempts
+        expr: increase(prompt_injection_blocked_total[5m]) > 10
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tentatives d'injection de prompt détectées"
+          description: "Plus de 10 tentatives d'injection bloquées en 5 minutes."

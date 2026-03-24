@@ -1,0 +1,91 @@
+version: "3.9"
+# ── Fichier centralisé pour étape 14 ────────────────────────────────────────
+# Référence l'image publiée depuis le registry (pas de build local).
+# Usage : IMAGE_TAG=v1.2.3 docker compose -f docker/docker-compose.prod.yml up -d
+#
+# Ce fichier est destiné à être utilisé sur le serveur de production.
+# L'image est buildée en CI/CD (GitHub Actions) et poussée sur GHCR.
+
+services:
+
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/nginx/certs:ro    # Certificats Let's Encrypt
+      - nginx_logs:/var/log/nginx
+    restart: always
+    networks:
+      - chatbot_net
+    depends_on:
+      chatbot:
+        condition: service_healthy
+
+  chatbot:
+    image: ${REGISTRY:-ghcr.io/YOUR_ORG}/chatbot-api:${IMAGE_TAG:-latest}
+    expose:
+      - "8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MODEL=${MODEL:-gpt-4o-mini}
+      - MODE=${MODE:-cloud}
+      - DB_PATH=/app/data/chat.db
+      - CHROMA_PATH=/app/data/chroma_db
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${TOKEN_EXPIRE:-60}
+    volumes:
+      - chatbot_data:/app/data
+    restart: always
+    networks:
+      - chatbot_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  prometheus:
+    image: prom/prometheus:v2.50.1
+    expose:
+      - "9090"
+    volumes:
+      - ../etape_13_deployable/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../etape_13_deployable/prometheus-alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=30d'
+    restart: always
+    networks:
+      - chatbot_net
+
+  grafana:
+    image: grafana/grafana:10.3.1
+    expose:
+      - "3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=https://${DOMAIN}/grafana
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../etape_13_deployable/grafana/provisioning:/etc/grafana/provisioning:ro
+    restart: always
+    networks:
+      - chatbot_net
+
+networks:
+  chatbot_net:
+    driver: bridge
+
+volumes:
+  chatbot_data:
+  prometheus_data:
+  grafana_data:
+  nginx_logs:

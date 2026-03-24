@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: chatbot
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - pvc.yaml
+  - chatbot-deployment.yaml
+  - chatbot-service.yaml
+  - chatbot-hpa.yaml
+  - ingress.yaml
+  - monitoring/prometheus-deployment.yaml
+  - monitoring/grafana-deployment.yaml
+
+images:
+  - name: ghcr.io/YOUR_ORG/chatbot-api
+    newTag: latest   # Remplacé par le tag réel en CI/CD
+
+commonLabels:
+  managed-by: kustomize
+  project: tp-chatbot

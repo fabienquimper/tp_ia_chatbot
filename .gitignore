@@ -4,3 +4,8 @@ etape_05_rag/chroma_db/
 **/avis/
 **/__pycache__/
 **/*.pyc
+**/chat.db
+**/*.bin
+.claude
+.coverage
+**/chroma.sqlite3

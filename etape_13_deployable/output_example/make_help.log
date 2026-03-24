@@ -1,0 +1,22 @@
+root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable# make help
+  help                 Affiche cette aide
+  dev                  Lance la stack de développement (API + Prometheus + Grafana)
+  dev-bg               Lance en arrière-plan
+  test                 Lance les tests dans Docker (build stage 'test')
+  test-local           Lance les tests localement (nécessite Python + deps)
+  test-security        Analyse de sécurité statique (bandit)
+  prod                 Lance la stack de production avec Nginx
+  build                Construit l'image de production (avec tests)
+  build-skip-tests     Construit sans tests (urgence seulement)
+  eval                 Évaluation complète : 15 questions avec vérification des mots-clés
+  eval-verbose         Évaluation complète avec réponses complètes affichées
+  smoke                Smoke test : 5 questions rapides pour vérifier que l'API répond
+  smoke-no-rag         Smoke test sans RAG
+  index-rag            Indexe les documents data/docs/ dans ChromaDB
+  index-rag-docker     Indexe le RAG dans le conteneur Docker (docs/ baked dans l'image)
+  logs                 Affiche les logs de l'API
+  stop                 Arrête tous les services
+  clean                Supprime conteneurs, volumes et images de build
+  status               Affiche le statut des services
+
+  IMAGE=chatbot-api  TAG=5ff626e

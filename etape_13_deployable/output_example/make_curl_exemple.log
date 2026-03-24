@@ -1,0 +1,9 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable# curl -X POST http://localhost:8000/auth/token \
+  -d "username=alice&password=password123"
+{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGljZSIsImV4cCI6MTc3NDM5MDY3Mn0.-WzWwtOloaB4Nz6OS834xJyBzz4_5WNBHPOj8CQ9p-Q","token_type":"bearer"}(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable#
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable#
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable# curl -X POST http://localhost:8000/chat \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGljZSIsImV4cCI6MTc3NDM5MDY3Mn0.-WzWwtOloaB4Nz6OS834xJyBzz4_5WNBHPOj8CQ9p-Q" \  
+  -H "Content-Type: application/json" \
+  -d '{"message": "Quel est le prix de CloudSync Pro ?"}'
+{"reply":"{\"response\":\"Le prix de CloudSync Pro est de 49 € par mois (facturation mensuelle) ou bien 470 € par an, ce qui correspond à deux mois gratuits.\"}","session_id":"default","latency":3.728,"tokens":26,"sources":[{"content":"Q : Comment installer CloudSync Pro ?\nR : Téléchargez l'agent depuis votre espace client, lancez l'installateur, puis configurez vos sources de données depuis l'interface web. Un guide de démarrage ra","source":"entreprise.txt"},{"content":"Depuis sa création, TechCorp Solutions a accompagné plus de 2 000 entreprises clientes, allant des PME aux grands groupes industriels. Notre taux de satisfaction client atteint 94 % selon notre derniè","source":"entreprise.txt"},{"content":"Prix : 49 € par mois (facturation mensuelle) ou 470 € par an (soit 2 mois offerts).\nInclus : synchronisation jusqu'à 5 sources de données, 50 Go de stockage temporaire, support email, tableau de bord ","source":"entreprise.txt"}],"rag_used":true}(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable#

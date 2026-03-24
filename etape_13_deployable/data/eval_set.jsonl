@@ -1,0 +1,15 @@
+{"id": "q001", "question": "Quel est le prix de CloudSync Pro ?", "expected_keywords": ["49", "mois"], "category": "pricing", "difficulty": "facile"}
+{"id": "q002", "question": "Comment contacter le support TechCorp ?", "expected_keywords": ["support@techcorp.fr"], "category": "support", "difficulty": "facile"}
+{"id": "q003", "question": "Qui est le CEO de TechCorp ?", "expected_keywords": ["Marie Dupont"], "category": "company", "difficulty": "facile"}
+{"id": "q004", "question": "Quel est le SLA garanti par TechCorp ?", "expected_keywords": ["99", "uptime"], "category": "sla", "difficulty": "facile"}
+{"id": "q005", "question": "Quelles sont les limites de taux de l'API TechCorp ?", "expected_keywords": ["rate", "limite"], "category": "technique", "difficulty": "moyen"}
+{"id": "q006", "question": "Combien de temps les données clients sont-elles conservées ?", "expected_keywords": ["2 ans", "7 ans"], "category": "rgpd", "difficulty": "moyen"}
+{"id": "q007", "question": "Où sont les bureaux de TechCorp en France ?", "expected_keywords": ["Paris", "Lyon"], "category": "company", "difficulty": "facile"}
+{"id": "q008", "question": "Comment s'authentifier avec l'API TechCorp ?", "expected_keywords": ["Bearer", "token"], "category": "technique", "difficulty": "moyen"}
+{"id": "q009", "question": "Quel est le produit le plus cher de TechCorp ?", "expected_keywords": ["APIConnect", "199"], "category": "pricing", "difficulty": "moyen"}
+{"id": "q010", "question": "Quelle est la politique de remboursement de TechCorp ?", "expected_keywords": ["30 jours"], "category": "support", "difficulty": "facile"}
+{"id": "q011", "question": "Quels formats de fichiers supporte CloudSync Pro ?", "expected_keywords": ["CSV", "JSON", "XML"], "category": "technique", "difficulty": "moyen"}
+{"id": "q012", "question": "TechCorp est-elle certifiée ISO 27001 ?", "expected_keywords": ["ISO 27001"], "category": "securite", "difficulty": "facile"}
+{"id": "q013", "question": "Quel langage utilise le SDK TechCorp ?", "expected_keywords": ["Python", "JavaScript"], "category": "technique", "difficulty": "moyen"}
+{"id": "q014", "question": "Quand a été fondée TechCorp ?", "expected_keywords": ["2018"], "category": "company", "difficulty": "facile"}
+{"id": "q015", "question": "Quelle est l'adresse email du support technique TechCorp ?", "expected_keywords": ["support@techcorp.fr"], "category": "support", "difficulty": "facile"}

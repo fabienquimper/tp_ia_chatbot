@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot-api
+  namespace: chatbot
+  labels:
+    app: chatbot-api
+    version: "4.0.0"
+spec:
+  replicas: 2                     # Scale horizontal via HPA
+  selector:
+    matchLabels:
+      app: chatbot-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0           # Zero-downtime deployment
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: chatbot-api
+        version: "4.0.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "8000"
+    spec:
+      serviceAccountName: chatbot-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      # Init container : index les docs RAG si nécessaire
+      initContainers:
+        - name: rag-indexer
+          image: ghcr.io/YOUR_ORG/chatbot-api:latest  # ← Remplacer YOUR_ORG
+          command: ["python", "scripts/index_rag.py", "--docs-dir", "/app/data/docs"]
+          env:
+            - name: CHROMA_PATH
+              valueFrom:
+                configMapKeyRef:
+                  name: chatbot-config
+                  key: CHROMA_PATH
+          volumeMounts:
+            - name: chatbot-data
+              mountPath: /app/data
+
+      containers:
+        - name: chatbot
+          image: ghcr.io/YOUR_ORG/chatbot-api:latest  # ← Remplacer YOUR_ORG
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+
+          envFrom:
+            - configMapRef:
+                name: chatbot-config
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: chatbot-secrets
+                  key: openai-api-key
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: chatbot-secrets
+                  key: secret-key
+
+          volumeMounts:
+            - name: chatbot-data
+              mountPath: /app/data
+
+          # Resources (adapter selon la charge réelle)
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop: ["ALL"]
+
+      volumes:
+        - name: chatbot-data
+          persistentVolumeClaim:
+            claimName: chatbot-data-pvc
+
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: chatbot-sa
+  namespace: chatbot

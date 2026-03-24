@@ -1,0 +1,87 @@
+version: "3.9"
+# ── Dev : stack locale complète ───────────────────────────────────────────
+# Usage : docker compose up --build
+# Accès : API http://localhost:8000/docs | Grafana http://localhost:3000
+
+services:
+
+  # ── Application ──────────────────────────────────────────────────────────
+  chatbot:
+    build:
+      context: .
+      target: production          # Skip le stage "test" en dev local
+    container_name: chatbot_api
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-changeme}
+      - MODEL=${MODEL:-gpt-4o-mini}
+      - MODE=${MODE:-cloud}
+      - LOCAL_BASE_URL=${LOCAL_BASE_URL:-http://host.docker.internal:1234/v1}
+      - LOCAL_MODEL=${LOCAL_MODEL:-mistral-7b-instruct}
+      - DB_PATH=/app/data/chat.db
+      - CHROMA_PATH=/app/data/chroma_db
+      - RAG_COLLECTION=chatbot_docs
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-changeme}
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
+    volumes:
+      - chatbot_data:/app/data
+    restart: unless-stopped
+    networks:
+      - chatbot_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── Prometheus ────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.50.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - chatbot_net
+    depends_on:
+      - chatbot
+
+  # ── Grafana ───────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.3.1
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    restart: unless-stopped
+    networks:
+      - chatbot_net
+    depends_on:
+      - prometheus
+
+networks:
+  chatbot_net:
+    driver: bridge
+
+volumes:
+  chatbot_data:
+  prometheus_data:
+  grafana_data:

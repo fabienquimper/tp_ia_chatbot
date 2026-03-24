@@ -1,0 +1,14 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable# make index-rag-docker
+docker-compose exec chatbot python scripts/index_rag.py --docs-dir docs
+INFO: === Indexation RAG ===
+INFO: Source  : docs
+INFO: ChromaDB: data/chroma_db
+INFO: Collection: chatbot_docs
+INFO: Documents trouvés : 3
+INFO: Collection existante supprimée.
+INFO:   Indexation : entreprise.txt (5669 chars)
+INFO:   Indexation : politique.txt (5005 chars)
+INFO:   Indexation : technique.txt (6984 chars)
+INFO: Indexation terminée : 44 chunks dans 'chatbot_docs'
+INFO: Résultat : 44 chunks indexés.
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable# 

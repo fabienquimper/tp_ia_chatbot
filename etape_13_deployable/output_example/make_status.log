@@ -1,0 +1,15 @@
+(venv) root@MSI:/mnt/c/git/ai/tp_ia_chatbot/etape_13_deployable# make status
+docker-compose ps
+   Name                  Command                  State                        Ports
+------------------------------------------------------------------------------------------------------
+chatbot_api   uvicorn app.main:app --hos ...   Up (healthy)   0.0.0.0:8000->8000/tcp,:::8000->8000/tcp
+grafana       /run.sh                          Up             0.0.0.0:3000->3000/tcp,:::3000->3000/tcp
+prometheus    /bin/prometheus --config.f ...   Up             0.0.0.0:9090->9090/tcp,:::9090->9090/tcp
+
+{
+    "status": "ok",
+    "model": "openai/gpt-oss-20b",
+    "uptime_seconds": 10560,
+    "rag_available": true,
+    "version": "4.0.0"
+}

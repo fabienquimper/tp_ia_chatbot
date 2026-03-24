@@ -1,0 +1,219 @@
+TechCorp Solutions — Documentation Technique API
+
+== Vue d'ensemble ==
+
+L'API TechCorp Solutions est une API REST exposée en HTTPS. Toutes les réponses sont au format JSON (Content-Type: application/json). La version actuelle est la v1. L'URL de base est :
+
+  https://api.techcorp.fr/api/v1
+
+Chaque requête doit être authentifiée. L'API utilise des codes de statut HTTP standard pour indiquer le succès ou l'échec d'une requête.
+
+== Authentification ==
+
+--- Bearer Token (recommandé) ---
+Obtenez un token en appelant l'endpoint /auth/token. Ce token JWT est valide 24 heures.
+
+  POST /api/v1/auth/token
+  Content-Type: application/json
+
+  {
+    "email": "utilisateur@entreprise.com",
+    "password": "votre_mot_de_passe"
+  }
+
+Réponse :
+  {
+    "access_token": "eyJhbGciOiJIUzI1NiIs...",
+    "token_type": "Bearer",
+    "expires_in": 86400
+  }
+
+Utilisez ensuite ce token dans le header Authorization :
+  Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+
+--- Clés API (API Keys) ---
+Pour les intégrations serveur-à-serveur, utilisez une clé API générée depuis votre espace client (section Paramètres > API Keys). Passez-la dans le header :
+  X-API-Key: tc_live_xxxxxxxxxxxxxxxxxxxxxxxx
+
+Les clés API n'expirent pas mais peuvent être révoquées à tout moment depuis l'interface.
+
+== Endpoints Principaux ==
+
+--- Authentification ---
+
+POST /api/v1/auth/token
+  Obtenir un token JWT (voir ci-dessus).
+
+POST /api/v1/auth/refresh
+  Rafraîchir un token expiré.
+  Headers : Authorization: Bearer <token_expire>
+  Réponse : nouveau token JWT.
+
+DELETE /api/v1/auth/token
+  Révoquer le token actuel (déconnexion).
+
+--- Synchronisation (CloudSync Pro) ---
+
+POST /api/v1/sync/start
+  Démarrer une synchronisation manuelle.
+  Body : { "source_id": "src_123", "full_sync": false }
+
+GET /api/v1/sync/status/{job_id}
+  Statut d'une tâche de synchronisation.
+  Réponse : { "job_id": "...", "status": "running|completed|failed", "progress": 72 }
+
+GET /api/v1/sync/history
+  Historique des synchronisations (30 derniers jours).
+  Paramètres : ?source_id=src_123&limit=20&offset=0
+
+--- Données (DataVault) ---
+
+POST /api/v1/data/upload
+  Upload d'un fichier vers DataVault.
+  Content-Type: multipart/form-data
+  Body : file (binaire), metadata (JSON optionnel)
+  Réponse : { "file_id": "f_abc123", "size": 10485760, "checksum": "sha256:..." }
+
+GET /api/v1/data/files
+  Lister les fichiers stockés.
+  Paramètres : ?folder=archives&limit=50
+
+GET /api/v1/data/files/{file_id}
+  Télécharger ou obtenir les métadonnées d'un fichier.
+  Paramètres : ?download=true (pour téléchargement direct)
+
+DELETE /api/v1/data/files/{file_id}
+  Supprimer un fichier définitivement.
+
+GET /api/v1/data/export
+  Exporter des données en JSON ou CSV.
+  Paramètres : ?format=csv&date_from=2025-01-01&date_to=2025-12-31
+
+== Limites de Taux (Rate Limiting) ==
+
+Plan gratuit / essai :
+  - 1 000 requêtes par heure
+  - 10 000 requêtes par jour
+  - Pas de limite mensuelle (soumis aux quotas journaliers)
+
+Plan payant (CloudSync Pro, DataVault, APIConnect) :
+  - 10 000 requêtes par heure
+  - 100 000 requêtes par jour
+  - Pas de limite mensuelle
+
+En cas de dépassement, l'API retourne le code 429 (Too Many Requests). Les headers de réponse indiquent la limite et le temps de réinitialisation :
+  X-RateLimit-Limit: 1000
+  X-RateLimit-Remaining: 0
+  X-RateLimit-Reset: 1735689600
+
+== Codes d'Erreur ==
+
+200 OK — Requête réussie.
+201 Created — Ressource créée avec succès.
+204 No Content — Suppression réussie, pas de corps de réponse.
+400 Bad Request — Paramètre manquant ou invalide. Vérifiez le corps de la requête.
+401 Unauthorized — Token absent, expiré ou invalide. Re-authentifiez-vous.
+403 Forbidden — Accès refusé à cette ressource. Droits insuffisants.
+404 Not Found — Ressource introuvable.
+422 Unprocessable Entity — Données valides syntaxiquement mais incohérentes.
+429 Too Many Requests — Limite de taux dépassée. Attendez la réinitialisation.
+500 Internal Server Error — Erreur côté serveur. Réessayez ultérieurement.
+503 Service Unavailable — Service temporairement indisponible (maintenance).
+
+Format d'erreur standard :
+  {
+    "error": {
+      "code": "RATE_LIMIT_EXCEEDED",
+      "message": "Vous avez dépassé la limite de 1000 requêtes/heure.",
+      "retry_after": 3542
+    }
+  }
+
+== Exemples SDK ==
+
+--- Python ---
+
+  import requests
+
+  BASE_URL = "https://api.techcorp.fr/api/v1"
+  API_KEY = "tc_live_xxxxxxxxxxxxxxxxxxxxxxxx"
+
+  headers = {"X-API-Key": API_KEY, "Content-Type": "application/json"}
+
+  # Démarrer une synchronisation
+  response = requests.post(
+      f"{BASE_URL}/sync/start",
+      headers=headers,
+      json={"source_id": "src_123", "full_sync": False}
+  )
+  job = response.json()
+  print(f"Job ID : {job['job_id']}")
+
+  # Vérifier le statut
+  status = requests.get(f"{BASE_URL}/sync/status/{job['job_id']}", headers=headers)
+  print(status.json())
+
+  # Exporter en CSV
+  export = requests.get(f"{BASE_URL}/data/export?format=csv", headers=headers)
+  with open("export.csv", "wb") as f:
+      f.write(export.content)
+
+--- JavaScript ---
+
+  const BASE_URL = "https://api.techcorp.fr/api/v1";
+  const API_KEY = "tc_live_xxxxxxxxxxxxxxxxxxxxxxxx";
+
+  const headers = {
+    "X-API-Key": API_KEY,
+    "Content-Type": "application/json"
+  };
+
+  // Démarrer une synchronisation
+  const response = await fetch(`${BASE_URL}/sync/start`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ source_id: "src_123", full_sync: false })
+  });
+  const job = await response.json();
+  console.log("Job ID:", job.job_id);
+
+  // Lister les fichiers
+  const files = await fetch(`${BASE_URL}/data/files?limit=10`, { headers });
+  const data = await files.json();
+  console.log(data.files);
+
+== Webhooks ==
+
+Configurez des webhooks depuis l'espace client (Paramètres > Webhooks) pour recevoir des notifications en temps réel lors d'événements :
+
+Événements disponibles :
+  - sync.completed — synchronisation terminée avec succès
+  - sync.failed — échec d'une synchronisation
+  - data.uploaded — fichier uploadé dans DataVault
+  - billing.invoice_created — nouvelle facture générée
+
+Format de payload webhook :
+  {
+    "event": "sync.completed",
+    "timestamp": "2025-06-15T14:32:00Z",
+    "data": {
+      "job_id": "job_abc123",
+      "source_id": "src_456",
+      "records_synced": 15842,
+      "duration_seconds": 47
+    }
+  }
+
+Sécurité : chaque requête webhook inclut un header X-TechCorp-Signature contenant un HMAC-SHA256 du payload, signé avec votre clé secrète webhook. Vérifiez toujours cette signature côté serveur.
+
+== Formats de Données ==
+
+Export JSON :
+  Les exports JSON suivent la structure : { "data": [...], "meta": { "total": 1500, "page": 1 } }
+
+Export CSV :
+  Encodage UTF-8 avec BOM pour compatibilité Excel. Délimiteur : virgule. En-têtes en première ligne.
+  Exemple de fichier CSV exporté : id,created_at,source,status,records_count
+
+Pagination :
+  Tous les endpoints de liste supportent ?limit=50&offset=0. La réponse inclut toujours le champ "total" pour le nombre total d'éléments.

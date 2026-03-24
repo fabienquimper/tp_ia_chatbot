@@ -1,0 +1,162 @@
+name: CD — Build, Push & Deploy
+
+on:
+  push:
+    branches: [ main ]
+    tags:     [ "v*.*.*" ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environnement cible
+        required: true
+        default: staging
+        type: choice
+        options: [ staging, production ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/chatbot-api
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # ── 1. Tests (obligatoires avant déploiement) ──────────────────────────────
+  test:
+    name: Tests obligatoires
+    uses: ./.github/workflows/ci.yml
+
+  # ── 2. Build & Push ────────────────────────────────────────────────────────
+  build-and-push:
+    name: Build & Push Docker
+    runs-on: ubuntu-latest
+    needs: [test]
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      image-digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build & Push (production stage — tests déjà passés)
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: etape_13_deployable
+          target: production       # On ne re-run pas les tests ici (déjà fait)
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: true
+          sbom: true               # Software Bill of Materials
+
+  # ── 3. Deploy Staging ──────────────────────────────────────────────────────
+  deploy-staging:
+    name: Deploy → Staging
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    environment:
+      name: staging
+      url: https://staging.your-domain.com/health
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to staging (Docker Compose over SSH)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/chatbot
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            export IMAGE_TAG=${{ needs.build-and-push.outputs.image-tag }}
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --no-build
+            # Health check
+            sleep 15
+            curl -sf http://localhost:8000/health || exit 1
+            echo "Staging déployé avec succès !"
+
+      - name: Smoke test staging
+        run: |
+          sleep 10
+          curl -sf https://staging.your-domain.com/health | \
+            python3 -c "import sys,json; d=json.load(sys.stdin); assert d['status']=='ok'"
+
+  # ── 4. Deploy Production ───────────────────────────────────────────────────
+  deploy-production:
+    name: Deploy → Production
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging]
+    environment:
+      name: production
+      url: https://your-domain.com/health
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.environment == 'production'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Option A : Docker Compose sur VPS
+      - name: Deploy to production (SSH)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /opt/chatbot
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # Sauvegarde avant déploiement
+            docker compose -f docker-compose.prod.yml ps > /tmp/pre-deploy-status.txt
+            # Déploiement avec rollback automatique
+            docker compose -f docker-compose.prod.yml pull && \
+            docker compose -f docker-compose.prod.yml up -d --no-build || \
+            (echo "Échec déploiement, rollback..." && \
+             docker compose -f docker-compose.prod.yml up -d --no-build --scale chatbot=1)
+            sleep 20
+            curl -sf http://localhost:8000/health || exit 1
+
+      # Option B (K8S) : décommenter et adapter
+      # - name: Deploy to K8S
+      #   uses: azure/k8s-deploy@v5
+      #   with:
+      #     namespace: chatbot-prod
+      #     images: ${{ needs.build-and-push.outputs.image-tag }}
+      #     manifests: etape_14_deployed/k8s/
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          body: |
+            ## Déploiement automatique
+            Image: `${{ needs.build-and-push.outputs.image-tag }}`
+            Digest: `${{ needs.build-and-push.outputs.image-digest }}`

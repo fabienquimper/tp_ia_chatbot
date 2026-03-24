@@ -1,0 +1,61 @@
+name: Security — Audit hebdomadaire
+
+on:
+  schedule:
+    - cron: '0 8 * * 1'    # Tous les lundis à 8h UTC
+  workflow_dispatch:
+
+jobs:
+  dependency-audit:
+    name: Audit des dépendances
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install safety
+        run: pip install safety
+
+      - name: Safety check
+        run: |
+          safety check \
+            -r etape_13_deployable/requirements.txt \
+            --output json > safety-report.json
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: safety-report-${{ github.run_id }}
+          path: safety-report.json
+
+  docker-scan:
+    name: Scan de l'image Docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image for scanning
+        run: |
+          docker build \
+            --target production \
+            -t chatbot-api:scan \
+            etape_13_deployable/
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: chatbot-api:scan
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
