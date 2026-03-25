@@ -46,6 +46,8 @@ def init_rag() -> bool:
 
 
 def is_available() -> bool:
+    if not _rag_available and Path(CHROMA_PATH).exists():
+        init_rag()
     return _rag_available
 
 
