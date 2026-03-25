@@ -17,7 +17,7 @@ from .llm import get_reply, MODEL, LLM_URL, check_llm_reachable
 from .metrics import (
     record_request, record_error, update_system_metrics,
     APP_INFO, ACTIVE_SESSIONS, RAG_LATENCY_HISTOGRAM,
-    AUTH_ATTEMPTS, INJECTION_BLOCKED
+    AUTH_ATTEMPTS, INJECTION_BLOCKED, CONTEXT_SIZE
 )
 from .security import (
     limiter, sanitize, authenticate_user, create_access_token, get_current_user
@@ -173,11 +173,14 @@ async def chat(
             sources = [{"content": d["content"][:200], "source": d["source"]} for d in docs]
             rag_used = True
 
+    CONTEXT_SIZE.set(len(history))
+
     try:
         reply, tokens = get_reply(safe_message, history, context=context)
     except Exception as e:
         latency = time.time() - t0
         record_error(type(e).__name__)
+        record_request(MODEL, "error", latency, 0, 0, rag=rag_used)
         raise HTTPException(status_code=503, detail=f"Erreur LLM : {str(e)}")
 
     latency = time.time() - t0

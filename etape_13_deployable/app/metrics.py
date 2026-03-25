@@ -60,6 +60,11 @@ ACTIVE_SESSIONS = Gauge(
     "Nombre de sessions avec activité"
 )
 
+CONTEXT_SIZE = Gauge(
+    "chat_context_messages",
+    "Nombre de messages dans l'historique de contexte au moment de la requête"
+)
+
 # ── Info ────────────────────────────────────────────────────────────────────
 APP_INFO = Info("chatbot_app", "Informations sur l'application")
 
