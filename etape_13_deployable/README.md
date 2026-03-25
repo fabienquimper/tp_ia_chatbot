@@ -157,14 +157,50 @@ make dev-bg        # rebuild auto (seules les layers modifiées sont reconstruit
 make smoke         # vérifier que ça répond
 ```
 
-### Après avoir changé les documents RAG
+### Ajouter ou mettre à jour des documents RAG
+
+1. **Déposer les fichiers** `.txt` dans `data/docs/`
+2. **Réindexer dans le conteneur** :
 
 ```bash
-make dev-bg
-make index-rag-docker
-docker-compose restart chatbot
-make eval          # vérifier la qualité de la récupération
+make index-rag-docker-section   # méthode recommandée (sections)
+# ou
+make index-rag-docker-paragraph # méthode paragraphes (chunks plus petits)
 ```
+
+Exemple essayer d'ajouter dans le répertoire /data un fichier /programme.txt avec par exemple:
+
+```
+Programme type de l'organisation interne de l'entreprise:
+
+10h11: Stand-up de l'équipe
+11h Réunion produit
+12h Réunion ingénieur et produit
+12h36: Repas
+13h47: Réunion clients
+16h11: Bilan de la journée
+```
+
+Essayer d'ajouter une question dans eval_set.jsonl:
+```
+{"id": "q004", "question": "A quelle heure a lieux la réunion client?", "expected_keywords": ["13", "47"], "category": "sla", "difficulty": "facile"}
+```
+
+3. **Redémarrer le chatbot** (la collection est chargée au démarrage) :
+
+```bash
+docker compose restart chatbot
+curl http://localhost:8000/health   # rag_available doit être true
+```
+
+4. **Vérifier la qualité** :
+
+```bash
+make eval
+```
+
+> **Formats supportés** : `.txt` uniquement (encodage UTF-8).
+> Le modèle d'embedding (~79 MB) est mis en cache dans le volume Docker après le premier téléchargement.
 
 ### Avant un commit / pull request
 
