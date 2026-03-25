@@ -107,7 +107,7 @@ Ou directement via Swagger : **http://localhost:8000/docs**
 
 ### 6. Vérifier les métriques dans Grafana
 
-1. Ouvrir **http://localhost:3000** (admin / admin123)
+1. Ouvrir **http://localhost:3000** — login : `admin` / valeur de `GRAFANA_PASSWORD` dans `.env` (défaut : `change-this-grafana-password`)
 2. Aller dans **Dashboards → Chatbot → Chatbot Monitoring**
 3. Générer du trafic : `make smoke` (5 questions rapides)
 
@@ -219,7 +219,7 @@ make test-security # bandit : pas de vulnérabilité critique
 | **Health check** | http://localhost:8000/health | — |
 | **Métriques Prometheus** | http://localhost:8000/metrics | — |
 | **Prometheus UI** | http://localhost:9090 | — |
-| **Grafana** | http://localhost:3000 | admin / admin123 |
+| **Grafana** | http://localhost:3000 | admin / (valeur de `GRAFANA_PASSWORD` dans `.env`) |
 
 ### Utilisateurs de démo
 
@@ -310,17 +310,52 @@ make prod
 
 ---
 
-## Alertes Prometheus
+## Métriques exposées
 
-Fichier : `prometheus-alerts.yml`
+Toutes les métriques sont disponibles sur `http://localhost:8000/metrics`.
+
+| Métrique | Type | Description |
+|---|---|---|
+| `chat_requests_total` | Counter | Requêtes par modèle, status (`success`/`error`), rag (`true`/`false`) |
+| `chat_tokens_total` | Counter | Tokens `prompt` et `completion` |
+| `chat_errors_total` | Counter | Erreurs par type d'exception |
+| `chat_latency_seconds` | Histogram | Latence des requêtes (buckets 0.1s … 30s) |
+| `rag_retrieval_seconds` | Histogram | Latence de la recherche ChromaDB |
+| `chat_context_messages` | Gauge | Taille de l'historique au moment de la requête |
+| `chat_active_sessions` | Gauge | Sessions actives |
+| `process_memory_bytes` | Gauge | RAM RSS du processus Python |
+| `system_memory_total_bytes` | Gauge | RAM totale du système hôte |
+| `system_memory_used_bytes` | Gauge | RAM utilisée sur le système hôte |
+| `process_cpu_percent` | Gauge | CPU % du processus chatbot |
+| `system_cpu_percent` | Gauge | CPU % global du système |
+| `gpu_utilization_percent` | Gauge | GPU % par carte (si NVIDIA détecté) |
+| `gpu_memory_used_bytes` | Gauge | VRAM utilisée par carte |
+| `gpu_memory_total_bytes` | Gauge | VRAM totale par carte |
+| `auth_attempts_total` | Counter | Tentatives d'authentification JWT |
+| `prompt_injection_blocked_total` | Counter | Injections de prompt bloquées |
+
+> Les métriques GPU ne sont renseignées que si un GPU NVIDIA est détecté (`pynvml`).
+> En l'absence de GPU, les panels correspondants affichent "No data" — comportement attendu.
+
+---
+
+## Alertes
+
+### Alertes Prometheus (`prometheus-alerts.yml`)
 
 | Alerte | Condition | Sévérité |
 |---|---|---|
 | ChatbotDown | API indisponible > 1 min | critical |
 | HighErrorRate | Taux erreur > 10% sur 5 min | warning |
 | HighLatency | P95 > 5s sur 5 min | warning |
-| HighMemoryUsage | RAM > 500 MB | warning |
+| HighMemoryUsage | RAM processus > 500 MB | warning |
 | PromptInjectionAttempts | > 10 injections/5 min | warning |
+
+### Alertes Grafana (`grafana/provisioning/alerting/alerts.yml`)
+
+| Alerte | Condition | Sévérité |
+|---|---|---|
+| Mémoire système > 95% | `system_memory_used / system_memory_total > 95%` pendant 1 min | critical |
 
 ---
 
@@ -344,3 +379,20 @@ Fichier : `prometheus-alerts.yml`
 
 **docker-compose `ContainerConfig` error**
 → Faire `make stop` avant `make dev-bg` — le vieux conteneur doit être supprimé d'abord.
+
+**`Chain 'DOCKER-ISOLATION-STAGE-2' does not exist` au démarrage**
+→ Bug Docker 28.4.0 + kernel 6.17+. Voir le commentaire en haut de `docker-compose.yml` pour le fix complet.
+→ Fix rapide (session courante) :
+```bash
+sudo iptables -t filter -N DOCKER-ISOLATION-STAGE-1 2>/dev/null || true
+sudo iptables -t filter -N DOCKER-ISOLATION-STAGE-2 2>/dev/null || true
+sudo iptables -t filter -A DOCKER-ISOLATION-STAGE-2 -j RETURN
+# Vérifier
+docker network create test-net && echo "OK" && docker network rm test-net
+```
+
+**Les panels GPU affichent "No data"**
+→ Normal si aucun GPU NVIDIA n'est détecté. Les métriques GPU (`gpu_utilization_percent`, etc.)
+  ne sont renseignées que si `pynvml` peut contacter le driver NVIDIA.
+→ Si un GPU est présent mais pas détecté : vérifier que `nvidia-smi` fonctionne et que
+  le NVIDIA Container Toolkit est installé (voir le commentaire GPU dans `docker-compose.yml`).

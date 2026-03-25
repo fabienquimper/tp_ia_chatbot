@@ -1,0 +1,86 @@
+---
+# ArgoCD Application — chatbot-api
+#
+# Surveille le repo Gitea local et synchronise les manifests K8S
+# vers le cluster kind local.
+#
+# Prérequis :
+#   1. ArgoCD installé dans le namespace argocd
+#   2. Gitea démarré sur localhost:3001 avec le repo chatbot-api
+#   3. Adapter GITEA_USER et GITEA_REPO ci-dessous
+#
+# Appliquer :
+#   kubectl apply -f k8s/argocd/application.yaml
+#
+# Voir l'état :
+#   kubectl get application chatbot-api -n argocd
+#   argocd app get chatbot-api  (avec CLI argocd installé)
+#
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: chatbot-api
+  namespace: argocd
+  labels:
+    app: chatbot-api
+    environment: local
+  # Auto-supprime les ressources K8s orphelines lors de la suppression de l'Application
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # ── Projet ArgoCD ───────────────────────────────────────────────────────────
+  project: default
+
+  # ── Source : repo Gitea local ───────────────────────────────────────────────
+  source:
+    # Remplacer GITEA_USER par votre identifiant Gitea
+    repoURL: http://local-gitea:3000/GITEA_USER/chatbot-api.git
+    targetRevision: main          # Branche à surveiller
+    path: etape_14_deployed/k8s  # Chemin des manifests dans le repo
+
+  # ── Destination : cluster kind local ───────────────────────────────────────
+  destination:
+    server: https://kubernetes.default.svc  # Cluster courant (in-cluster)
+    namespace: chatbot
+
+  # ── Politique de synchronisation ────────────────────────────────────────────
+  syncPolicy:
+    automated:
+      prune: true      # Supprimer les ressources retirées du repo
+      selfHeal: true   # Re-synchroniser si quelqu'un modifie le cluster manuellement
+    syncOptions:
+      - CreateNamespace=true  # Crée le namespace chatbot s'il n'existe pas
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+---
+# Secret pour que ArgoCD puisse accéder à Gitea (HTTP basique)
+# Remplacer GITEA_USER et GITEA_PASSWORD avec vos identifiants Gitea
+#
+# Pour ne pas mettre le mot de passe en clair :
+#   kubectl create secret generic gitea-creds \
+#     --from-literal=username=GITEA_USER \
+#     --from-literal=password=GITEA_PASSWORD \
+#     -n argocd
+#   kubectl label secret gitea-creds \
+#     argocd.argoproj.io/secret-type=repository \
+#     -n argocd
+#
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gitea-repo-creds
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+type: Opaque
+stringData:
+  type: git
+  url: http://local-gitea:3000/GITEA_USER/chatbot-api.git
+  username: GITEA_USER
+  password: GITEA_PASSWORD   # ⚠ Remplacer avant d'appliquer

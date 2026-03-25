@@ -27,24 +27,28 @@ etape_14_deployed/
 │   ├── chatbot-hpa.yaml         # Autoscale 2 → 10 replicas
 │   ├── ingress.yaml             # Nginx Ingress + TLS cert-manager
 │   ├── kustomization.yaml
-│   └── monitoring/
-│       ├── prometheus-deployment.yaml        # Prometheus + ConfigMap + RBAC
-│       ├── grafana-deployment.yaml           # Grafana + montage provisioning
-│       └── grafana-provisioning-configmap.yaml  # Datasource uid:prometheus + dashboard provider
+│   ├── monitoring/
+│   │   ├── prometheus-deployment.yaml        # Prometheus + ConfigMap + RBAC
+│   │   ├── grafana-deployment.yaml           # Grafana + montage provisioning
+│   │   └── grafana-provisioning-configmap.yaml  # Datasource uid:prometheus + dashboard provider
+│   └── argocd/
+│       └── application.yaml      # Application ArgoCD (GitOps local)
 │
 ├── docker/
 │   ├── docker-compose.prod.yml  # Compose tirant l'image depuis GHCR
 │   └── nginx/nginx.conf
 │
 ├── scripts/
-│   ├── deploy-docker.sh   # Déploiement VPS via SSH
-│   ├── deploy-k8s.sh      # Déploiement cluster K8S
-│   └── local-cloud.sh     # Simulation cloud local avec kind
+│   ├── deploy-docker.sh          # Déploiement VPS via SSH
+│   ├── deploy-k8s.sh             # Déploiement cluster K8S
+│   ├── local-cloud.sh            # Simulation cloud local avec kind
+│   └── setup-local-pipeline.sh  # Pipeline CI/CD complet (registry+Gitea+kind+ArgoCD)
 │
 └── docs/
     ├── DEPLOY_GCP.md        # Google Cloud Run + GKE
     ├── DEPLOY_AWS.md        # AWS ECS Fargate + EKS
-    └── DEPLOY_LOCAL_K8S.md  # K8S local avec kind (pas de compte cloud requis)
+    ├── DEPLOY_LOCAL_K8S.md  # K8S local avec kind (pas de compte cloud requis)
+    └── LOCAL_PIPELINE.md    # Pipeline CI/CD complet local (act + Gitea + ArgoCD)
 ```
 
 ---
@@ -55,11 +59,38 @@ etape_14_deployed/
 Besoin                          Solution recommandée
 ─────────────────────────────────────────────────────
 Tester K8S sans compte cloud  → Local avec kind
+Pipeline CI/CD visuel local   → act + Gitea + ArgoCD + kind
 1 serveur, budget limité       → Docker Compose VPS
 Serverless, scale to zero      → Google Cloud Run
 Déjà sur AWS                   → ECS Fargate
 Forte charge, équipe DevOps    → GKE ou EKS
 ```
+
+---
+
+## Option 0 — Pipeline CI/CD local complet (act + Gitea + ArgoCD + kind)
+
+Pour simuler un pipeline de production **entier** sur votre machine : CI/CD, registry, Git server, GitOps.
+
+```
+git push → Gitea → act (CI) → registry:5001 → ArgoCD → kind (K8S)
+```
+
+```bash
+# Installation complète en une commande
+./scripts/setup-local-pipeline.sh setup
+
+# Lancer le CI localement (lint + tests + docker build)
+./scripts/setup-local-pipeline.sh ci
+
+# Build et push l'image vers le registry local
+./scripts/setup-local-pipeline.sh push-image
+
+# Voir l'état de tout le pipeline
+./scripts/setup-local-pipeline.sh status
+```
+
+Voir `docs/LOCAL_PIPELINE.md` pour le guide complet avec ArgoCD, les webhooks, et le workflow de développement.
 
 ---
 

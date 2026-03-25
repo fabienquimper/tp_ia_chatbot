@@ -14,9 +14,14 @@ FastAPI → /metrics → Prometheus (scrape 15s) → Grafana (dashboard)
 | `chat_requests_total` | Counter | Nb requêtes par modèle/status |
 | `chat_latency_seconds` | Histogram | Distribution latence |
 | `chat_tokens_total` | Counter | Tokens prompt/completion |
-| `process_memory_bytes` | Gauge | RAM du processus |
+| `chat_errors_total` | Counter | Erreurs par type d'exception |
+| `chat_context_messages` | Gauge | Taille de l'historique à chaque requête |
 | `chat_active_sessions` | Gauge | Sessions actives |
-| `chat_errors_total` | Counter | Erreurs par type |
+| `process_memory_bytes` | Gauge | RAM RSS du processus Python |
+| `system_memory_total_bytes` | Gauge | RAM totale du système hôte |
+| `system_memory_used_bytes` | Gauge | RAM utilisée sur le système hôte |
+| `process_cpu_percent` | Gauge | CPU % du processus chatbot |
+| `system_cpu_percent` | Gauge | CPU % global du système |
 
 ## Lancement
 ```bash
@@ -164,6 +169,6 @@ chat_tokens_total — 16 300 tokens prompt / 10 853 completion
 chat_latency_seconds — histogramme : toutes les requêtes sont entre 5s et +Inf (modèle lent)
 chat_active_sessions — 5 sessions actives
 chat_errors_total — vide (aucune erreur)
-chat_context_messages — 0 (métrique non alimentée)
+chat_context_messages — taille de l'historique au moment de la requête
 chatbot_app_info — métadonnées de l'app
 Prometheus stocke tout ça dans sa TSDB (time series database) et Grafana lit ensuite via PromQL.
