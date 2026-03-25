@@ -1,4 +1,4 @@
-.PHONY: help dev prod test build clean index-rag index-rag-docker index-rag-paragraph index-rag-section logs stop eval eval-strict eval-verbose smoke smoke-no-rag
+.PHONY: help dev prod test build build-push build-skip-tests clean index-rag index-rag-docker index-rag-paragraph index-rag-section logs stop eval eval-strict eval-verbose smoke smoke-no-rag
 
 # Variables
 IMAGE  := chatbot-api
@@ -38,6 +38,9 @@ prod:  ## Lance la stack de production avec Nginx
 
 build:  ## Construit l'image de production (avec tests)
 	./build.sh
+
+build-push:  ## Construit et pousse vers le registry (REGISTRY=ghcr.io/org requis)
+	./build.sh --push
 
 build-skip-tests:  ## Construit sans tests (urgence seulement)
 	./build.sh --skip-tests

@@ -34,6 +34,8 @@ class ChatResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     model: str
+    llm_url: str
+    llm_reachable: bool
     uptime_seconds: int
     rag_available: bool = False
     version: str = "4.0.0"

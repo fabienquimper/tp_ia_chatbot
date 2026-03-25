@@ -13,7 +13,7 @@ from slowapi.errors import RateLimitExceeded
 
 from .models import ChatRequest, ChatResponse, HealthResponse, HistoryResponse, TokenResponse
 from .database import init_db, save_message, load_history, get_all_sessions
-from .llm import get_reply, MODEL
+from .llm import get_reply, MODEL, LLM_URL, check_llm_reachable
 from .metrics import (
     record_request, record_error, update_system_metrics,
     APP_INFO, ACTIVE_SESSIONS, RAG_LATENCY_HISTOGRAM,
@@ -92,9 +92,12 @@ async def startup():
 async def health():
     """Health check public (pas d'authentification requise)."""
     update_system_metrics()
+    llm_reachable = await asyncio.get_event_loop().run_in_executor(None, check_llm_reachable)
     return HealthResponse(
         status="ok",
         model=MODEL,
+        llm_url=LLM_URL,
+        llm_reachable=llm_reachable,
         uptime_seconds=int(time.time() - START_TIME),
         rag_available=rag_module.is_available(),
         version=VERSION,

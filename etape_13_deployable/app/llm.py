@@ -6,6 +6,7 @@ Supporte mode cloud (OpenAI) et mode local (LM Studio / Ollama).
 import os
 import re
 import logging
+import urllib.request
 from typing import List, Tuple
 
 from langchain_openai import ChatOpenAI
@@ -29,6 +30,7 @@ LOCAL_BASE_URL = os.environ.get("LOCAL_BASE_URL", "http://host.docker.internal:1
 # ── Initialisation LLM ─────────────────────────────────────────────────────
 if MODE == "local":
     _active_model = LOCAL_MODEL
+    LLM_URL = LOCAL_BASE_URL
     llm = ChatOpenAI(
         model=LOCAL_MODEL,
         base_url=LOCAL_BASE_URL,
@@ -37,6 +39,7 @@ if MODE == "local":
     )
 else:
     _active_model = MODEL
+    LLM_URL = "https://api.openai.com/v1"
     llm = ChatOpenAI(
         model=MODEL,
         api_key=os.environ.get("OPENAI_API_KEY", ""),
@@ -44,6 +47,21 @@ else:
     )
 
 MODEL = _active_model  # export du modèle effectif
+
+
+def check_llm_reachable(timeout: int = 3) -> bool:
+    """Vérifie que l'API LLM répond via GET /models (sans consommer de tokens)."""
+    try:
+        url = LLM_URL.rstrip("/") + "/models"
+        req = urllib.request.Request(url)
+        if MODE != "local":
+            api_key = os.environ.get("OPENAI_API_KEY", "")
+            req.add_header("Authorization", f"Bearer {api_key}")
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.status == 200
+    except Exception as exc:
+        logger.debug("LLM health check failed: %s", exc)
+        return False
 
 # ── Prompts ────────────────────────────────────────────────────────────────
 _SYSTEM_BASE = (
