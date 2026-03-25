@@ -1,0 +1,38 @@
+---
+# ConfigMap Grafana — Provisioning automatique datasource + dashboard
+#
+# Monté dans le Deployment Grafana via subPath (voir grafana-deployment.yaml).
+# Datasource : Prometheus avec uid fixe "prometheus" (évite "No data" dans les panels).
+# Dashboard  : importer manuellement depuis etape_13_deployable/grafana/provisioning/dashboards/chatbot.json
+#              via Grafana UI (Dashboards → Import) ou via kubectl apply d'un ConfigMap séparé.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-provisioning
+  namespace: chatbot
+data:
+  # ── Datasource Prometheus ────────────────────────────────────────────────────
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        uid: prometheus          # UID fixe — requis pour que les panels du dashboard fonctionnent
+        access: proxy
+        url: http://prometheus:9090
+        isDefault: true
+        editable: false
+        jsonData:
+          timeInterval: "15s"
+
+  # ── Dashboard provider — indique à Grafana où chercher les fichiers JSON ─────
+  dashboards.yaml: |
+    apiVersion: 1
+    providers:
+      - name: chatbot
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        options:
+          path: /var/lib/grafana/dashboards

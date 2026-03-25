@@ -28,8 +28,9 @@ etape_14_deployed/
 │   ├── ingress.yaml             # Nginx Ingress + TLS cert-manager
 │   ├── kustomization.yaml
 │   └── monitoring/
-│       ├── prometheus-deployment.yaml
-│       └── grafana-deployment.yaml
+│       ├── prometheus-deployment.yaml        # Prometheus + ConfigMap + RBAC
+│       ├── grafana-deployment.yaml           # Grafana + montage provisioning
+│       └── grafana-provisioning-configmap.yaml  # Datasource uid:prometheus + dashboard provider
 │
 ├── docker/
 │   ├── docker-compose.prod.yml  # Compose tirant l'image depuis GHCR
@@ -248,4 +249,66 @@ Le fichier `k8s/secret.yaml` contient des **placeholders** — remplacer avant d
 ```bash
 # Revenir à une image précédente
 IMAGE_TAG=v1.2.2 docker compose -f docker/docker-compose.prod.yml up -d --no-build
+```
+
+---
+
+## Monitoring (Prometheus + Grafana)
+
+### Docker Compose
+
+Le fichier `docker/docker-compose.prod.yml` référence directement les fichiers de configuration
+de l'étape 13 — **aucune configuration supplémentaire requise** :
+
+```
+../etape_13_deployable/prometheus.yml              → config Prometheus
+../etape_13_deployable/prometheus-alerts.yml       → règles d'alerte
+../etape_13_deployable/grafana/provisioning/       → datasource + dashboard automatiques
+```
+
+Grafana est accessible à `https://votre-domaine/grafana` — le dashboard se charge automatiquement.
+
+---
+
+### Kubernetes
+
+#### 1. Déployer le stack monitoring
+
+```bash
+kubectl apply -f k8s/monitoring/grafana-provisioning-configmap.yaml
+kubectl apply -f k8s/monitoring/prometheus-deployment.yaml
+kubectl apply -f k8s/monitoring/grafana-deployment.yaml
+```
+
+#### 2. Accéder à Grafana
+
+```bash
+kubectl port-forward svc/grafana 3000:3000 -n chatbot
+# → http://localhost:3000
+# Login : admin / (valeur du secret grafana-password)
+```
+
+#### 3. Importer le dashboard
+
+La datasource Prometheus est configurée automatiquement (uid `prometheus`).
+Le dashboard doit être importé manuellement **une seule fois** :
+
+1. Grafana → **Dashboards → Import**
+2. Cliquer **Upload JSON file**
+3. Sélectionner :
+   ```
+   etape_13_deployable/grafana/provisioning/dashboards/chatbot.json
+   ```
+4. Cliquer **Import**
+
+> **Pourquoi manuel en K8s ?** Le JSON fait 550+ lignes — trop verbeux pour un ConfigMap inline.
+> Alternative : créer un ConfigMap dédié et le monter dans `/var/lib/grafana/dashboards/`
+> (le dashboard provider est déjà configuré pour ce chemin dans `grafana-provisioning-configmap.yaml`).
+
+#### 4. Vérifier que les métriques arrivent
+
+```bash
+# Prometheus scrape le chatbot ?
+kubectl port-forward svc/prometheus 9090:9090 -n chatbot
+# → http://localhost:9090/targets  (chatbot-api doit être UP)
 ```

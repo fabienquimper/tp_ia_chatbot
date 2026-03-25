@@ -157,6 +157,49 @@ spec:
 EOF
 ```
 
+### 8. Déployer le monitoring (Prometheus + Grafana)
+
+```bash
+# Appliquer les manifests monitoring
+kubectl apply -f etape_14_deployed/k8s/monitoring/grafana-provisioning-configmap.yaml
+kubectl apply -f etape_14_deployed/k8s/monitoring/prometheus-deployment.yaml
+kubectl apply -f etape_14_deployed/k8s/monitoring/grafana-deployment.yaml
+
+# Vérifier que les pods démarrent
+kubectl get pods -n chatbot -l 'app in (prometheus,grafana)'
+```
+
+Attendre que les deux pods soient `Running`, puis :
+
+```bash
+# Accéder à Prometheus (vérifier que chatbot-api est bien scrapé)
+kubectl port-forward svc/prometheus 9090:9090 -n chatbot &
+# → http://localhost:9090/targets  (chatbot-api doit être UP)
+
+# Accéder à Grafana
+kubectl port-forward svc/grafana 3000:3000 -n chatbot &
+# → http://localhost:3000
+# Login : admin / admin123  (valeur du secret grafana-password créé à l'étape 4)
+```
+
+**Importer le dashboard (une seule fois) :**
+
+La datasource Prometheus est configurée automatiquement grâce au ConfigMap
+(`uid: prometheus` — requis pour que les panels affichent des données).
+
+Le dashboard doit être importé manuellement :
+
+1. Grafana → **Dashboards → Import**
+2. Cliquer **Upload JSON file**
+3. Sélectionner le fichier :
+   ```
+   etape_13_deployable/grafana/provisioning/dashboards/chatbot.json
+   ```
+4. Cliquer **Import**
+
+Tous les panels devraient afficher des données après quelques secondes
+(le scrape Prometheus se fait toutes les 15 s).
+
 ---
 
 ## Commandes utiles

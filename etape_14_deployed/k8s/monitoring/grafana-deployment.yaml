@@ -42,6 +42,14 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/lib/grafana
+            # Provisioning automatique datasource (uid: prometheus)
+            - name: provisioning
+              mountPath: /etc/grafana/provisioning/datasources/datasources.yaml
+              subPath: datasources.yaml
+            # Provisioning dashboard provider (cherche les JSON dans /var/lib/grafana/dashboards)
+            - name: provisioning
+              mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
+              subPath: dashboards.yaml
           resources:
             requests:
               memory: "128Mi"
@@ -53,6 +61,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: grafana-data-pvc
+        - name: provisioning
+          configMap:
+            name: grafana-provisioning
 ---
 apiVersion: v1
 kind: Service
