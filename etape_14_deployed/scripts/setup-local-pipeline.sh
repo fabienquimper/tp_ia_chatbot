@@ -118,6 +118,15 @@ setup_gitea() {
 setup_kind() {
     step "Cluster kind '${CLUSTER_NAME}' avec registry locale"
 
+    # Pré-créer le réseau Docker 'kind' sans IPv6 (évite l'erreur ip6tables sur certains kernels)
+    if ! docker network inspect kind >/dev/null 2>&1; then
+        docker network create -d=bridge \
+            -o com.docker.network.bridge.enable_ip_masquerade=true \
+            -o com.docker.network.driver.mtu=1500 \
+            kind
+        success "Réseau Docker 'kind' créé (IPv4 uniquement)"
+    fi
+
     if kind get clusters 2>/dev/null | grep -q "^${CLUSTER_NAME}$"; then
         warning "Cluster '${CLUSTER_NAME}' déjà existant"
     else
@@ -126,6 +135,9 @@ setup_kind() {
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 name: ${CLUSTER_NAME}
+# Forcer IPv4 uniquement (évite les problèmes ip6tables sur certains kernels Linux)
+networking:
+  ipFamily: ipv4
 # Connexion au registry local (localhost:${REGISTRY_PORT})
 containerdConfigPatches:
   - |-
@@ -192,7 +204,10 @@ setup_argocd() {
     kubectl get namespace "${ARGOCD_NAMESPACE}" >/dev/null 2>&1 || \
         kubectl create namespace "${ARGOCD_NAMESPACE}"
 
+    # --server-side : obligatoire pour ArgoCD — les CRDs dépassent la limite de 262 Ko
+    # des annotations last-applied-configuration gérées côté client (kubectl apply classique)
     kubectl apply -n "${ARGOCD_NAMESPACE}" \
+        --server-side \
         -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
     info "Attente qu'ArgoCD soit prêt (peut prendre 2-3 min)..."
