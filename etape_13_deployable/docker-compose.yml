@@ -18,7 +18,7 @@ services:
       - MODEL=${MODEL:-gpt-4o-mini}
       - MODE=${MODE:-cloud}
       - LOCAL_BASE_URL=${LOCAL_BASE_URL:-http://host.docker.internal:1234/v1}
-      - LOCAL_MODEL=${LOCAL_MODEL:-mistral-7b-instruct}
+      - LOCAL_MODEL=${LOCAL_MODEL:-openai/gpt-oss-20b}
       - DB_PATH=/app/data/chat.db
       - CHROMA_PATH=/app/data/chroma_db
       - RAG_COLLECTION=chatbot_docs
@@ -29,6 +29,8 @@ services:
       - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
     volumes:
       - chatbot_data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     networks:
       - chatbot_net
