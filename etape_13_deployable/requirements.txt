@@ -18,6 +18,7 @@ bcrypt>=4.0.1
 # ── Monitoring ────────────────────────────────────────────────────────────
 prometheus-client>=0.19.0
 psutil>=5.9.0
+pynvml>=11.0.0              # Métriques GPU NVIDIA (optionnel — fallback si absent)
 
 # ── Persistance ───────────────────────────────────────────────────────────
 python-dotenv>=1.0.0

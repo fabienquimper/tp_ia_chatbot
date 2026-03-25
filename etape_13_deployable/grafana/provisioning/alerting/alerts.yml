@@ -1,0 +1,53 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Chatbot Memory Alerts
+    folder: Alertes Chatbot
+    interval: 1m
+    rules:
+      - uid: chatbot-memory-critical
+        title: "Mémoire système > 95%"
+        condition: B
+        data:
+          # Requête A : pourcentage mémoire utilisée
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              editorMode: code
+              expr: system_memory_used_bytes / system_memory_total_bytes * 100
+              instant: true
+              refId: A
+          # Condition B : seuil > 95
+          - refId: B
+            datasourceUid: "__expr__"
+            model:
+              type: threshold
+              refId: B
+              expression: A
+              conditions:
+                - evaluator:
+                    type: gt
+                    params: [95]
+                  operator:
+                    type: and
+                  query:
+                    params: [A]
+                  reducer:
+                    type: last
+                    params: []
+                  type: query
+        noDataState: NoData
+        execErrState: Alerting
+        for: 1m
+        annotations:
+          summary: "Mémoire système critique"
+          description: >
+            L'utilisation mémoire système dépasse 95% — risque d'OOM Kill imminent.
+            Valeur courante : {{ $values.A.Value | printf "%.1f" }}%
+        labels:
+          severity: critical
+        isPaused: false

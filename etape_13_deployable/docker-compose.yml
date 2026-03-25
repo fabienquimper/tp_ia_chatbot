@@ -2,6 +2,27 @@ version: "3.9"
 # ── Dev : stack locale complète ───────────────────────────────────────────
 # Usage : docker compose up --build
 # Accès : API http://localhost:8000/docs | Grafana http://localhost:3000
+#
+# ── PROBLÈME CONNU : iptables / kernel récent (Ubuntu 25.x+ / kernel 6.17+) ──
+#
+# Symptôme : "Chain 'DOCKER-ISOLATION-STAGE-2' does not exist" au démarrage.
+# Cause    : Docker crée ses chaînes avec le backend iptables-legacy,
+#            mais Ubuntu récent utilise nf_tables par défaut.
+#            Un restart Docker perd la synchronisation entre les deux.
+#
+# Fix (passer en iptables-legacy) :
+#   sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+#   sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+#   sudo systemctl restart docker
+#
+# Revenir en arrière (remettre nf_tables) :
+#   sudo update-alternatives --set iptables /usr/sbin/iptables-nft
+#   sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-nft
+#   sudo systemctl restart docker
+#
+# Vérifier le mode actif :
+#   sudo update-alternatives --display iptables
+# ─────────────────────────────────────────────────────────────────────────────
 
 services:
 
@@ -31,6 +52,32 @@ services:
       - chatbot_data:/app/data
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    # ── GPU NVIDIA (optionnel — métriques Ollama/LM Studio via pynvml) ─────────
+    #
+    # Pré-requis :
+    #   1. Pilotes NVIDIA installés   → nvidia-smi doit fonctionner
+    #   2. NVIDIA Container Toolkit   → docker info | grep -i nvidia
+    #                                   doit afficher "nvidia" dans Runtimes
+    #
+    # Installation du toolkit (Ubuntu — dépôt NVIDIA requis, absent des repos Ubuntu) :
+    #   curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \
+    #     | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-ctk-keyring.gpg
+    #   curl -sL https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list \
+    #     | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-ctk-keyring.gpg] https://#g' \
+    #     | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+    #   sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+    #   sudo nvidia-ctk runtime configure --runtime=docker
+    #   sudo systemctl restart docker
+    #
+    # Sans GPU : commenter le bloc deploy ci-dessous → les panneaux Grafana GPU
+    # afficheront "No data" (comportement normal, l'app ne plante pas).
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
     restart: unless-stopped
     networks:
       - chatbot_net
