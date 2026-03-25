@@ -3,25 +3,43 @@ version: "3.9"
 # Usage : docker compose up --build
 # Accès : API http://localhost:8000/docs | Grafana http://localhost:3000
 #
-# ── PROBLÈME CONNU : iptables / kernel récent (Ubuntu 25.x+ / kernel 6.17+) ──
+# ── PROBLÈME CONNU : Docker 28.4 + kernel 6.17+ ───────────────────────────────
 #
-# Symptôme : "Chain 'DOCKER-ISOLATION-STAGE-2' does not exist" au démarrage.
-# Cause    : Docker crée ses chaînes avec le backend iptables-legacy,
-#            mais Ubuntu récent utilise nf_tables par défaut.
-#            Un restart Docker perd la synchronisation entre les deux.
+# Symptôme : "Chain 'DOCKER-ISOLATION-STAGE-2' does not exist" à la création
+#            d'un bridge réseau user-defined.
 #
-# Fix (passer en iptables-legacy) :
-#   sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
-#   sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-#   sudo systemctl restart docker
+# Cause    : Bug Docker 28.4.0 — crée les nouvelles chaînes nft au démarrage
+#            (DOCKER-BRIDGE, DOCKER-FORWARD…) mais bascule sur les anciennes
+#            (DOCKER-ISOLATION-STAGE-1/2) pour les bridges user-defined.
 #
-# Revenir en arrière (remettre nf_tables) :
-#   sudo update-alternatives --set iptables /usr/sbin/iptables-nft
-#   sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-nft
-#   sudo systemctl restart docker
+# Fix permanent (à appliquer une fois) :
+#   1. Forcer le mode nft dans le daemon Docker :
+#      sudo bash -c 'echo "{\"iptables\": \"nft\"}" > /etc/docker/daemon.json'
+#      sudo systemctl restart docker
 #
-# Vérifier le mode actif :
-#   sudo update-alternatives --display iptables
+#   2. Filet de sécurité — service systemd créant les chaînes manquantes au boot :
+#      sudo bash -c 'cat > /etc/systemd/system/docker-iptables-fix.service << EOF
+#      [Unit]
+#      Description=Create missing Docker iptables chains
+#      Before=docker.service
+#      [Service]
+#      Type=oneshot
+#      ExecStart=/sbin/iptables -t filter -N DOCKER-ISOLATION-STAGE-1
+#      ExecStart=/sbin/iptables -t filter -N DOCKER-ISOLATION-STAGE-2
+#      ExecStart=/sbin/iptables -t filter -A DOCKER-ISOLATION-STAGE-2 -j RETURN
+#      RemainAfterExit=yes
+#      [Install]
+#      WantedBy=multi-user.target
+#      EOF'
+#      sudo systemctl daemon-reload && sudo systemctl enable docker-iptables-fix.service
+#
+# Fix temporaire (session courante uniquement, sans reboot) :
+#   sudo iptables -t filter -N DOCKER-ISOLATION-STAGE-1 2>/dev/null || true
+#   sudo iptables -t filter -N DOCKER-ISOLATION-STAGE-2 2>/dev/null || true
+#   sudo iptables -t filter -A DOCKER-ISOLATION-STAGE-2 -j RETURN
+#
+# Vérifier que Docker peut créer un réseau bridge (doit afficher "OK") :
+#   docker network create test-net && echo "OK" && docker network rm test-net
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
