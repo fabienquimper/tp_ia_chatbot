@@ -66,7 +66,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
-          "expr": "sum(rate(chat_requests_total{status=\"error\"}[5m])) / sum(rate(chat_requests_total[5m]))",
+          "expr": "(sum(rate(chat_requests_total{status=\"error\"}[5m])) or vector(0)) / sum(rate(chat_requests_total[5m]))",
           "legendFormat": "Erreurs",
           "refId": "A"
         }
@@ -395,14 +395,26 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
       "id": 30,
       "options": { "legend": { "calcs": ["mean", "last", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "none" } },
-      "title": "Mémoire RSS du processus",
+      "title": "Mémoire — processus & système",
       "type": "timeseries",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "process_memory_bytes / 1024 / 1024",
-          "legendFormat": "RAM (MB)",
+          "legendFormat": "RSS processus (MB)",
           "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "system_memory_used_bytes / 1024 / 1024",
+          "legendFormat": "Système utilisé (MB)",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "system_memory_total_bytes / 1024 / 1024",
+          "legendFormat": "Système total (MB)",
+          "refId": "C"
         }
       ]
     },
@@ -434,6 +446,42 @@
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "expr": "chat_context_messages",
           "legendFormat": "Contexte moyen (messages)",
+          "refId": "B"
+        }
+      ]
+    }
+
+  ,
+
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "%", "axisPlacement": "auto", "fillOpacity": 10, "lineWidth": 2, "pointSize": 5, "showPoints": "never", "spanNulls": false },
+          "mappings": [],
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 40 },
+      "id": 40,
+      "options": { "legend": { "calcs": ["mean", "last", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi", "sort": "none" } },
+      "title": "CPU — processus & système",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "system_cpu_percent",
+          "legendFormat": "CPU système (%)",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "expr": "process_cpu_percent",
+          "legendFormat": "CPU processus (%)",
           "refId": "B"
         }
       ]

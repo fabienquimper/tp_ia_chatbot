@@ -1,23 +1,28 @@
 version: "3.9"
 
 services:
-  chatbot:
+  chatbot:      
+    env_file:                                                                                                                                                                                                                                         
+      - .env
     build: .
     container_name: chatbot_monitoring
     ports:
       - "8000:8000"
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-changeme}
-      - MODEL=${MODEL:-gpt-4o-mini}
-      - MODE=${MODE:-cloud}
-      - LOCAL_BASE_URL=${LOCAL_BASE_URL:-http://localhost:1234/v1}
-      - LOCAL_MODEL=${LOCAL_MODEL:-mistral-7b-instruct}
       - DB_PATH=/app/data/chat.db
+      # - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-changeme}
+      # - MODEL=${MODEL:-gpt-4o-mini}
+      # - MODE=${MODE:-cloud}
+      # - LOCAL_BASE_URL=${LOCAL_BASE_URL:-http://host.docker.internal:1234/v1}
+      # - LOCAL_MODEL=${LOCAL_MODEL:-mistral-7b-instruct}
+      # - DB_PATH=/app/data/chat.db
     volumes:
       - ./data:/app/data
     restart: unless-stopped
     networks:
       - monitoring
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   prometheus:
     image: prom/prometheus:latest

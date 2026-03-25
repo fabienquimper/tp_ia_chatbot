@@ -38,6 +38,26 @@ MEMORY_USAGE_BYTES = Gauge(
     "Utilisation mémoire du processus Python (RSS)"
 )
 
+SYSTEM_MEMORY_TOTAL_BYTES = Gauge(
+    "system_memory_total_bytes",
+    "Mémoire RAM totale du système hôte"
+)
+
+SYSTEM_MEMORY_USED_BYTES = Gauge(
+    "system_memory_used_bytes",
+    "Mémoire RAM utilisée sur le système hôte"
+)
+
+PROCESS_CPU_PERCENT = Gauge(
+    "process_cpu_percent",
+    "CPU % utilisé par le processus chatbot"
+)
+
+SYSTEM_CPU_PERCENT = Gauge(
+    "system_cpu_percent",
+    "CPU % global du système hôte"
+)
+
 ACTIVE_SESSIONS = Gauge(
     "chat_active_sessions",
     "Nombre de sessions actives (avec activité dans les 5 dernières minutes)"
@@ -55,6 +75,12 @@ def update_system_metrics():
     """Met à jour les métriques système. À appeler périodiquement."""
     process = psutil.Process(os.getpid())
     MEMORY_USAGE_BYTES.set(process.memory_info().rss)
+    vm = psutil.virtual_memory()
+    SYSTEM_MEMORY_TOTAL_BYTES.set(vm.total)
+    SYSTEM_MEMORY_USED_BYTES.set(vm.used)
+    # interval=None : non-bloquant, compare depuis le dernier appel
+    PROCESS_CPU_PERCENT.set(process.cpu_percent(interval=None))
+    SYSTEM_CPU_PERCENT.set(psutil.cpu_percent(interval=None))
 
 def record_request(model: str, status: str, latency: float, prompt_tokens: int, completion_tokens: int):
     """Enregistre les métriques d'une requête."""

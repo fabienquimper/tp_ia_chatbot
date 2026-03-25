@@ -12,7 +12,7 @@ from .database import init_db, save_message, load_history, get_all_sessions
 from .llm import get_reply, MODEL
 from .metrics import (
     record_request, record_error, update_system_metrics,
-    APP_INFO, ACTIVE_SESSIONS
+    APP_INFO, ACTIVE_SESSIONS, CONTEXT_SIZE
 )
 
 app = FastAPI(
@@ -65,6 +65,7 @@ async def metrics():
 @app.post("/chat", response_model=ChatResponse, tags=["Chat"])
 async def chat(req: ChatRequest):
     history = load_history(req.session_id)
+    CONTEXT_SIZE.set(len(history))
     t0 = time.time()
 
     try:
@@ -80,6 +81,7 @@ async def chat(req: ChatRequest):
     except Exception as e:
         latency = time.time() - t0
         record_error(type(e).__name__)
+        record_request(MODEL, "error", latency, 0, 0)
         raise HTTPException(status_code=503, detail=f"Erreur LLM : {str(e)}")
 
     save_message(req.session_id, "user", req.message)
