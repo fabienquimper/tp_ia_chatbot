@@ -94,23 +94,27 @@ setup_gitea() {
         -e GITEA__server__HTTP_PORT="3000" \
         -e GITEA__database__DB_TYPE="sqlite3" \
         -e GITEA__database__PATH="/data/gitea/gitea.db" \
-        -e GITEA__security__INSTALL_LOCK="false" \
+        -e GITEA__security__INSTALL_LOCK="true" \
         gitea/gitea:latest
 
     info "Gitea en cours de démarrage..."
-    sleep 10
+    sleep 8
 
-    # Initialisation automatique via API Gitea (premier lancement)
-    if curl -sf "http://localhost:${GITEA_PORT}/api/v1/version" >/dev/null 2>&1; then
+    # Créer le compte admin automatiquement via CLI (évite le wizard web)
+    if docker exec -u git "${GITEA_NAME}" gitea admin user create \
+            --username admin \
+            --password admin1234 \
+            --email admin@local.dev \
+            --admin 2>/dev/null; then
         success "Gitea prêt → http://localhost:${GITEA_PORT}"
+        echo "  Login : admin / admin1234"
         echo ""
-        echo "  → Créer un compte admin sur : http://localhost:${GITEA_PORT}"
-        echo "  → Puis créer un repo 'chatbot-api'"
-        echo "  → Puis pousser le code :"
-        echo "     git remote add local http://localhost:${GITEA_PORT}/<USER>/chatbot-api.git"
-        echo "     git push local main"
+        echo "  Créer un repo 'chatbot-api' puis pousser le code :"
+        echo "    git remote add local http://localhost:${GITEA_PORT}/admin/chatbot-api.git"
+        echo "    git push local main"
     else
-        warning "Gitea démarre encore... Attendre 30s puis visiter http://localhost:${GITEA_PORT}"
+        warning "Gitea démarre encore ou compte admin déjà existant"
+        info "Accès : http://localhost:${GITEA_PORT}  (admin / admin1234)"
     fi
 }
 
