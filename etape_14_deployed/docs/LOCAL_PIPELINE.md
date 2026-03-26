@@ -94,14 +94,17 @@ Ce script installe et configure automatiquement :
 
 ### 2. Configurer Gitea (première fois)
 
+Le script `setup` crée automatiquement le compte admin via CLI — pas de wizard web.
+
 1. Ouvrir http://localhost:3001
-2. Cliquer **"Register"** → créer un compte admin
-3. Créer un nouveau repository : **"chatbot-api"** (public)
+2. Se connecter : **admin / admin1234**
+3. Créer un nouveau repository : **"+"** → **"Nouveau dépôt"** → nom `chatbot-api`, public, sans initialisation
 4. Configurer le remote local :
 ```bash
 cd /chemin/vers/le/repo
-git remote add local http://localhost:3001/<VOTRE_USER>/chatbot-api.git
+git remote add local http://localhost:3001/admin/chatbot-api.git
 git push local main
+# Login demandé : admin / admin1234
 ```
 
 ### 3. Configurer les secrets act
@@ -130,19 +133,60 @@ docker build --target production -t localhost:5001/chatbot-api:latest etape_13_d
 docker push localhost:5001/chatbot-api:latest
 ```
 
-### 6. Configurer ArgoCD
+### 6. Adapter les manifests pour le registry local
+
+Le `kustomization.yaml` référence `ghcr.io/YOUR_ORG/chatbot-api` par défaut (image cloud).
+Pour le déploiement local, il faut substituer avec le registry local :
+
+```bash
+# Remplacer l'image dans kustomization.yaml
+sed -i 's|ghcr.io/YOUR_ORG/chatbot-api|localhost:5001/chatbot-api|g' \
+  etape_14_deployed/k8s/kustomization.yaml
+
+# Vérifier
+grep "localhost:5001" etape_14_deployed/k8s/kustomization.yaml
+```
+
+> **Important :** pousser ce changement sur Gitea pour qu'ArgoCD le voie :
+> ```bash
+> git add etape_14_deployed/k8s/kustomization.yaml
+> git commit -m "chore: use local registry for kind deployment"
+> git push local main
+> ```
+
+### 7. Créer le secret K8S manuellement
+
+Les secrets ne sont pas gérés par ArgoCD (risque d'écraser avec les valeurs placeholder).
+À créer **une fois** avant la première sync :
+
+```bash
+kubectl create namespace chatbot 2>/dev/null || true
+
+kubectl create secret generic chatbot-secrets \
+  --from-literal=openai-api-key="${OPENAI_API_KEY:-sk-fake-local-test}" \
+  --from-literal=secret-key="$(openssl rand -hex 32)" \
+  --from-literal=grafana-password="admin123" \
+  -n chatbot \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+
+> `--dry-run=client -o yaml | kubectl apply -f -` : crée le secret s'il n'existe pas,
+> ne l'écrase pas s'il existe déjà.
+
+### 8. Configurer ArgoCD
 
 **a. Adapter le fichier Application :**
 ```bash
-# Remplacer GITEA_USER dans k8s/argocd/application.yaml
-sed -i 's/GITEA_USER/votre-login-gitea/g' etape_14_deployed/k8s/argocd/application.yaml
+# Remplacer GITEA_USER et GITEA_PASSWORD dans k8s/argocd/application.yaml
+sed -i 's/GITEA_USER/admin/g; s/GITEA_PASSWORD/admin1234/g' \
+  etape_14_deployed/k8s/argocd/application.yaml
 ```
 
 **b. Configurer les credentials Gitea :**
 ```bash
 kubectl create secret generic gitea-creds \
-  --from-literal=username=<VOTRE_USER> \
-  --from-literal=password=<VOTRE_MOT_DE_PASSE> \
+  --from-literal=username=admin \
+  --from-literal=password=admin1234 \
   -n argocd
 kubectl label secret gitea-creds \
   argocd.argoproj.io/secret-type=repository \
@@ -260,8 +304,15 @@ kubectl proxy &
 
 Interface visuelle pour voir l'état de synchronisation entre le repo Git et le cluster.
 
+> **Note installation :** Le script utilise `kubectl apply --server-side` pour ArgoCD.
+> C'est obligatoire — les CRDs ArgoCD dépassent la limite de 262 Ko des annotations
+> `last-applied-configuration` gérées côté client par `kubectl apply` classique.
+
 ```bash
-# Login CLI
+# Login CLI (mot de passe récupéré via kubectl)
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d; echo
+
 argocd login localhost:8081 --username admin --password <PASSWORD> --insecure
 
 # Voir toutes les applications

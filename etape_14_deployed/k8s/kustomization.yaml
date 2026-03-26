@@ -6,7 +6,13 @@ namespace: chatbot
 resources:
   - namespace.yaml
   - configmap.yaml
-  - secret.yaml
+  # secret.yaml intentionnellement exclu : les secrets ne doivent pas être gérés
+  # par ArgoCD depuis un fichier en clair. Créer le secret manuellement :
+  #   kubectl create secret generic chatbot-secrets \
+  #     --from-literal=openai-api-key="sk-..." \
+  #     --from-literal=secret-key="$(openssl rand -hex 32)" \
+  #     --from-literal=grafana-password="admin123" \
+  #     -n chatbot
   - pvc.yaml
   - chatbot-deployment.yaml
   - chatbot-service.yaml
@@ -14,6 +20,7 @@ resources:
   - ingress.yaml
   - monitoring/prometheus-deployment.yaml
   - monitoring/grafana-deployment.yaml
+  - monitoring/grafana-provisioning-configmap.yaml
 
 images:
   - name: ghcr.io/YOUR_ORG/chatbot-api
