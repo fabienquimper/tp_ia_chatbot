@@ -133,26 +133,27 @@ docker build --target production -t localhost:5001/chatbot-api:latest etape_13_d
 docker push localhost:5001/chatbot-api:latest
 ```
 
-### 6. Adapter les manifests pour le registry local
+### 6. Vérifier la substitution d'image
 
-Le `kustomization.yaml` référence `ghcr.io/YOUR_ORG/chatbot-api` par défaut (image cloud).
-Pour le déploiement local, il faut substituer avec le registry local :
+Le `kustomization.yaml` est déjà configuré pour utiliser le registry local via le bloc `images:` :
 
-```bash
-# Remplacer l'image dans kustomization.yaml
-sed -i 's|ghcr.io/YOUR_ORG/chatbot-api|localhost:5001/chatbot-api|g' \
-  etape_14_deployed/k8s/kustomization.yaml
-
-# Vérifier
-grep "localhost:5001" etape_14_deployed/k8s/kustomization.yaml
+```yaml
+images:
+  - name: ghcr.io/YOUR_ORG/chatbot-api   # clé de correspondance avec les manifests
+    newName: localhost:5001/chatbot-api   # ← registry local (kind)
+    newTag: latest
 ```
 
-> **Important :** pousser ce changement sur Gitea pour qu'ArgoCD le voie :
-> ```bash
-> git add etape_14_deployed/k8s/kustomization.yaml
-> git commit -m "chore: use local registry for kind deployment"
-> git push local main
-> ```
+Kustomize remplace automatiquement toutes les occurrences de `ghcr.io/YOUR_ORG/chatbot-api`
+par `localhost:5001/chatbot-api:latest` à l'apply — sans modifier les fichiers de déploiement.
+
+Vérifier que l'image est bien dans le registry local avant de continuer :
+```bash
+curl -s http://localhost:5001/v2/_catalog
+# → {"repositories":["chatbot-api"]}
+```
+
+Si l'image n'est pas encore poussée, revenir à l'étape 5.
 
 ### 7. Créer le secret K8S manuellement
 

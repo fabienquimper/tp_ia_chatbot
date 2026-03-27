@@ -23,8 +23,10 @@ resources:
   - monitoring/grafana-provisioning-configmap.yaml
 
 images:
-  - name: ghcr.io/YOUR_ORG/chatbot-api
-    newTag: latest   # Remplacé par le tag réel en CI/CD
+  - name: ghcr.io/YOUR_ORG/chatbot-api   # clé de correspondance avec les manifests
+    newName: localhost:5001/chatbot-api   # ← registry local (kind)
+    # newName: ghcr.io/YOUR_ORG/chatbot-api  # ← décommenter pour déploiement cloud
+    newTag: latest
 
 commonLabels:
   managed-by: kustomize
