@@ -53,6 +53,50 @@ rate(chat_requests_total[1m])
 process_memory_bytes / 1024 / 1024
 ```
 
+## Reset des données
+
+### Reset complet (Prometheus + base de données sessions)
+
+Arrête la stack, supprime les volumes Prometheus et la base SQLite, puis relance :
+
+```bash
+docker compose down
+docker volume rm etape_08_monitoring_prometheus_data
+rm -f data/chat.db
+docker compose up -d
+```
+
+> Grafana n'affichera plus de données tant qu'aucune requête n'a été envoyée. Les 229 sessions disparaissent car la base SQLite est recréée vide au démarrage.
+
+### Reset Prometheus uniquement (conserver l'historique des sessions)
+
+```bash
+docker compose down
+docker volume rm etape_08_monitoring_prometheus_data
+docker compose up -d
+```
+
+### Reset de la base de données sessions uniquement (conserver l'historique Prometheus)
+
+```bash
+docker compose exec chatbot python -c "
+import sqlite3
+conn = sqlite3.connect('/app/data/chat.db')
+conn.execute('DELETE FROM messages')
+conn.commit()
+conn.close()
+print('Base vidée.')
+"
+```
+
+### Reset des métriques en mémoire uniquement (Counters, Histograms)
+
+Redémarrer le container chatbot remet à zéro tous les compteurs en mémoire (les données restent dans Prometheus et SQLite) :
+
+```bash
+docker compose restart chatbot
+```
+
 ## Exercice
 1. Lancez la stack : `docker-compose up --build -d`
 2. Envoyez 50 requêtes : `python send_test_requests.py`
