@@ -25,8 +25,12 @@ SYSTEM = {
 history = []
 
 def build_context():
-    """Retourne la fenêtre glissante des MAX_HISTORY derniers messages."""
+    """Retourne la fenêtre glissante des MAX_HISTORY derniers messages.
+    S'assure que la fenêtre commence toujours par un message 'user'."""
     window = history[-MAX_HISTORY:]
+    # Si la fenêtre commence par un assistant, on saute ce message orphelin
+    while window and window[0]["role"] != "user":
+        window = window[1:]
     return [SYSTEM] + window
 
 def count_approx_tokens(messages):

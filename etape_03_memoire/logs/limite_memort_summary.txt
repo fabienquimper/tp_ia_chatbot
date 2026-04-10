@@ -1,0 +1,17 @@
+Pédagogiquement, cette conversation illustre le problème fondamental de la mémoire par résumé : la perte d'information progressive.
+
+Ce qui se passe concrètement :
+
+L'info "Marie = ostéopathe" est introduite tôt, survit 2-3 cycles de résumé, puis disparaît. À la fin, quand l'utilisateur demande "Quel est le métier de Marie ?", le modèle répond qu'il ne connaît pas Marie.
+
+C'est la leçon clé : le LLM choisit ce qu'il juge important lors du résumé. Marie était une info périphérique, elle a été sacrifiée.
+
+Les 3 enseignements pédagogiques :
+
+Le résumé est lui-même faillible : c'est le LLM qui résume, avec ses propres biais de sélection. Une info mentionnée une seule fois = risque élevé de disparition.
+
+L'accumulation des cycles = dégradation : chaque résumé est un résumé de résumé. L'information se dilue à chaque passage. Fabien a survécu (mentionné souvent, dans des contextes centraux), Marie non.
+
+La mémoire par résumé est un compromis : on évite le dépassement de contexte, mais on accepte une perte d'information. C'est l'opposé d'un vrai stockage (base de données, RAG) qui lui ne perd rien.
+
+En une phrase : cette conversation démontre que la mémoire par résumé est utile mais lossy — parfaite pour illustrer pourquoi les chatbots réels utilisent du RAG ou des bases de données structurées pour les infos critiques.
