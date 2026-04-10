@@ -6,9 +6,9 @@ services:
     container_name: chatbot_api
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-sk-changeme}
-      - MODEL=${MODEL:-gpt-4o-mini}
       - DB_PATH=/app/data/chat.db
       - MAX_HISTORY=8
     volumes:
