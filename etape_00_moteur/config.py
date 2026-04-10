@@ -14,6 +14,10 @@ import openai
 # Charge toujours depuis ce répertoire, indépendamment du cwd de l'appelant
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
+# Serveurs LM Studio — modifiez ici si les IPs changent
+LM_STUDIO_LOCAL  = "http://192.168.1.66:1235/v1"   # machine locale (exemple WSL2 sur Windows)
+LM_STUDIO_RESEAU = "http://192.168.1.141:1234/v1"  # serveur IA réseau loca
+
 CONFIG = {
     "cloud": {
         "base_url": None,
@@ -30,7 +34,7 @@ CONFIG = {
         "price_output": 0.0,
     },
     "force_localhost_gpt_oss_20b": {
-        "base_url": "http://192.168.1.66:1235/v1",  # Windows host depuis WSL2 (LM Studio port 1235)
+        "base_url": LM_STUDIO_LOCAL,  # Windows host depuis WSL2 (LM Studio port 1235)
         "api_key": "lm-studio",
         "model": "openai/gpt-oss-20b",
         "price_input": 0.0,
@@ -38,14 +42,14 @@ CONFIG = {
         "timeout": 120,  # MSI sans GPU dédié = lent, timeout généreux
     },
     "force_localhost_mistral7b": {
-        "base_url": "http://192.168.1.66:1235/v1",  # Windows host depuis WSL2 (LM Studio port 1235)
+        "base_url": LM_STUDIO_LOCAL,  # Windows host depuis WSL2 (LM Studio port 1235)
         "api_key": "lm-studio",
         "model": "mistralai/ministral-3-3b",
         "price_input": 0.0,   # gratuit (local)
         "price_output": 0.0,
     },
     "reseau_ministral3b": {
-        "base_url": "http://192.168.1.141:1234/v1",
+        "base_url": LM_STUDIO_RESEAU,
         "api_key": "lm-studio",
         "model": "mistralai/ministral-3-3b",
         "price_input": 0.0,   # gratuit (réseau local)
@@ -53,7 +57,7 @@ CONFIG = {
         "timeout": 120,       # modèle lourd sur réseau — timeout généreux
     },
     "reseau_ministral14b": {
-        "base_url": "http://192.168.1.141:1234/v1",
+        "base_url": LM_STUDIO_RESEAU,
         "api_key": "lm-studio",
         "model": "mistralai/ministral-3-14b-reasoning",
         "price_input": 0.0,   # gratuit (réseau local)
@@ -61,7 +65,7 @@ CONFIG = {
         "timeout": 120,       # modèle lourd sur réseau — timeout généreux
     },
     "reseau_gpt_oss_20b": {
-        "base_url": "http://192.168.1.141:1234/v1",
+        "base_url": LM_STUDIO_RESEAU,
         "api_key": "lm-studio",
         "model": "openai/gpt-oss-20b",
         "price_input": 0.0,   # gratuit (réseau local)
