@@ -1,45 +1,90 @@
 {
-  "local": {
-    "model": "openai/gpt-oss-20b",
+  "reseau_ministral3b": {
+    "model": "mistralai/ministral-3-3b",
     "results": [
       {
         "prompt": "Explique le concept de m\u00e9moire dans les ...",
-        "latency": 11.92,
-        "tps": 5.5,
-        "prompt_tokens": 99,
-        "completion_tokens": 66,
+        "latency": 3.422,
+        "tps": 19.6,
+        "prompt_tokens": 31,
+        "completion_tokens": 67,
         "cost_mc": 0.0
       },
       {
         "prompt": "Quelle est la diff\u00e9rence entre GPT-4o et...",
-        "latency": 13.432,
-        "tps": 6.3,
-        "prompt_tokens": 100,
-        "completion_tokens": 85,
+        "latency": 0.812,
+        "tps": 133.0,
+        "prompt_tokens": 35,
+        "completion_tokens": 108,
         "cost_mc": 0.0
       },
       {
         "prompt": "Donne-moi 3 avantages du RAG par rapport...",
-        "latency": 24.879,
-        "tps": 6.1,
-        "prompt_tokens": 100,
-        "completion_tokens": 151,
+        "latency": 1.01,
+        "tps": 138.6,
+        "prompt_tokens": 32,
+        "completion_tokens": 140,
         "cost_mc": 0.0
       },
       {
         "prompt": "Qu'est-ce que le context window d'un LLM...",
-        "latency": 23.686,
-        "tps": 5.9,
-        "prompt_tokens": 96,
-        "completion_tokens": 139,
+        "latency": 0.863,
+        "tps": 135.6,
+        "prompt_tokens": 27,
+        "completion_tokens": 117,
         "cost_mc": 0.0
       },
       {
         "prompt": "Explique TPS (Tokens Per Second) et pour...",
-        "latency": 38.789,
-        "tps": 5.4,
-        "prompt_tokens": 98,
-        "completion_tokens": 211,
+        "latency": 1.716,
+        "tps": 141.6,
+        "prompt_tokens": 30,
+        "completion_tokens": 243,
+        "cost_mc": 0.0
+      }
+    ]
+  },
+  "force_localhost_mistral7b": {
+    "model": "mistralai/ministral-3-3b",
+    "results": [
+      {
+        "prompt": "Explique le concept de m\u00e9moire dans les ...",
+        "latency": 6.518,
+        "tps": 11.0,
+        "prompt_tokens": 31,
+        "completion_tokens": 72,
+        "cost_mc": 0.0
+      },
+      {
+        "prompt": "Quelle est la diff\u00e9rence entre GPT-4o et...",
+        "latency": 14.959,
+        "tps": 11.2,
+        "prompt_tokens": 35,
+        "completion_tokens": 168,
+        "cost_mc": 0.0
+      },
+      {
+        "prompt": "Donne-moi 3 avantages du RAG par rapport...",
+        "latency": 13.655,
+        "tps": 10.9,
+        "prompt_tokens": 32,
+        "completion_tokens": 149,
+        "cost_mc": 0.0
+      },
+      {
+        "prompt": "Qu'est-ce que le context window d'un LLM...",
+        "latency": 12.564,
+        "tps": 10.7,
+        "prompt_tokens": 27,
+        "completion_tokens": 135,
+        "cost_mc": 0.0
+      },
+      {
+        "prompt": "Explique TPS (Tokens Per Second) et pour...",
+        "latency": 13.028,
+        "tps": 11.0,
+        "prompt_tokens": 30,
+        "completion_tokens": 143,
         "cost_mc": 0.0
       }
     ]

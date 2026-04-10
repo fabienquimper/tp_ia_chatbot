@@ -86,3 +86,12 @@ Si problème de firewall `sudo ufw allow 1234`
 Vérifier que LM Studio écoute bien partout:
 
 ss -tulnp | grep 1234 (on doit voir 0.0.0.0:1234, si on voit 127.0.0.1:1234 ça veut dire que c'est encore bloqué en local)
+
+
+Exemple de sortie:
+
+ $ hostname -I
+192.168.1.141 172.19.0.1 172.17.0.1 172.20.0.1 172.18.0.1 2001:861:5441:a6d0:8242:xx:yyy:ccc 2001:861:5441:a6d0:16fc:zz:aa:vvv
+
+ss -tulnp | grep 1234
+tcp   LISTEN 0      511                             0.0.0.0:1234       0.0.0.0:*    users:(("lm-studio",pid=17384,fd=127))

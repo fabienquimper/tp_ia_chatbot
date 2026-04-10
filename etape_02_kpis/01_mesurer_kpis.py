@@ -53,12 +53,15 @@ def print_session_summary():
         return
     avg_latency = session_stats["total_latency"] / n
     latencies = sorted(session_stats["latencies"])
+    p50_idx = int(0.50 * len(latencies))
+    p50 = latencies[min(p50_idx, len(latencies) - 1)]
     p95_idx = int(0.95 * len(latencies))
     p95 = latencies[min(p95_idx, len(latencies) - 1)]
     cost_str = f"${session_stats['total_cost']:.6f}" if price_output > 0 else "gratuit (local)"
     print(f"\n  ╔═ RÉSUMÉ DE SESSION ({'='*30})╗")
     print(f"  ║ Requêtes        : {n}")
     print(f"  ║ Latence moyenne : {avg_latency:.3f}s")
+    print(f"  ║ Latence P50     : {p50:.3f}s")
     print(f"  ║ Latence P95     : {p95:.3f}s")
     print(f"  ║ Tokens totaux   : {session_stats['total_prompt_tokens']} in / {session_stats['total_completion_tokens']} out")
     print(f"  ║ Coût total      : {cost_str}")
