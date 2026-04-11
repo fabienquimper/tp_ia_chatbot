@@ -57,7 +57,8 @@ spec:
   ports:
     - port: 9090
       targetPort: 9090
-  type: ClusterIP
+      nodePort: 30090      # accessible sur http://localhost:9090 via kind
+  type: NodePort
 ---
 apiVersion: v1
 kind: ConfigMap

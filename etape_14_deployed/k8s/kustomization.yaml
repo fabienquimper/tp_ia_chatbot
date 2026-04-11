@@ -21,6 +21,7 @@ resources:
   - monitoring/prometheus-deployment.yaml
   - monitoring/grafana-deployment.yaml
   - monitoring/grafana-provisioning-configmap.yaml
+  - monitoring/grafana-dashboard-configmap.yaml
 
 images:
   - name: ghcr.io/YOUR_ORG/chatbot-api   # clé de correspondance avec les manifests

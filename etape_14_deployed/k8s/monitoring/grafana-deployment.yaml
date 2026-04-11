@@ -34,9 +34,9 @@ spec:
             - name: GF_USERS_ALLOW_SIGN_UP
               value: "false"
             - name: GF_SERVER_ROOT_URL
-              value: "https://your-domain.com/grafana"
+              value: "http://localhost:3000"   # surchargé en prod — local : accès direct
             - name: GF_SERVER_SERVE_FROM_SUB_PATH
-              value: "true"
+              value: "false"
             - name: GF_ANALYTICS_REPORTING_ENABLED
               value: "false"
           volumeMounts:
@@ -50,6 +50,10 @@ spec:
             - name: provisioning
               mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
               subPath: dashboards.yaml
+            # Dashboard JSON — monté dans le dossier que surveille le provider
+            - name: dashboard
+              mountPath: /var/lib/grafana/dashboards/chatbot.json
+              subPath: chatbot.json
           resources:
             requests:
               memory: "128Mi"
@@ -64,6 +68,9 @@ spec:
         - name: provisioning
           configMap:
             name: grafana-provisioning
+        - name: dashboard
+          configMap:
+            name: grafana-dashboard
 ---
 apiVersion: v1
 kind: Service
@@ -76,4 +83,5 @@ spec:
   ports:
     - port: 3000
       targetPort: 3000
-  type: ClusterIP
+      nodePort: 30030      # accessible sur http://localhost:3000 via kind
+  type: NodePort

@@ -1,0 +1,62 @@
+## Overlay : déploiement depuis une image Docker locale (sans GHCR)
+#
+# Ce fichier patche la base (k8s/) pour utiliser chatbot-api:local
+# au lieu de ghcr.io/fabienquimper/chatbot-api:latest.
+#
+# Prérequis :
+#   docker build -t chatbot-api:local ../etape_13_deployable/
+#   kind load docker-image chatbot-api:local --name chatbot-local
+#
+# Usage :
+#   kubectl apply -k k8s/overlays/local-image/
+#
+# Utilisé automatiquement par : make deploy-k8s-image
+# ─────────────────────────────────────────────────────
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../k8s   # réutilise tous les manifests existants, sans les dupliquer
+
+# Remplace l'image GHCR par l'image buildée localement
+images:
+  - name: ghcr.io/fabienquimper/chatbot-api   # doit correspondre à chatbot-deployment.yaml
+    newName: chatbot-api                        # image locale (docker build)
+    newTag: local                               # tag local (docker build -t chatbot-api:local)
+
+# Patches sur le Deployment :
+#   - imagePullPolicy: Never → K8S utilise l'image déjà dans le cache du nœud kind
+#   - supprime imagePullSecrets → plus besoin de credentials GHCR
+patches:
+  # Deployment : image locale + pas de pull depuis registry
+  - target:
+      kind: Deployment
+      name: chatbot-api
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+      - op: remove
+        path: /spec/template/spec/imagePullSecrets
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe/timeoutSeconds
+        value: 10
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe/timeoutSeconds
+        value: 10
+
+  # Ingress : supprime host et TLS (inutiles en local kind)
+  - target:
+      kind: Ingress
+      name: chatbot-ingress
+    patch: |-
+      - op: remove
+        path: /spec/tls
+      - op: remove
+        path: /spec/rules/0/host
+      - op: replace
+        path: /metadata/annotations/nginx.ingress.kubernetes.io~1ssl-redirect
+        value: "false"
+      - op: replace
+        path: /metadata/annotations/nginx.ingress.kubernetes.io~1force-ssl-redirect
+        value: "false"

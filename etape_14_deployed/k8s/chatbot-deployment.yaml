@@ -7,7 +7,7 @@ metadata:
     app: chatbot-api
     version: "4.0.0"
 spec:
-  replicas: 2                     # Scale horizontal via HPA
+  replicas: 1
   selector:
     matchLabels:
       app: chatbot-api
@@ -27,25 +27,12 @@ spec:
         prometheus.io/port: "8000"
     spec:
       serviceAccountName: chatbot-sa
+      imagePullSecrets:
+        - name: ghcr-secret
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
         fsGroup: 1000
-
-      # Init container : index les docs RAG si nécessaire
-      initContainers:
-        - name: rag-indexer
-          image: ghcr.io/YOUR_ORG/chatbot-api:latest  # ← Remplacer YOUR_ORG
-          command: ["python", "scripts/index_rag.py", "--docs-dir", "/app/data/docs"]
-          env:
-            - name: CHROMA_PATH
-              valueFrom:
-                configMapKeyRef:
-                  name: chatbot-config
-                  key: CHROMA_PATH
-          volumeMounts:
-            - name: chatbot-data
-              mountPath: /app/data
 
       containers:
         - name: chatbot
@@ -91,6 +78,7 @@ spec:
             initialDelaySeconds: 20
             periodSeconds: 30
             failureThreshold: 3
+            timeoutSeconds: 10   # /health peut prendre ~3s si le LLM est injoignable
 
           readinessProbe:
             httpGet:
@@ -99,6 +87,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
             failureThreshold: 3
+            timeoutSeconds: 10   # idem
 
           securityContext:
             allowPrivilegeEscalation: false
@@ -110,6 +99,13 @@ spec:
         - name: chatbot-data
           persistentVolumeClaim:
             claimName: chatbot-data-pvc
+
+      # Permet aux pods d'atteindre le LLM local sur le réseau de la machine hôte
+      # (LM Studio / Ollama à l'adresse IP locale ex: 192.168.1.141)
+      hostAliases:
+        - ip: "192.168.168.1"        # ← gateway Docker bridge (host.docker.internal)
+          hostnames:
+            - "host.docker.internal"
 
       terminationGracePeriodSeconds: 30
 ---

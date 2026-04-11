@@ -160,10 +160,16 @@ nodes:
             node-labels: "ingress-ready=true"
     extraPortMappings:
       - containerPort: 80
-        hostPort: 8080
+        hostPort: 8080      # API via Ingress
         protocol: TCP
       - containerPort: 443
-        hostPort: 8443
+        hostPort: 8443      # HTTPS local
+        protocol: TCP
+      - containerPort: 30030
+        hostPort: 3000      # Grafana  → http://localhost:3000
+        protocol: TCP
+      - containerPort: 30090
+        hostPort: 9090      # Prometheus → http://localhost:9090
         protocol: TCP
   - role: worker
   - role: worker
