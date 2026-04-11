@@ -12,6 +12,14 @@ success() { echo -e "${GREEN}[OK]${NC}    $*"; }
 warning() { echo -e "${YELLOW}[WARN]${NC}  $*"; }
 error()   { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
 
+# ── Chargement du .env (les variables déjà exportées dans l'env ont priorité) ─
+if [ -f ".env" ]; then
+    set -o allexport
+    # shellcheck disable=SC1091
+    source .env
+    set +o allexport
+fi
+
 # ── Paramètres ────────────────────────────────────────────────────────────────
 SKIP_TESTS=false
 PUSH_IMAGE=false
@@ -85,6 +93,16 @@ if [ "$PUSH_IMAGE" = true ]; then
     info "Étape 4/5 : Push vers le registry"
 
     if [ -n "$REGISTRY" ]; then
+        # Authentification si les variables sont disponibles
+        if [ -n "${REGISTRY_TOKEN:-}" ] && [ -n "${REGISTRY_USER:-}" ]; then
+            info "Authentification sur ${REGISTRY}..."
+            echo "$REGISTRY_TOKEN" | docker login "$REGISTRY" -u "$REGISTRY_USER" --password-stdin \
+                || error "Échec de l'authentification sur ${REGISTRY}"
+            success "Connecté à ${REGISTRY}"
+        else
+            warning "REGISTRY_USER / REGISTRY_TOKEN non définis — login ignoré (supposé déjà connecté)"
+        fi
+
         FULL_TAG="${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
         docker tag "${IMAGE_NAME}:${IMAGE_TAG}" "$FULL_TAG"
         docker push "$FULL_TAG"

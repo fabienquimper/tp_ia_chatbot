@@ -1,4 +1,4 @@
-.PHONY: help dev prod test build build-push build-skip-tests clean index-rag index-rag-docker index-rag-paragraph index-rag-section logs stop eval eval-strict eval-verbose smoke smoke-no-rag
+.PHONY: help dev prod test build build-push build-skip-tests clean images test-registry registry-ls registry-rm index-rag index-rag-docker index-rag-paragraph index-rag-section logs stop eval eval-strict eval-verbose smoke smoke-no-rag
 
 # Variables
 IMAGE  := chatbot-api
@@ -41,6 +41,73 @@ build:  ## Construit l'image de production (avec tests)
 
 build-push:  ## Construit et pousse vers le registry (REGISTRY=ghcr.io/org requis)
 	./build.sh --push
+
+test-registry:  ## Teste l'authentification sur le registry (sans build ni push)
+	@. ./.env 2>/dev/null || true; \
+	if [ -z "$$REGISTRY" ]; then echo "REGISTRY non défini dans .env"; exit 1; fi; \
+	if [ -z "$$REGISTRY_TOKEN" ] || [ -z "$$REGISTRY_USER" ]; then echo "REGISTRY_USER / REGISTRY_TOKEN manquants dans .env"; exit 1; fi; \
+	echo "Test login sur $$REGISTRY (user: $$REGISTRY_USER)..."; \
+	echo "$$REGISTRY_TOKEN" | docker login "$$REGISTRY" -u "$$REGISTRY_USER" --password-stdin \
+	  && echo "  Login OK — push autorisé" \
+	  || echo "  Login ECHEC — vérifier token et droits write:packages"
+
+registry-ls:  ## Liste les versions et tags disponibles sur ghcr.io pour chatbot-api
+	@. ./.env 2>/dev/null || true; \
+	if [ -z "$$REGISTRY_TOKEN" ] || [ -z "$$REGISTRY_USER" ]; then \
+	  echo "REGISTRY_USER / REGISTRY_TOKEN manquants dans .env"; exit 1; \
+	fi; \
+	echo "Versions de chatbot-api sur ghcr.io/$$REGISTRY_USER :"; \
+	echo ""; \
+	BODY=$$(curl -s -w "\n%{http_code}" \
+	  -H "Authorization: Bearer $$REGISTRY_TOKEN" \
+	  -H "Accept: application/vnd.github+json" \
+	  "https://api.github.com/user/packages/container/chatbot-api/versions"); \
+	HTTP=$$(echo "$$BODY" | tail -1); \
+	JSON=$$(echo "$$BODY" | head -n -1); \
+	if [ "$$HTTP" = "404" ]; then \
+	  echo "  (aucune image — faire make build-push d'abord)"; \
+	else \
+	  echo "$$JSON" | python3 -c "import sys,json; vs=json.load(sys.stdin); [print(f\"  tags={str(v['metadata']['container']['tags']):<30} id={v['id']}  updated={v['updated_at'][:10]}\") for v in vs] if vs else print('  (aucune image)')"; \
+	fi
+
+registry-rm:  ## Supprime un tag distant sur ghcr.io (TAG=sha1234 requis)
+	@. ./.env 2>/dev/null || true; \
+	if [ -z "$$REGISTRY_TOKEN" ] || [ -z "$$REGISTRY_USER" ]; then \
+	  echo "REGISTRY_USER / REGISTRY_TOKEN manquants dans .env"; exit 1; \
+	fi; \
+	if [ -z "$(TAG)" ]; then \
+	  echo "Usage : make registry-rm TAG=<tag>   ex: make registry-rm TAG=b5b88ec"; exit 1; \
+	fi; \
+	echo "Recherche du tag '$(TAG)' dans chatbot-api sur ghcr.io..."; \
+	VERSION_ID=$$(curl -sf \
+	  -H "Authorization: Bearer $$REGISTRY_TOKEN" \
+	  -H "Accept: application/vnd.github+json" \
+	  "https://api.github.com/user/packages/container/chatbot-api/versions" \
+	| python3 -c "import sys,json; vs=json.load(sys.stdin); m=[v for v in vs if '$(TAG)' in v.get('metadata',{}).get('container',{}).get('tags',[])]; print(m[0]['id'] if m else '')"); \
+	if [ -z "$$VERSION_ID" ]; then \
+	  echo "Tag '$(TAG)' introuvable sur ghcr.io"; exit 1; \
+	fi; \
+	echo "Suppression version id=$$VERSION_ID (tag: $(TAG))..."; \
+	HTTP_CODE=$$(curl -s -o /tmp/registry_rm_response.json -w "%{http_code}" -X DELETE \
+	  -H "Authorization: Bearer $$REGISTRY_TOKEN" \
+	  -H "Accept: application/vnd.github+json" \
+	  "https://api.github.com/user/packages/container/chatbot-api/versions/$$VERSION_ID"); \
+	if [ "$$HTTP_CODE" = "204" ]; then \
+	  echo "  Tag '$(TAG)' supprimé"; \
+	elif grep -q "last tagged version" /tmp/registry_rm_response.json 2>/dev/null; then \
+	  echo "  Dernière version — suppression du package entier chatbot-api..."; \
+	  HTTP2=$$(curl -s -o /tmp/registry_rm2.json -w "%{http_code}" -X DELETE \
+	    -H "Authorization: Bearer $$REGISTRY_TOKEN" \
+	    -H "Accept: application/vnd.github+json" \
+	    "https://api.github.com/user/packages/container/chatbot-api"); \
+	  if [ "$$HTTP2" = "204" ]; then \
+	    echo "  Package chatbot-api supprimé entièrement"; \
+	  else \
+	    echo "  Echec HTTP $$HTTP2 :"; cat /tmp/registry_rm2.json; echo ""; \
+	  fi; \
+	else \
+	  echo "  Echec HTTP $$HTTP_CODE :"; cat /tmp/registry_rm_response.json; echo ""; \
+	fi
 
 build-skip-tests:  ## Construit sans tests (urgence seulement)
 	./build.sh --skip-tests
@@ -96,3 +163,9 @@ status:  ## Affiche le statut des services
 	@echo ""
 	@curl -sf http://localhost:8000/health | python3 -m json.tool 2>/dev/null || \
 	  echo "API non disponible"
+
+images:  ## Liste les images Docker buildées pour ce projet
+	@echo "Images locales (chatbot-api) :"
+	@docker images $(IMAGE) --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}\t{{.CreatedSince}}"
+	@echo ""
+	@echo "Pour voir toutes les images Docker : docker images"

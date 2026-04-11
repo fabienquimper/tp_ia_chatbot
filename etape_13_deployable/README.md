@@ -7,17 +7,18 @@ réunies en une seule app conteneurisée, testée et monitorée.
 
 ## Ce qui est inclus
 
-| Fonctionnalité | Vient de |
-|---|---|
-| LangChain + support cloud/local | Étape 06 |
-| RAG ChromaDB (optionnel, graceful fallback) | Étapes 04/05 |
-| Prometheus + Grafana + alertes | Étape 08 |
-| JWT + Rate limiting + Prompt injection guard | Étape 09 |
-| Suite de tests (unit / intégration / sécurité) | Étape 11 |
-| Dockerfile multi-stage (build → test → prod) | Nouveau |
-| Tests bloquants au build Docker | Nouveau |
-| Nginx reverse proxy avec TLS | Nouveau |
-| Script d'évaluation RAG avec keywords | Nouveau |
+
+| Fonctionnalité                                   | Vient de      |
+| ------------------------------------------------- | ------------- |
+| LangChain + support cloud/local                   | Étape 06     |
+| RAG ChromaDB (optionnel, graceful fallback)       | Étapes 04/05 |
+| Prometheus + Grafana + alertes                    | Étape 08     |
+| JWT + Rate limiting + Prompt injection guard      | Étape 09     |
+| Suite de tests (unit / intégration / sécurité) | Étape 11     |
+| Dockerfile multi-stage (build → test → prod)    | Nouveau       |
+| Tests bloquants au build Docker                   | Nouveau       |
+| Nginx reverse proxy avec TLS                      | Nouveau       |
+| Script d'évaluation RAG avec keywords            | Nouveau       |
 
 ---
 
@@ -67,6 +68,7 @@ curl http://localhost:8000/health
 ```
 
 Réponse attendue :
+
 ```json
 {"status": "ok", "rag_available": false, "version": "4.0.0", ...}
 ```
@@ -119,30 +121,38 @@ Ou directement via Swagger : **http://localhost:8000/docs**
 make help          # liste toutes les commandes
 ```
 
-| Commande | Description |
-|---|---|
-| `make dev` | Lance la stack avec logs en direct |
-| `make dev-bg` | Lance en arrière-plan |
-| `make stop` | Arrête tous les services |
-| `make status` | Affiche l'état + health check |
-| `make logs` | Suit les logs de l'API |
-| | |
-| `make test` | Lance les tests dans Docker (recommandé) |
-| `make test-local` | Lance les tests localement |
-| `make test-security` | Analyse statique bandit |
-| | |
-| `make index-rag` | Indexe les docs localement (hors Docker) |
-| `make index-rag-docker` | Indexe les docs **dans** le conteneur (à utiliser) |
-| | |
-| `make smoke` | 5 questions rapides pour vérifier l'API + alimenter Grafana |
-| `make eval` | Évaluation complète : 15 questions + vérification keywords |
-| `make eval-verbose` | Idem avec les réponses complètes affichées |
-| `make smoke-no-rag` | Smoke test sans RAG |
-| | |
-| `make build` | Build complet avec tests puis image prod |
-| `make build-skip-tests` | Build sans tests (urgence seulement) |
-| `make prod` | Lance la stack production avec Nginx |
-| `make clean` | Supprime conteneurs, volumes et images |
+
+| Commande                       | Description                                                   |
+| ------------------------------ | ------------------------------------------------------------- |
+| `make dev`                     | Lance la stack avec logs en direct                            |
+| `make dev-bg`                  | Lance en arrière-plan                                        |
+| `make stop`                    | Arrête tous les services                                     |
+| `make status`                  | Affiche l'état + health check                                |
+| `make logs`                    | Suit les logs de l'API                                        |
+|                                |                                                               |
+| `make test`                    | Lance les tests dans Docker (recommandé)                     |
+| `make test-local`              | Lance les tests localement                                    |
+| `make test-security`           | Analyse statique bandit                                       |
+|                                |                                                               |
+| `make index-rag`               | Indexe les docs localement (hors Docker)                      |
+| `make index-rag-docker`        | Indexe les docs**dans** le conteneur (à utiliser)            |
+|                                |                                                               |
+| `make smoke`                   | 5 questions rapides pour vérifier l'API + alimenter Grafana  |
+| `make eval`                    | Évaluation complète : 15 questions + vérification keywords |
+| `make eval-verbose`            | Idem avec les réponses complètes affichées                 |
+| `make smoke-no-rag`            | Smoke test sans RAG                                           |
+|                                |                                                               |
+| `make build`                   | Build complet avec tests puis image prod                      |
+| `make build-skip-tests`        | Build sans tests (urgence seulement)                          |
+| `make build-push`              | Build + push vers le registry (`REGISTRY` requis dans `.env`) |
+|                                |                                                               |
+| `make images`                  | Liste les images Docker buildées**localement**               |
+| `make test-registry`           | Teste l'authentification sur ghcr.io (sans build ni push)     |
+| `make registry-ls`             | Liste les images disponibles**sur ghcr.io**                   |
+| `make registry-rm TAG=sha1234` | Supprime un tag distant sur ghcr.io                           |
+|                                |                                                               |
+| `make prod`                    | Lance la stack production avec Nginx                          |
+| `make clean`                   | Supprime conteneurs, volumes et images locaux                 |
 
 ---
 
@@ -182,6 +192,7 @@ Programme type de l'organisation interne de l'entreprise:
 ```
 
 Essayer d'ajouter une question dans eval_set.jsonl:
+
 ```
 {"id": "q004", "question": "A quelle heure a lieux la réunion client?", "expected_keywords": ["13", "47"], "category": "sla", "difficulty": "facile"}
 ```
@@ -213,21 +224,23 @@ make test-security # bandit : pas de vulnérabilité critique
 
 ## Services et accès
 
-| Service | URL | Identifiants |
-|---|---|---|
-| **API Swagger** | http://localhost:8000/docs | — |
-| **Health check** | http://localhost:8000/health | — |
-| **Métriques Prometheus** | http://localhost:8000/metrics | — |
-| **Prometheus UI** | http://localhost:9090 | — |
-| **Grafana** | http://localhost:3000 | admin / (valeur de `GRAFANA_PASSWORD` dans `.env`) |
+
+| Service                   | URL                           | Identifiants                                      |
+| ------------------------- | ----------------------------- | ------------------------------------------------- |
+| **API Swagger**           | http://localhost:8000/docs    | —                                                |
+| **Health check**          | http://localhost:8000/health  | —                                                |
+| **Métriques Prometheus** | http://localhost:8000/metrics | —                                                |
+| **Prometheus UI**         | http://localhost:9090         | —                                                |
+| **Grafana**               | http://localhost:3000         | admin / (valeur de`GRAFANA_PASSWORD` dans `.env`) |
 
 ### Utilisateurs de démo
 
-| Utilisateur | Mot de passe | Usage |
-|---|---|---|
-| alice | password123 | Tests généraux |
-| bob | secret456 | Tests multi-sessions |
-| admin | admin789 | Tests droits admin |
+
+| Utilisateur | Mot de passe | Usage                |
+| ----------- | ------------ | -------------------- |
+| alice       | password123  | Tests généraux     |
+| bob         | secret456    | Tests multi-sessions |
+| admin       | admin789     | Tests droits admin   |
 
 ---
 
@@ -279,6 +292,7 @@ make eval-verbose  # idem + réponses complètes affichées
 ```
 
 Exemple de sortie :
+
 ```
 [PASS] q001 Quel est le prix de CloudSync Pro ?     2.9s [RAG 3src]
 [FAIL] q003 Qui est le CEO de TechCorp ?            1.9s [RAG 3src]
@@ -291,6 +305,89 @@ Résultat : 7/15 PASS (47%)   1 PARTIEL   7 FAIL
 Un score < 100% est normal : il indique les questions dont les chunks
 ne remontent pas dans le top-3. Améliorer : ajuster la taille des chunks
 dans `scripts/index_rag.py` ou enrichir les documents dans `data/docs/`.
+
+---
+
+## Image Docker — cycle de vie et limites
+
+### Voir les images locales
+
+Après un `make build`, l'image est stockée dans le daemon Docker local (pas dans le projet) :
+
+```bash
+make images
+# ou
+docker images chatbot-api
+```
+
+Elle est aussi visible dans **Docker Desktop → onglet Images**.
+
+### Vérifier la connexion au registry
+
+Avant tout push, vérifier que le token est valide :
+
+```bash
+make test-registry
+# → Login OK — push autorisé
+```
+
+Prérequis dans `.env` :
+
+```env
+REGISTRY=ghcr.io/fabienquimper
+REGISTRY_USER=fabienquimper
+REGISTRY_TOKEN=ghp_xxx...    # token GitHub avec scope write:packages
+```
+
+Créer le token : GitHub → Settings → Developer settings → Personal access tokens → scope `write:packages`.
+
+### Voir les images distantes sur ghcr.io
+
+```bash
+make registry-ls
+```
+
+Sortie après un premier push :
+
+```
+Images disponibles sur ghcr.io pour fabienquimper :
+
+  chatbot-api                    updated: 2026-04-11
+```
+
+### Supprimer un tag distant
+
+```bash
+make registry-rm TAG=b5b88ec    # le SHA git affiché au build
+```
+
+> Le token doit avoir le scope `delete:packages` en plus de `write:packages`.
+
+### Ce que fait (et ne fait pas) le `--push`
+
+```
+make build-push   # nécessite REGISTRY dans .env
+```
+
+**Ce que ça fait :** construit l'image et la pousse vers le registry configuré.
+L'image devient accessible depuis n'importe quelle machine avec `docker pull ghcr.io/fabienquimper/chatbot-api:sha1234`.
+
+**Ce que ça ne fait pas :** déployer sur un serveur distant. L'étape 5 du `build.sh` (`docker compose up`) tourne **toujours en local** sur ta machine.
+
+![1775916463539](images/README/1775916463539.png)
+
+### Limites de cette étape
+
+Cette étape s'arrête au push de l'image. Pour un vrai déploiement distant, il faudrait en plus :
+
+
+| Ce qui manque              | Solution possible                     |
+| -------------------------- | ------------------------------------- |
+| Un serveur cible           | VPS, VM cloud (AWS EC2, Scaleway…)   |
+| Accès SSH au serveur      | `ssh user@serveur docker compose up`  |
+| Pipeline CI/CD automatisé | GitHub Actions (`.github/workflows/`) |
+
+L'étape 13 pose les fondations (image versionnée, registry, health check) — la couche CI/CD n'est pas incluse.
 
 ---
 
@@ -314,25 +411,26 @@ make prod
 
 Toutes les métriques sont disponibles sur `http://localhost:8000/metrics`.
 
-| Métrique | Type | Description |
-|---|---|---|
-| `chat_requests_total` | Counter | Requêtes par modèle, status (`success`/`error`), rag (`true`/`false`) |
-| `chat_tokens_total` | Counter | Tokens `prompt` et `completion` |
-| `chat_errors_total` | Counter | Erreurs par type d'exception |
-| `chat_latency_seconds` | Histogram | Latence des requêtes (buckets 0.1s … 30s) |
-| `rag_retrieval_seconds` | Histogram | Latence de la recherche ChromaDB |
-| `chat_context_messages` | Gauge | Taille de l'historique au moment de la requête |
-| `chat_active_sessions` | Gauge | Sessions actives |
-| `process_memory_bytes` | Gauge | RAM RSS du processus Python |
-| `system_memory_total_bytes` | Gauge | RAM totale du système hôte |
-| `system_memory_used_bytes` | Gauge | RAM utilisée sur le système hôte |
-| `process_cpu_percent` | Gauge | CPU % du processus chatbot |
-| `system_cpu_percent` | Gauge | CPU % global du système |
-| `gpu_utilization_percent` | Gauge | GPU % par carte (si NVIDIA détecté) |
-| `gpu_memory_used_bytes` | Gauge | VRAM utilisée par carte |
-| `gpu_memory_total_bytes` | Gauge | VRAM totale par carte |
-| `auth_attempts_total` | Counter | Tentatives d'authentification JWT |
-| `prompt_injection_blocked_total` | Counter | Injections de prompt bloquées |
+
+| Métrique                        | Type      | Description                                                             |
+| -------------------------------- | --------- | ----------------------------------------------------------------------- |
+| `chat_requests_total`            | Counter   | Requêtes par modèle, status (`success`/`error`), rag (`true`/`false`) |
+| `chat_tokens_total`              | Counter   | Tokens`prompt` et `completion`                                          |
+| `chat_errors_total`              | Counter   | Erreurs par type d'exception                                            |
+| `chat_latency_seconds`           | Histogram | Latence des requêtes (buckets 0.1s … 30s)                             |
+| `rag_retrieval_seconds`          | Histogram | Latence de la recherche ChromaDB                                        |
+| `chat_context_messages`          | Gauge     | Taille de l'historique au moment de la requête                         |
+| `chat_active_sessions`           | Gauge     | Sessions actives                                                        |
+| `process_memory_bytes`           | Gauge     | RAM RSS du processus Python                                             |
+| `system_memory_total_bytes`      | Gauge     | RAM totale du système hôte                                            |
+| `system_memory_used_bytes`       | Gauge     | RAM utilisée sur le système hôte                                     |
+| `process_cpu_percent`            | Gauge     | CPU % du processus chatbot                                              |
+| `system_cpu_percent`             | Gauge     | CPU % global du système                                                |
+| `gpu_utilization_percent`        | Gauge     | GPU % par carte (si NVIDIA détecté)                                   |
+| `gpu_memory_used_bytes`          | Gauge     | VRAM utilisée par carte                                                |
+| `gpu_memory_total_bytes`         | Gauge     | VRAM totale par carte                                                   |
+| `auth_attempts_total`            | Counter   | Tentatives d'authentification JWT                                       |
+| `prompt_injection_blocked_total` | Counter   | Injections de prompt bloquées                                          |
 
 > Les métriques GPU ne sont renseignées que si un GPU NVIDIA est détecté (`pynvml`).
 > En l'absence de GPU, les panels correspondants affichent "No data" — comportement attendu.
@@ -343,19 +441,21 @@ Toutes les métriques sont disponibles sur `http://localhost:8000/metrics`.
 
 ### Alertes Prometheus (`prometheus-alerts.yml`)
 
-| Alerte | Condition | Sévérité |
-|---|---|---|
-| ChatbotDown | API indisponible > 1 min | critical |
-| HighErrorRate | Taux erreur > 10% sur 5 min | warning |
-| HighLatency | P95 > 5s sur 5 min | warning |
-| HighMemoryUsage | RAM processus > 500 MB | warning |
-| PromptInjectionAttempts | > 10 injections/5 min | warning |
+
+| Alerte                  | Condition                   | Sévérité |
+| ----------------------- | --------------------------- | ----------- |
+| ChatbotDown             | API indisponible > 1 min    | critical    |
+| HighErrorRate           | Taux erreur > 10% sur 5 min | warning     |
+| HighLatency             | P95 > 5s sur 5 min          | warning     |
+| HighMemoryUsage         | RAM processus > 500 MB      | warning     |
+| PromptInjectionAttempts | > 10 injections/5 min       | warning     |
 
 ### Alertes Grafana (`grafana/provisioning/alerting/alerts.yml`)
 
-| Alerte | Condition | Sévérité |
-|---|---|---|
-| Mémoire système > 95% | `system_memory_used / system_memory_total > 95%` pendant 1 min | critical |
+
+| Alerte                  | Condition                                                      | Sévérité |
+| ----------------------- | -------------------------------------------------------------- | ----------- |
+| Mémoire système > 95% | `system_memory_used / system_memory_total > 95%` pendant 1 min | critical    |
 
 ---
 
@@ -383,6 +483,7 @@ Toutes les métriques sont disponibles sur `http://localhost:8000/metrics`.
 **`Chain 'DOCKER-ISOLATION-STAGE-2' does not exist` au démarrage**
 → Bug Docker 28.4.0 + kernel 6.17+. Voir le commentaire en haut de `docker-compose.yml` pour le fix complet.
 → Fix rapide (session courante) :
+
 ```bash
 sudo iptables -t filter -N DOCKER-ISOLATION-STAGE-1 2>/dev/null || true
 sudo iptables -t filter -N DOCKER-ISOLATION-STAGE-2 2>/dev/null || true
@@ -393,6 +494,6 @@ docker network create test-net && echo "OK" && docker network rm test-net
 
 **Les panels GPU affichent "No data"**
 → Normal si aucun GPU NVIDIA n'est détecté. Les métriques GPU (`gpu_utilization_percent`, etc.)
-  ne sont renseignées que si `pynvml` peut contacter le driver NVIDIA.
+ne sont renseignées que si `pynvml` peut contacter le driver NVIDIA.
 → Si un GPU est présent mais pas détecté : vérifier que `nvidia-smi` fonctionne et que
-  le NVIDIA Container Toolkit est installé (voir le commentaire GPU dans `docker-compose.yml`).
+le NVIDIA Container Toolkit est installé (voir le commentaire GPU dans `docker-compose.yml`).
