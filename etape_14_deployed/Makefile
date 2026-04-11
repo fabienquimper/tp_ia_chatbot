@@ -1,5 +1,5 @@
 .PHONY: help pull deploy-local deploy-vps deploy-k8s-local deploy-k8s-image \
-        k8s-setup k8s-status k8s-logs k8s-destroy status logs stop clean \
+        k8s-setup k8s-status k8s-index-rag k8s-logs k8s-destroy status logs stop clean \
         registry-ls test-registry
 
 # ── Variables ─────────────────────────────────────────────────────────────────
@@ -140,6 +140,9 @@ k8s-status:  ## Statut des pods dans le cluster kind
 	@echo "  Grafana    : http://localhost:3000"
 	@echo "  Prometheus : http://localhost:9090"
 	@echo "  API docs   : http://localhost:8080/docs"
+
+k8s-index-rag:  ## Indexe les documents RAG (Job K8S dédié 1Gi, à faire après deploy)
+	./scripts/local-cloud.sh index-rag
 
 k8s-logs:  ## Logs de l'API dans K8S
 	kubectl logs -f deployment/chatbot-api -n chatbot

@@ -24,6 +24,7 @@ error()   { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
 CLUSTER_NAME="chatbot-local"
 NAMESPACE="chatbot"
 IMAGE="chatbot-api:local"
+IMAGE="ghcr.io/fabienquimper/chatbot-api:latest"
 
 # ── Configuration du cluster kind ─────────────────────────────────────────────
 KIND_CONFIG=$(cat <<'EOF'
@@ -110,22 +111,26 @@ cmd_deploy() {
     info "Déploiement des manifests K8S..."
     kubectl apply -k k8s/
 
-    # Injection des variables .env dans le ConfigMap (après apply, sinon écrasé)
+    # Injection des variables .env dans le ConfigMap
+    # xargs trimme les espaces — le .env a des commentaires qui laissent des espaces en fin de valeur
+    local _mode _url _model
+    _mode=$(echo "${MODE:-local}"        | xargs)
+    _url=$(echo  "${LOCAL_BASE_URL:-}"   | xargs)
+    _model=$(echo "${LOCAL_MODEL:-}"     | xargs)
     kubectl patch configmap chatbot-config -n "${NAMESPACE}" --type merge \
-        -p "{\"data\":{\"MODE\":\"${MODE:-local}\",\"LOCAL_BASE_URL\":\"${LOCAL_BASE_URL:-}\",\"LOCAL_MODEL\":\"${LOCAL_MODEL:-}\"}}"
+        -p "{\"data\":{\"MODE\":\"${_mode}\",\"LOCAL_BASE_URL\":\"${_url}\",\"LOCAL_MODEL\":\"${_model}\"}}"
 
-    # Patches locaux : ingress sans TLS/host + probe timeouts adaptés au LLM lent
+    # Patch ingress : supprime host et TLS (inutiles en local kind)
     kubectl patch ingress chatbot-ingress -n "${NAMESPACE}" --type=json -p='[
       {"op":"remove","path":"/spec/tls"},
       {"op":"remove","path":"/spec/rules/0/host"},
       {"op":"replace","path":"/metadata/annotations/nginx.ingress.kubernetes.io~1ssl-redirect","value":"false"},
       {"op":"replace","path":"/metadata/annotations/nginx.ingress.kubernetes.io~1force-ssl-redirect","value":"false"}
     ]' 2>/dev/null || true
-    kubectl patch deployment chatbot-api -n "${NAMESPACE}" --type=json -p='[
-      {"op":"add","path":"/spec/template/spec/containers/0/livenessProbe/timeoutSeconds","value":10},
-      {"op":"add","path":"/spec/template/spec/containers/0/readinessProbe/timeoutSeconds","value":10}
-    ]' 2>/dev/null || true
 
+    # Redémarre les pods pour qu'ils chargent les nouvelles valeurs du ConfigMap
+    info "Redémarrage des pods (chargement des variables .env)..."
+    kubectl rollout restart deployment/chatbot-api -n "${NAMESPACE}"
     info "Attente du déploiement..."
     kubectl rollout status deployment/chatbot-api -n "${NAMESPACE}" --timeout=3m
 
@@ -151,6 +156,83 @@ cmd_status() {
     kubectl get services -n "${NAMESPACE}" 2>/dev/null || true
     echo ""
     kubectl get ingress -n "${NAMESPACE}" 2>/dev/null || true
+}
+
+cmd_index_rag() {
+    # Récupère l'image et la pull policy du deployment en cours
+    local image pull_policy
+    image=$(kubectl get deployment chatbot-api -n "${NAMESPACE}" \
+        -o jsonpath='{.spec.template.spec.containers[0].image}' 2>/dev/null)
+    pull_policy=$(kubectl get deployment chatbot-api -n "${NAMESPACE}" \
+        -o jsonpath='{.spec.template.spec.containers[0].imagePullPolicy}' 2>/dev/null)
+
+    if [ -z "${image}" ]; then
+        error "chatbot-api non déployé. Lancer make deploy-k8s-local ou make deploy-k8s-image d'abord."
+    fi
+
+    info "Image : ${image} (pullPolicy: ${pull_policy})"
+    info "Lancement du Job d'indexation RAG (mémoire dédiée : 1Gi)..."
+
+    # Supprime un job précédent éventuel
+    kubectl delete job rag-indexer -n "${NAMESPACE}" --ignore-not-found 2>/dev/null
+
+    # Crée un Job K8S temporaire avec le même PVC mais plus de mémoire
+    kubectl apply -f - <<EOF
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: rag-indexer
+  namespace: ${NAMESPACE}
+spec:
+  ttlSecondsAfterFinished: 120
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: indexer
+          image: ${image}
+          imagePullPolicy: IfNotPresent   # l'image est déjà sur le nœud kind
+          command:
+            - python
+            - scripts/index_rag.py
+            - --docs-dir
+            - /app/docs
+            - --chroma-dir
+            - /app/data/chroma_db
+          resources:
+            requests:
+              memory: "512Mi"
+            limits:
+              memory: "1Gi"    # l'API est à 512Mi — le modèle ONNX a besoin de plus
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: chatbot-data-pvc
+EOF
+
+    info "Indexation en cours (téléchargement modèle ONNX ~80Mo la première fois)..."
+    kubectl wait --for=condition=complete job/rag-indexer \
+        -n "${NAMESPACE}" --timeout=5m
+    echo ""
+    kubectl logs job/rag-indexer -n "${NAMESPACE}"
+    kubectl delete job rag-indexer -n "${NAMESPACE}" --ignore-not-found 2>/dev/null
+
+    # Redémarre l'API pour qu'elle recharge la collection ChromaDB (nouveau UUID après re-index)
+    info "Redémarrage de l'API pour recharger la collection..."
+    kubectl rollout restart deployment/chatbot-api -n "${NAMESPACE}"
+    kubectl rollout status deployment/chatbot-api -n "${NAMESPACE}" --timeout=60s
+
+    success "Indexation terminée !"
+    echo ""
+    curl -sf http://localhost:8080/health \
+        | python3 -c "import sys,json; h=json.load(sys.stdin); print('  rag_available:', h['rag_available'])" \
+        2>/dev/null || true
 }
 
 cmd_deploy_local_image() {
@@ -182,14 +264,22 @@ cmd_deploy_local_image() {
         -n "${NAMESPACE}" \
         --dry-run=client -o yaml | kubectl apply -f -
 
-    # 5. Déploiement via l'overlay kustomize (image locale, imagePullPolicy Never)
+    # 5. Déploiement via l'overlay kustomize (image locale, imagePullPolicy Never, ingress local)
     info "Déploiement des manifests (overlay image locale)..."
-    kubectl apply -k k8s/overlays/local-image/
+    kubectl apply -k overlays/local-image/
 
-    # Injection des variables .env dans le ConfigMap (après apply, sinon écrasé)
+    # Injection des variables .env dans le ConfigMap
+    # xargs trimme les espaces — le .env a des commentaires qui laissent des espaces en fin de valeur
+    local _mode _url _model
+    _mode=$(echo "${MODE:-local}"        | xargs)
+    _url=$(echo  "${LOCAL_BASE_URL:-}"   | xargs)
+    _model=$(echo "${LOCAL_MODEL:-}"     | xargs)
     kubectl patch configmap chatbot-config -n "${NAMESPACE}" --type merge \
-        -p "{\"data\":{\"MODE\":\"${MODE:-local}\",\"LOCAL_BASE_URL\":\"${LOCAL_BASE_URL:-}\",\"LOCAL_MODEL\":\"${LOCAL_MODEL:-}\"}}"
-    echo ""
+        -p "{\"data\":{\"MODE\":\"${_mode}\",\"LOCAL_BASE_URL\":\"${_url}\",\"LOCAL_MODEL\":\"${_model}\"}}"
+
+    # Redémarre les pods pour qu'ils chargent les nouvelles valeurs du ConfigMap
+    info "Redémarrage des pods (chargement des variables .env)..."
+    kubectl rollout restart deployment/chatbot-api -n "${NAMESPACE}"
 
     # 6. Attente
     info "Attente que les pods soient Running..."
@@ -221,6 +311,7 @@ case "${1:-help}" in
     setup)              cmd_setup ;;
     deploy)             cmd_deploy ;;
     deploy-local-image) cmd_deploy_local_image ;;
+    index-rag)          cmd_index_rag ;;
     status)             cmd_status ;;
     destroy)            cmd_destroy ;;
     *)
@@ -229,6 +320,7 @@ case "${1:-help}" in
         echo "  setup               — Crée le cluster kind local"
         echo "  deploy              — Déploie depuis GHCR (nécessite REGISTRY_TOKEN)"
         echo "  deploy-local-image  — Build + charge l'image locale, déploie sans GHCR"
+        echo "  index-rag           — Indexe les documents RAG dans un Job K8S dédié"
         echo "  status              — Affiche le statut"
         echo "  destroy             — Supprime le cluster"
         ;;

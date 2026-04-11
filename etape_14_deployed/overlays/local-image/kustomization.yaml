@@ -1,14 +1,14 @@
 ## Overlay : déploiement depuis une image Docker locale (sans GHCR)
 #
 # Ce fichier patche la base (k8s/) pour utiliser chatbot-api:local
-# au lieu de ghcr.io/fabienquimper/chatbot-api:latest.
+# au lieu de ghcr.io/{ORGANIZATION}/chatbot-api:latest.
 #
 # Prérequis :
 #   docker build -t chatbot-api:local ../etape_13_deployable/
 #   kind load docker-image chatbot-api:local --name chatbot-local
 #
 # Usage :
-#   kubectl apply -k k8s/overlays/local-image/
+#   kubectl apply -k overlays/local-image/
 #
 # Utilisé automatiquement par : make deploy-k8s-image
 # ─────────────────────────────────────────────────────
@@ -16,11 +16,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../../k8s   # réutilise tous les manifests existants, sans les dupliquer
+  - ../../k8s   # pointe vers k8s/ — réutilise tous les manifests sans les dupliquer
 
 # Remplace l'image GHCR par l'image buildée localement
 images:
-  - name: ghcr.io/fabienquimper/chatbot-api   # doit correspondre à chatbot-deployment.yaml
+  - name: ghcr.io/{ORGANIZATION}/chatbot-api   # doit correspondre à chatbot-deployment.yaml
     newName: chatbot-api                        # image locale (docker build)
     newTag: local                               # tag local (docker build -t chatbot-api:local)
 

@@ -170,12 +170,12 @@ kubectl describe secret chatbot-secrets -n chatbot
 ### Étape 5 — Déployer tout le reste
 
 ```bash
-kubectl apply -k k8s/overlays/local-image/
+kubectl apply -k overlays/local-image/
 ```
 
 > **Pourquoi `-k` et pas `-f` ?**
 > `-k` (kustomize) applique un ensemble de fichiers avec des patches.
-> L'overlay `k8s/overlays/local-image/` réutilise tous les manifests existants
+> L'overlay `overlays/local-image/` réutilise tous les manifests existants
 > et applique deux patches sur le Deployment :
 > - remplace l'image `ghcr.io/...` par `chatbot-api:local`
 > - passe `imagePullPolicy` à `Never` (K8S n'essaie plus de tirer depuis internet)
@@ -287,6 +287,34 @@ make deploy-k8s-image
 
 Voir la sortie complète : [`output_example/deploy_local_image.log`](output_example/deploy_local_image.log)
 
+### Activer le RAG
+
+Le pod démarre sans base vectorielle — les réponses sont génériques jusqu'à ce que tu indexes les documents.
+
+```bash
+make k8s-index-rag
+```
+
+Ce que ça fait : lance `scripts/index_rag.py` **à l'intérieur du pod** sur les documents embarqués dans l'image (`/app/docs/`), et écrit la ChromaDB sur le volume persistant (`/app/data/chroma_db/`).
+
+> **Pourquoi le RAG n'est pas automatique au démarrage ?**
+> L'indexation prend ~30 secondes (calcul des embeddings) et ne doit se faire qu'une fois.
+> Le volume PVC survit aux redémarrages de pods — pas besoin de re-indexer après chaque `make deploy`.
+
+Sortie attendue :
+
+```
+INFO: === Indexation RAG ===
+INFO: Documents trouvés : 3  (méthode : section)
+INFO:   Indexation : entreprise.txt (4832 chars) → 12 chunks
+INFO:   Indexation : politique.txt  (3201 chars) →  8 chunks
+INFO:   Indexation : technique.txt  (5614 chars) → 14 chunks
+INFO: Indexation terminée : 34 chunks dans 'chatbot_docs'
+
+Vérification :
+  rag_available: True
+```
+
 ### Nettoyage
 
 ```bash
@@ -379,7 +407,15 @@ Ce que ça fait :
 > **Prérequis** : `REGISTRY_USER` et `REGISTRY_TOKEN` doivent être dans le `.env`
 > (copiés depuis l'étape 13 — `cp ../etape_13_deployable/.env .env`)
 
-### Étape 3 — Vérifier
+### Étape 3 — Activer le RAG
+
+```bash
+make k8s-index-rag
+```
+
+Sans cette étape, l'API répond mais ignore les documents internes — les réponses sont génériques.
+
+### Étape 4 — Vérifier
 
 ```bash
 make k8s-status
@@ -835,6 +871,7 @@ make help   # liste toutes les commandes
 | `make k8s-setup`         | Crée le cluster kind                          |
 | `make deploy-k8s-image`  | Build image locale + déploie (Parcours 0)     |
 | `make deploy-k8s-local`  | Déploie depuis GHCR dans le cluster kind      |
+| `make k8s-index-rag`     | Indexe les documents RAG dans le pod          |
 | `make k8s-status`        | Statut du cluster                             |
 | `make k8s-destroy`       | Supprime le cluster                           |
 |                         |                                         |
