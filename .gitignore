@@ -9,3 +9,4 @@ etape_05_rag/chroma_db/
 .claude
 .coverage
 **/chroma.sqlite3
+evaluation/
