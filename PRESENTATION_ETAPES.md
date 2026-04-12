@@ -426,7 +426,7 @@ k8s/
 ├── pvc.yaml                     → 3 volumes : data, chroma, grafana
 ├── chatbot-deployment.yaml      → Deployment + init container RAG
 ├── chatbot-service.yaml         → ClusterIP
-├── chatbot-hpa.yaml             → HPA : 2 → 10 replicas (CPU 70% / RAM 80%)
+├── chatbot-hpa.yaml             → HPA : 1 → 10 replicas (CPU 70% / RAM 80%)
 ├── ingress.yaml                 → Nginx Ingress + TLS cert-manager
 ├── kustomization.yaml           → orchestration des manifests
 ├── monitoring/
@@ -445,7 +445,7 @@ les documents RAG avant que le pod principal démarre.
 
 `chatbot-hpa.yaml` — HPA (Horizontal Pod Autoscaler) :
 ```yaml
-minReplicas: 2
+minReplicas: 1
 maxReplicas: 10
 # Scale up si CPU > 70% ou mémoire > 80%
 # Scale down après 5 min de charge réduite

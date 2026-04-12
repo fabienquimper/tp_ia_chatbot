@@ -1,6 +1,6 @@
 .PHONY: help pull deploy-local deploy-vps deploy-k8s-local deploy-k8s-image \
-        k8s-setup k8s-status k8s-index-rag k8s-logs k8s-destroy status logs stop clean \
-        registry-ls test-registry
+        k8s-setup k8s-status k8s-index-rag k8s-eval k8s-smoke k8s-logs k8s-destroy \
+        status logs stop clean registry-ls test-registry
 
 # ── Variables ─────────────────────────────────────────────────────────────────
 include $(wildcard .env)
@@ -143,6 +143,25 @@ k8s-status:  ## Statut des pods dans le cluster kind
 
 k8s-index-rag:  ## Indexe les documents RAG (Job K8S dédié 1Gi, à faire après deploy)
 	./scripts/local-cloud.sh index-rag
+
+EVAL_SCRIPT := ../etape_13_deployable/scripts/eval.py
+EVAL_DATA   := ../etape_13_deployable/data/eval_set.jsonl
+K8S_URL     := http://localhost:8080
+
+k8s-eval:  ## Évaluation RAG : 15 questions/mots-clés contre le cluster K8S (seuil 70%)
+	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --pass-threshold 70
+
+k8s-eval-strict:  ## Évaluation stricte : exit 1 si le moindre FAIL
+	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --pass-threshold 100
+
+k8s-eval-verbose:  ## Évaluation avec réponses complètes affichées
+	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --verbose --pass-threshold 70
+
+k8s-smoke:  ## Smoke test rapide : 5 questions aléatoires (seuil 60%)
+	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --count 5 --shuffle --pass-threshold 60
+
+k8s-smoke-no-rag:  ## Smoke test sans RAG : vérifie que l'API répond sans contexte
+	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --count 5 --no-rag --pass-threshold 60
 
 k8s-logs:  ## Logs de l'API dans K8S
 	kubectl logs -f deployment/chatbot-api -n chatbot

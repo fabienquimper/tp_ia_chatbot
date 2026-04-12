@@ -315,6 +315,23 @@ Vérification :
   rag_available: True
 ```
 
+Voir la sortie complète : [`output_example/make_k8s_index_rag.log`](output_example/make_k8s_index_rag.log)
+
+### Tester les réponses RAG
+
+Une fois le RAG indexé, vérifie que l'API répond correctement aux questions sur TechCorp :
+
+```bash
+# Test rapide — 5 questions aléatoires (seuil 60%)
+make k8s-smoke
+
+# Test complet — 15 questions avec réponses détaillées (seuil 70%)
+make k8s-eval-verbose
+```
+
+Score attendu : ≥ 12/15 PASS (80%).
+Voir un exemple de résultat : [`output_example/make_k8s_eval_verbose.log`](output_example/make_k8s_eval_verbose.log)
+
 ### Nettoyage
 
 ```bash
@@ -415,7 +432,41 @@ make k8s-index-rag
 
 Sans cette étape, l'API répond mais ignore les documents internes — les réponses sont génériques.
 
-### Étape 4 — Vérifier
+Voir la sortie complète : [`output_example/make_k8s_index_rag.log`](output_example/make_k8s_index_rag.log)
+
+### Étape 4 — Tester le RAG
+
+Vérifie que l'API répond correctement aux questions sur TechCorp :
+
+```bash
+# Test rapide — 5 questions aléatoires
+make k8s-smoke
+
+# Test complet — 15 questions avec réponses complètes affichées
+make k8s-eval-verbose
+```
+
+Score attendu : ≥ 12/15 PASS (80%).
+
+```
+═══════════════════════════════════════════════════════════════
+  Résultat : 12/15 PASS (80%)   1 PARTIEL   2 FAIL
+  Latence  : moy=2.07s  min=1.28s  max=3.92s
+
+  Catégorie            Pass  Score
+  company             3/3  ██████████ 100%
+  pricing             2/2  ██████████ 100%
+  rgpd                2/2  ██████████ 100%
+  securite            1/1  ██████████ 100%
+  sla                 0/1  █████░░░░░ 50%
+  support             1/2  █████░░░░░ 50%
+  technique           3/4  ███████░░░ 75%
+═══════════════════════════════════════════════════════════════
+```
+
+Voir la sortie complète avec toutes les réponses : [`output_example/make_k8s_eval_verbose.log`](output_example/make_k8s_eval_verbose.log)
+
+### Étape 5 — Vérifier
 
 ```bash
 make k8s-status
@@ -460,7 +511,7 @@ Accès — tous les services sont directement accessibles comme à l'étape 13 :
 > Prometheus et Grafana sont exposés via NodePort (ports 30030 et 30090 dans le cluster,
 > mappés sur 3000 et 9090 sur ta machine). Pas besoin de `port-forward`.
 
-### Étape 4 — Explorer le cluster (tuto interactif)
+### Étape 6 — Explorer le cluster (tuto interactif)
 
 Kubernetes expose tout via des **ressources**. Voici comment les inspecter une par une.
 Lance chaque commande et observe ce qu'elle retourne — c'est comme ça qu'on apprend K8S.
@@ -609,11 +660,19 @@ kubectl get secret chatbot-secrets -n chatbot \
 Le **HorizontalPodAutoscaler** ajoute ou supprime des pods selon la charge CPU/mémoire.
 
 ```bash
-# Voir l'état du HPA (replicas actuels, cibles, métriques)
+# L'app tourne avec minimum 1 replica (configuré dans k8s/chatbot-hpa.yaml)
+# Le HPA peut monter jusqu'à 10 replicas si CPU > 70% ou mémoire > 80%
 kubectl get hpa -n chatbot
 
 # Détail : seuils de déclenchement, politique de scale
 kubectl describe hpa chatbot-api-hpa -n chatbot
+
+# Scaler manuellement à 3 replicas (simulation de charge)
+kubectl scale deployment chatbot-api --replicas=3 -n chatbot
+kubectl get pods -n chatbot   # → 3 pods Running
+
+# Revenir à 1
+kubectl scale deployment chatbot-api --replicas=1 -n chatbot
 ```
 
 ---
@@ -872,6 +931,9 @@ make help   # liste toutes les commandes
 | `make deploy-k8s-image`  | Build image locale + déploie (Parcours 0)     |
 | `make deploy-k8s-local`  | Déploie depuis GHCR dans le cluster kind      |
 | `make k8s-index-rag`     | Indexe les documents RAG dans le pod          |
+| `make k8s-smoke`         | 5 questions aléatoires — vérifie le RAG       |
+| `make k8s-eval`          | 15 questions avec score (seuil 70%)           |
+| `make k8s-eval-verbose`  | Idem avec les réponses complètes              |
 | `make k8s-status`        | Statut du cluster                             |
 | `make k8s-destroy`       | Supprime le cluster                           |
 |                         |                                         |
