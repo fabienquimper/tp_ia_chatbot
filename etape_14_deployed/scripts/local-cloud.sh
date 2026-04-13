@@ -21,6 +21,75 @@ success() { echo -e "${GREEN}[OK]${NC}    $*"; }
 warning() { echo -e "${YELLOW}[WARN]${NC}  $*"; }
 error()   { echo -e "${RED}[ERROR]${NC} $*"; exit 1; }
 
+# ── Détection plateforme & port-forward ───────────────────────────────────────
+
+# Retourne 0 si on tourne sous WSL2
+is_wsl() {
+    grep -qi microsoft /proc/version 2>/dev/null
+}
+
+# L'API répond-elle déjà sur 127.0.0.1:8080 ?
+_api_reachable() {
+    curl -sf --max-time 2 "http://127.0.0.1:8080/health" >/dev/null 2>&1
+}
+
+PF_PID_FILE="/tmp/chatbot-pf-8080.pid"
+
+# Démarre un port-forward kubectl en arrière-plan si l'API n'est pas joignable.
+# Idempotent : no-op si l'API répond déjà.
+# Nécessaire sur WSL2 (routage IPv6/ingress cassé) et sur tout cluster multi-nœuds
+# où l'ingress-nginx n'est pas sur le nœud avec le port mapping.
+ensure_port_forward() {
+    if _api_reachable; then
+        return 0
+    fi
+
+    # Tue un éventuel PF fantôme (process mort mais PID file restant)
+    if [ -f "${PF_PID_FILE}" ]; then
+        kill "$(cat "${PF_PID_FILE}")" 2>/dev/null || true
+        rm -f "${PF_PID_FILE}"
+    fi
+
+    if is_wsl; then
+        info "WSL2 détecté — l'ingress n'est pas routé, démarrage du port-forward..."
+    else
+        info "API non joignable via l'ingress — démarrage du port-forward..."
+    fi
+
+    kubectl port-forward svc/chatbot-api 8080:80 \
+        -n "${NAMESPACE}" --address=0.0.0.0 \
+        >>/tmp/chatbot-pf.log 2>&1 &
+    echo $! > "${PF_PID_FILE}"
+
+    # Attend que le port-forward soit opérationnel (max 20s)
+    local elapsed=0
+    printf "  Attente de l'API"
+    while ! _api_reachable; do
+        elapsed=$((elapsed + 1))
+        if [ "${elapsed}" -ge 20 ]; then
+            echo ""
+            error "Port-forward timeout. Vérifier : kubectl logs deployment/chatbot-api -n ${NAMESPACE}"
+        fi
+        printf "."
+        sleep 1
+    done
+    echo " OK"
+    success "API accessible sur http://127.0.0.1:8080"
+}
+
+# Vérifie/restaure l'accès à l'API. Appelable via 'make k8s-check-api'.
+cmd_check_api() {
+    if _api_reachable; then
+        success "API joignable sur http://127.0.0.1:8080"
+        curl -s http://127.0.0.1:8080/health | python3 -m json.tool 2>/dev/null || true
+    else
+        ensure_port_forward
+        curl -s http://127.0.0.1:8080/health | python3 -m json.tool 2>/dev/null || true
+    fi
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+
 CLUSTER_NAME="chatbot-local"
 NAMESPACE="chatbot"
 IMAGE="chatbot-api:local"
@@ -79,7 +148,7 @@ cmd_setup() {
     success "cert-manager prêt"
 
     success "Cluster '${CLUSTER_NAME}' opérationnel !"
-    info "API sera accessible sur : http://localhost:8080"
+    info "API sera accessible sur : http://127.0.0.1:8080  (port-forward auto si WSL2)"
 }
 
 cmd_deploy() {
@@ -138,11 +207,16 @@ cmd_deploy() {
     echo ""
     kubectl get pods -n "${NAMESPACE}"
     echo ""
+
+    # Assure l'accès à l'API (port-forward automatique si l'ingress n'est pas routé)
+    ensure_port_forward
+
+    echo ""
     echo "╔════════════════════════════════════════════╗"
     echo "║  Cloud local opérationnel !               ║"
     echo "╠════════════════════════════════════════════╣"
-    echo "║  API   : http://localhost:8080/docs        ║"
-    echo "║  Health: http://localhost:8080/health      ║"
+    echo "║  API   : http://127.0.0.1:8080/docs        ║"
+    echo "║  Health: http://127.0.0.1:8080/health      ║"
     echo "╚════════════════════════════════════════════╝"
 }
 
@@ -228,9 +302,13 @@ EOF
     kubectl rollout restart deployment/chatbot-api -n "${NAMESPACE}"
     kubectl rollout status deployment/chatbot-api -n "${NAMESPACE}" --timeout=60s
 
+    # Le redémarrage coupe le port-forward s'il était actif — on le relance
+    rm -f "${PF_PID_FILE}"
+    ensure_port_forward
+
     success "Indexation terminée !"
     echo ""
-    curl -sf http://localhost:8080/health \
+    curl -sf http://127.0.0.1:8080/health \
         | python3 -c "import sys,json; h=json.load(sys.stdin); print('  rag_available:', h['rag_available'])" \
         2>/dev/null || true
 }
@@ -290,11 +368,16 @@ cmd_deploy_local_image() {
     echo ""
     kubectl get pods -n "${NAMESPACE}"
     echo ""
+
+    # Assure l'accès à l'API (port-forward automatique si l'ingress n'est pas routé)
+    ensure_port_forward
+
+    echo ""
     echo "╔════════════════════════════════════════════════╗"
     echo "║   Cluster K8S (image locale) opérationnel !   ║"
     echo "╠════════════════════════════════════════════════╣"
-    echo "║  API       : http://localhost:8080/docs        ║"
-    echo "║  Health    : http://localhost:8080/health      ║"
+    echo "║  API       : http://127.0.0.1:8080/docs        ║"
+    echo "║  Health    : http://127.0.0.1:8080/health      ║"
     echo "║  Prometheus: http://localhost:9090             ║"
     echo "║  Grafana   : http://localhost:3000             ║"
     echo "╚════════════════════════════════════════════════╝"
@@ -312,15 +395,17 @@ case "${1:-help}" in
     deploy)             cmd_deploy ;;
     deploy-local-image) cmd_deploy_local_image ;;
     index-rag)          cmd_index_rag ;;
+    check-api)          cmd_check_api ;;
     status)             cmd_status ;;
     destroy)            cmd_destroy ;;
     *)
-        echo "Usage : $0 {setup|deploy|deploy-local-image|status|destroy}"
+        echo "Usage : $0 {setup|deploy|deploy-local-image|index-rag|check-api|status|destroy}"
         echo ""
         echo "  setup               — Crée le cluster kind local"
         echo "  deploy              — Déploie depuis GHCR (nécessite REGISTRY_TOKEN)"
         echo "  deploy-local-image  — Build + charge l'image locale, déploie sans GHCR"
         echo "  index-rag           — Indexe les documents RAG dans un Job K8S dédié"
+        echo "  check-api           — Vérifie/restaure l'accès à l'API (port-forward si besoin)"
         echo "  status              — Affiche le statut"
         echo "  destroy             — Supprime le cluster"
         ;;

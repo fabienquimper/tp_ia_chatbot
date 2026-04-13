@@ -12,7 +12,17 @@ COMPOSE      := $(shell docker compose version >/dev/null 2>&1 && echo "docker c
 COMPOSE_FILE := docker/docker-compose.prod.yml
 
 help:  ## Affiche cette aide
-	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | \
+	@echo ""
+	@echo "  \033[1m── Registry ──────────────────────────────────────────────\033[0m"
+	@grep -E '^(test-registry|registry-ls):.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | \
+	  awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "  \033[1m── Kubernetes / kind (port 8080) ─────────────────────────\033[0m"
+	@grep -E '^(k8s-[a-z-]+|deploy-k8s-[a-z-]+):.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | \
+	  awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "  \033[1m── Docker Compose (port 8000) ────────────────────────────\033[0m"
+	@grep -E '^(pull|deploy-local|deploy-vps|status|logs|stop|clean):.*?## .*$$' $(firstword $(MAKEFILE_LIST)) | \
 	  awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-25s\033[0m %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  REGISTRY=$(REGISTRY)  IMAGE_TAG=$(IMAGE_TAG)"
@@ -99,8 +109,8 @@ deploy-k8s-local:  ## Déploie l'app dans le cluster kind (injecte le .env)
 	@echo "╔══════════════════════════════════════════════╗"
 	@echo "║    Cluster K8S local opérationnel !          ║"
 	@echo "╠══════════════════════════════════════════════╣"
-	@echo "║  API       : http://localhost:8080/docs      ║"
-	@echo "║  Health    : http://localhost:8080/health    ║"
+	@echo "║  API       : http://127.0.0.1:8080/docs      ║"
+	@echo "║  Health    : http://127.0.0.1:8080/health    ║"
 	@echo "║  Prometheus: http://localhost:9090           ║"
 	@echo "║  Grafana   : http://localhost:3000           ║"
 	@echo "╚══════════════════════════════════════════════╝"
@@ -134,33 +144,38 @@ k8s-status:  ## Statut des pods dans le cluster kind
 	@kubectl get pods -n cert-manager 2>/dev/null || true
 	@echo ""
 	@echo "── Health check API ──────────────────────────"
-	@curl -sf http://localhost:8080/health | python3 -m json.tool 2>/dev/null || \
+	@curl -sf http://127.0.0.1:8080/health | python3 -m json.tool 2>/dev/null || \
 	  echo "  API non disponible (normal si deploy-k8s-local pas encore lancé)"
 	@echo ""
 	@echo "  Grafana    : http://localhost:3000"
 	@echo "  Prometheus : http://localhost:9090"
-	@echo "  API docs   : http://localhost:8080/docs"
+	@echo "  API docs   : http://127.0.0.1:8080/docs"
 
 k8s-index-rag:  ## Indexe les documents RAG (Job K8S dédié 1Gi, à faire après deploy)
 	./scripts/local-cloud.sh index-rag
 
+# 127.0.0.1 (et non localhost) pour éviter la résolution IPv6 de WSL2
+# qui fait échouer httpx/requests avec "Connection reset by peer".
 EVAL_SCRIPT := ../etape_13_deployable/scripts/eval.py
 EVAL_DATA   := ../etape_13_deployable/data/eval_set.jsonl
-K8S_URL     := http://localhost:8080
+K8S_URL     := http://127.0.0.1:8080
 
-k8s-eval:  ## Évaluation RAG : 15 questions/mots-clés contre le cluster K8S (seuil 70%)
+k8s-check-api:  ## Vérifie/restaure l'accès à l'API (port-forward automatique si besoin)
+	@./scripts/local-cloud.sh check-api
+
+k8s-eval: k8s-check-api  ## Évaluation RAG : 15 questions/mots-clés contre le cluster K8S (seuil 70%)
 	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --pass-threshold 70
 
-k8s-eval-strict:  ## Évaluation stricte : exit 1 si le moindre FAIL
+k8s-eval-strict: k8s-check-api  ## Évaluation stricte : exit 1 si le moindre FAIL
 	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --pass-threshold 100
 
-k8s-eval-verbose:  ## Évaluation avec réponses complètes affichées
+k8s-eval-verbose: k8s-check-api  ## Évaluation avec réponses complètes affichées
 	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --verbose --pass-threshold 70
 
-k8s-smoke:  ## Smoke test rapide : 5 questions aléatoires (seuil 60%)
+k8s-smoke: k8s-check-api  ## Smoke test rapide : 5 questions aléatoires (seuil 60%)
 	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --count 5 --shuffle --pass-threshold 60
 
-k8s-smoke-no-rag:  ## Smoke test sans RAG : vérifie que l'API répond sans contexte
+k8s-smoke-no-rag: k8s-check-api  ## Smoke test sans RAG : vérifie que l'API répond sans contexte
 	python $(EVAL_SCRIPT) --url $(K8S_URL) --eval-file $(EVAL_DATA) --count 5 --no-rag --pass-threshold 60
 
 k8s-logs:  ## Logs de l'API dans K8S

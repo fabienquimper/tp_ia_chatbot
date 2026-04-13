@@ -12,42 +12,30 @@ les clés API ne doivent **jamais** être dans le code, et la latence de départ
 
 ## ✅ Checklist de validation
 
-- [ ] J'ai créé mon `.env` à partir de `.env.example` et ajouté ma clé API
-- [ ] J'ai lancé `python demo_connexion.py` et obtenu une réponse du LLM
-- [ ] J'ai noté la latence affichée pour le mode cloud
-- [ ] J'ai vérifié que le fichier `.env` **n'apparaît pas** dans `git status`
+- [ ]  J'ai créé mon `.env` à partir de `.env.example` et ajouté ma clé API
+- [ ]  J'ai lancé `python demo_connexion.py` et obtenu une réponse du LLM (LM Studio en local)
+- [ ]  J'ai lancé `python demo_connexion.py` et obtenu une réponse du LLM (LM Studio sur un serveur local)
+- [ ]  J'ai noté la latence affichée (mode local LM Studio)
+- [ ]  J'ai vérifié que le fichier `.env` **n'apparaît pas** dans `git status`
 
 ---
 
 ## 🔍 Questions de compréhension
 
 ### Niveau 1 — Observation
+
 1. Quelle latence as-tu obtenue lors de ton premier appel (`demo_connexion.py`) ? En combien de millisecondes ?
-
-   > _________________________________________________________
-
 2. Qu'affiche `python config.py` sur ton poste ? Quel mode est actif (cloud / local) et quel modèle est configuré ?
-
-   > _________________________________________________________
-
 3. Si tu ouvres ton `.env`, quelles variables y sont définies ? Laquelle serait catastrophique à exposer sur GitHub ?
 
-   > _________________________________________________________
-
 ### Niveau 2 — Analyse
+
 1. Pourquoi utilise-t-on `python-dotenv` plutôt que d'écrire `api_key = "sk-..."` directement dans le code ? Que se passerait-il avec un `git push` avec la clé en dur ?
-
-   > _________________________________________________________
-
 2. Cloud et local utilisent la **même interface** (`client.chat.completions.create`). Qu'est-ce que ça implique pour le code des étapes suivantes ?
 
-   > _________________________________________________________
-
 ### Niveau 3 — Décision
-1. Tu dois choisir entre cloud (OpenAI) et local (LM Studio) pour un chatbot interne à une banque. Quels critères guident ta décision ? Cite au moins 3 dimensions (coût, conformité, latence, confidentialité...).
 
-   > _________________________________________________________
-   > _________________________________________________________
+1. Tu dois choisir entre cloud (OpenAI) et local (LM Studio) pour un chatbot interne à une banque. Quels critères guident ta décision ? Cite au moins 3 dimensions (coût, conformité, latence, confidentialité...).
 
 ---
 
@@ -56,6 +44,7 @@ les clés API ne doivent **jamais** être dans le code, et la latence de départ
 Dans `demo_connexion.py`, change `max_tokens` à `5`. Que se passe-t-il ? La réponse est-elle complète ?
 
 **Observation :**
+
 ```
 _____________________________________________________________
 _____________________________________________________________
