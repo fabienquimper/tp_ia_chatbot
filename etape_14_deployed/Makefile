@@ -1,5 +1,7 @@
 .PHONY: help pull deploy-local deploy-vps deploy-k8s-local deploy-k8s-image \
-        k8s-setup k8s-status k8s-index-rag k8s-eval k8s-smoke k8s-logs k8s-destroy \
+        k8s-setup k8s-clean k8s-status k8s-index-rag k8s-check-api \
+        k8s-eval k8s-eval-strict k8s-eval-verbose k8s-smoke k8s-smoke-no-rag \
+        k8s-logs k8s-destroy \
         status logs stop clean registry-ls test-registry
 
 # ── Variables ─────────────────────────────────────────────────────────────────
@@ -102,6 +104,9 @@ deploy-vps:  ## Déploie sur un VPS via SSH (DEPLOY_HOST requis dans .env)
 
 k8s-setup:  ## Crée le cluster kind (ports 8080/API 3000/Grafana 9090/Prometheus)
 	./scripts/local-cloud.sh setup
+
+k8s-clean:  ## Libère le port 8080 — supprime tout cluster kind conflictuel + port-forward
+	./scripts/local-cloud.sh clean
 
 deploy-k8s-local:  ## Déploie l'app dans le cluster kind (injecte le .env)
 	./scripts/local-cloud.sh deploy

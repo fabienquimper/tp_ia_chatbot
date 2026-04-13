@@ -128,6 +128,19 @@ cmd_setup() {
     command -v kind >/dev/null 2>&1 || error "kind non installé. Voir https://kind.sigs.k8s.io/docs/user/quick-start/"
     command -v kubectl >/dev/null 2>&1 || error "kubectl non installé."
 
+    # Vérifie que le port 8080 est libre avant de tenter la création du cluster
+    if docker ps --format '{{.Ports}}' 2>/dev/null | grep -q '0.0.0.0:8080->'; then
+        local owner
+        owner=$(docker ps --format '{{.Names}}\t{{.Ports}}' | grep '0.0.0.0:8080->' | awk '{print $1}')
+        echo ""
+        echo -e "${RED}[ERROR]${NC} Le port 8080 est déjà alloué par : ${owner}"
+        echo ""
+        echo "  → Libérez-le avec : make k8s-clean"
+        echo "    (supprime le cluster conflictuel + le port-forward)"
+        echo ""
+        exit 1
+    fi
+
     # Crée le cluster
     echo "${KIND_CONFIG}" | kind create cluster --config=-
     success "Cluster créé"
@@ -384,9 +397,60 @@ cmd_deploy_local_image() {
 }
 
 cmd_destroy() {
+    # Tue le port-forward associé avant de supprimer le cluster
+    _kill_port_forward
+
     warning "Suppression du cluster '${CLUSTER_NAME}'..."
-    kind delete cluster --name "${CLUSTER_NAME}"
-    success "Cluster supprimé"
+    if kind get clusters 2>/dev/null | grep -q "^${CLUSTER_NAME}$"; then
+        kind delete cluster --name "${CLUSTER_NAME}"
+        success "Cluster '${CLUSTER_NAME}' supprimé"
+    else
+        warning "Cluster '${CLUSTER_NAME}' introuvable — rien à supprimer"
+    fi
+}
+
+# Arrête proprement le port-forward kubectl sur 8080
+_kill_port_forward() {
+    if [ -f "${PF_PID_FILE}" ]; then
+        kill "$(cat "${PF_PID_FILE}")" 2>/dev/null || true
+        rm -f "${PF_PID_FILE}"
+    fi
+    # Tue aussi tout kubectl port-forward résiduel sur ce port (PID file manquant)
+    pkill -f "kubectl port-forward.*8080" 2>/dev/null || true
+}
+
+# Libère le port 8080 : détruit tout cluster kind qui l'occupe + le port-forward.
+# À utiliser avant make k8s-setup si le port est déjà alloué.
+cmd_clean() {
+    info "Nettoyage de l'environnement K8S local (libération du port 8080)..."
+
+    # 1. Tue le port-forward kubectl
+    _kill_port_forward
+    info "Port-forward arrêté"
+
+    # 2. Détruit tous les clusters kind qui ont le port 8080 mappé
+    local found=0
+    for cluster in $(kind get clusters 2>/dev/null); do
+        if docker ps --format '{{.Names}}\t{{.Ports}}' 2>/dev/null \
+               | grep "${cluster}" | grep -q '0.0.0.0:8080->'; then
+            warning "Cluster '${cluster}' occupe le port 8080 — suppression..."
+            kind delete cluster --name "${cluster}"
+            success "Cluster '${cluster}' supprimé"
+            found=1
+        fi
+    done
+
+    # 3. Détruit aussi le cluster cible s'il existe encore (cluster sans port mapping actif)
+    if kind get clusters 2>/dev/null | grep -q "^${CLUSTER_NAME}$"; then
+        warning "Suppression du cluster cible '${CLUSTER_NAME}'..."
+        kind delete cluster --name "${CLUSTER_NAME}"
+        success "Cluster '${CLUSTER_NAME}' supprimé"
+        found=1
+    fi
+
+    [ "${found}" -eq 0 ] && info "Aucun cluster à supprimer — port 8080 déjà libre"
+
+    success "Environnement propre — lancez : make k8s-setup"
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────
@@ -396,17 +460,19 @@ case "${1:-help}" in
     deploy-local-image) cmd_deploy_local_image ;;
     index-rag)          cmd_index_rag ;;
     check-api)          cmd_check_api ;;
+    clean)              cmd_clean ;;
     status)             cmd_status ;;
     destroy)            cmd_destroy ;;
     *)
-        echo "Usage : $0 {setup|deploy|deploy-local-image|index-rag|check-api|status|destroy}"
+        echo "Usage : $0 {setup|deploy|deploy-local-image|index-rag|check-api|clean|status|destroy}"
         echo ""
         echo "  setup               — Crée le cluster kind local"
         echo "  deploy              — Déploie depuis GHCR (nécessite REGISTRY_TOKEN)"
         echo "  deploy-local-image  — Build + charge l'image locale, déploie sans GHCR"
         echo "  index-rag           — Indexe les documents RAG dans un Job K8S dédié"
         echo "  check-api           — Vérifie/restaure l'accès à l'API (port-forward si besoin)"
+        echo "  clean               — Libère le port 8080 (clusters + port-forward) avant k8s-setup"
         echo "  status              — Affiche le statut"
-        echo "  destroy             — Supprime le cluster"
+        echo "  destroy             — Supprime le cluster '${CLUSTER_NAME}'"
         ;;
 esac
