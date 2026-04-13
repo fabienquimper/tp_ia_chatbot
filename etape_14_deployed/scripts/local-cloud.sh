@@ -336,9 +336,25 @@ cmd_deploy_local_image() {
     echo ""
 
     # 2. Charger l'image dans le cluster kind (le cluster ne voit pas le daemon Docker local)
-    info "Chargement de l'image dans le cluster kind '${CLUSTER_NAME}'..."
-    kind load docker-image chatbot-api:local --name "${CLUSTER_NAME}"
-    success "Image disponible dans le cluster"
+    # Vérifie d'abord si l'image est déjà présente pour éviter un transfert inutile de ~640Mo
+    local local_digest kind_digest
+    local_digest=$(docker inspect --format='{{index .RepoDigests 0}}' chatbot-api:local 2>/dev/null \
+                   || docker inspect --format='{{.Id}}' chatbot-api:local 2>/dev/null)
+    kind_digest=$(docker exec "${CLUSTER_NAME}-control-plane" \
+                    crictl inspecti chatbot-api:local 2>/dev/null \
+                    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['status']['id'])" \
+                    2>/dev/null || echo "")
+
+    if [ -n "${kind_digest}" ] && echo "${local_digest}" | grep -q "${kind_digest:0:12}"; then
+        success "Image chatbot-api:local déjà présente dans le cluster — chargement ignoré"
+    else
+        info "Chargement de l'image dans le cluster kind '${CLUSTER_NAME}' (~640Mo, patience)..."
+        # Utilise docker save | ctr import pour avoir un retour de progression
+        docker save chatbot-api:local \
+            | docker exec -i "${CLUSTER_NAME}-control-plane" \
+                ctr -n=k8s.io images import -
+        success "Image disponible dans le cluster"
+    fi
     echo ""
 
     # 3. Namespace
