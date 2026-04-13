@@ -28,6 +28,33 @@ La différence est dans **l'origine de l'image** et **comment le déploiement es
 
 ## Mise en place commune
 
+### 0. Remplacer `{ORGANIZATION}` par ton compte GitHub
+
+Tous les manifests utilisent le placeholder `{ORGANIZATION}` pour désigner le compte ou
+l'organisation GitHub qui héberge l'image sur GHCR (`ghcr.io/{ORGANIZATION}/chatbot-api`).
+
+**Avant toute chose, remplace-le dans ces fichiers :**
+
+| Fichier | Ligne concernée |
+|---|---|
+| `k8s/chatbot-deployment.yaml` | `image: ghcr.io/{ORGANIZATION}/chatbot-api:latest` |
+| `k8s/kustomization.yaml` | `name: ghcr.io/{ORGANIZATION}/chatbot-api` |
+| `overlays/local-image/kustomization.yaml` | `name: ghcr.io/{ORGANIZATION}/chatbot-api` |
+
+Exemple avec `sed` (remplace en une commande) :
+
+```bash
+# Depuis le dossier etape_14_deployed/
+find k8s/ overlays/ -name "*.yaml" \
+  -exec sed -i 's|{ORGANIZATION}|moncompte|g' {} +
+```
+
+> **Pourquoi un placeholder et pas ton nom directement ?**
+> Pour que le dépôt reste partageable. Chacun adapte localement ;
+> le placeholder `{ORGANIZATION}` reste dans la version committée.
+
+---
+
 ### 1. Copier le .env de l'étape 13
 
 ```bash

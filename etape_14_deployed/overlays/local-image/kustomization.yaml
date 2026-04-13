@@ -3,6 +3,19 @@
 # Ce fichier patche la base (k8s/) pour utiliser chatbot-api:local
 # au lieu de ghcr.io/{ORGANIZATION}/chatbot-api:latest.
 #
+# ┌─────────────────────────────────────────────────────────────────────────┐
+# │  RAPPEL : qu'est-ce qu'un "overlay" Kustomize ?                         │
+# │                                                                         │
+# │  Kustomize fonctionne en deux couches :                                 │
+# │    • base/     : les manifests "canoniques", identiques en prod et      │
+# │                  en local (k8s/)                                        │
+# │    • overlay/  : des patches qui s'appliquent PAR-DESSUS la base,       │
+# │                  sans la modifier. Chaque environnement a son overlay.  │
+# │                                                                         │
+# │  Ici l'overlay "local-image" adapte le déploiement pour Kind            │
+# │  (cluster K8S local) : image locale, pas de GHCR, pas de TLS.          │
+# └─────────────────────────────────────────────────────────────────────────┘
+#
 # Prérequis :
 #   docker build -t chatbot-api:local ../etape_13_deployable/
 #   kind load docker-image chatbot-api:local --name chatbot-local
@@ -15,29 +28,107 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# ─── BASE ────────────────────────────────────────────────────────────────────
+# On réutilise l'intégralité des manifests définis dans k8s/ sans les copier.
+# k8s/ contient les ressources suivantes (voir k8s/kustomization.yaml) :
+#
+#   Namespace          : espace de nommage isolé "chatbot" — cloisonne toutes
+#                        les ressources du projet pour éviter les collisions
+#                        avec d'autres apps sur le même cluster.
+#
+#   ConfigMap          : fichier de configuration injecté en variable d'env
+#                        dans les pods (URL de la base, niveau de log, etc.).
+#                        Séparé du code pour pouvoir changer la config sans
+#                        reconstruire l'image Docker.
+#
+#   PersistentVolumeClaim : réservation de stockage persistant (ex. base SQLite).
+#                        Survit aux redémarrages de pods — sans ça, chaque
+#                        redémarrage efface les données.
+#
+#   Deployment         : décrit COMMENT faire tourner l'application :
+#                          - quelle image Docker utiliser
+#                          - combien de réplicas (instances)
+#                          - variables d'env, volumes montés
+#                          - liveness/readiness probes (K8S sait si le pod est sain)
+#                        C'est K8S qui crée/supprime/remplace les Pods pour
+#                        atteindre l'état décrit ici.
+#
+#   Service            : point d'entrée réseau stable vers les Pods du Deployment.
+#                        Les Pods ont des IPs éphémères qui changent ; le Service
+#                        a une IP fixe et fait le load-balancing entre eux.
+#                        (analogue : un DNS interne au cluster)
+#
+#   HorizontalPodAutoscaler : ajuste automatiquement le nombre de réplicas du
+#                        Deployment selon la charge CPU/mémoire. Entre 1 et N pods
+#                        selon le trafic.
+#
+#   Ingress            : règles de routage HTTP(S) vers les Services depuis
+#                        l'extérieur du cluster. C'est la "porte d'entrée" :
+#                          - quel nom de domaine → quel Service
+#                          - terminaison TLS (certificats HTTPS)
+#                          - redirections, path rewrites…
+#                        Nécessite un Ingress Controller (nginx ici) installé
+#                        séparément sur le cluster.
+#
+#   Prometheus         : scrape les métriques exposées par l'app (/metrics)
+#                        et les stocke dans une base de séries temporelles.
+#
+#   Grafana            : interface web qui visualise les métriques Prometheus
+#                        sous forme de dashboards et d'alertes.
+#
 resources:
-  - ../../k8s   # pointe vers k8s/ — réutilise tous les manifests sans les dupliquer
+  - ../../k8s
 
-# Remplace l'image GHCR par l'image buildée localement
+# ─── SUBSTITUTION D'IMAGE ────────────────────────────────────────────────────
+# Kustomize cherche dans tous les manifests de la base les conteneurs qui
+# utilisent l'image "ghcr.io/{ORGANIZATION}/chatbot-api" et remplace le nom
+# et le tag. C'est une substitution textuelle sur l'ensemble du graphe de
+# ressources — pas besoin de modifier chaque fichier à la main.
+#
+#   En prod  : ghcr.io/{ORGANIZATION}/chatbot-api:latest  (poussée par CI/CD)
+#   En local : chatbot-api:local                          (buildée avec docker build)
 images:
   - name: ghcr.io/{ORGANIZATION}/chatbot-api   # doit correspondre à chatbot-deployment.yaml
     newName: chatbot-api                        # image locale (docker build)
     newTag: local                               # tag local (docker build -t chatbot-api:local)
 
-# Patches sur le Deployment :
-#   - imagePullPolicy: Never → K8S utilise l'image déjà dans le cache du nœud kind
-#   - supprime imagePullSecrets → plus besoin de credentials GHCR
+# ─── PATCHES JSON PATCH (RFC 6902) ───────────────────────────────────────────
+# Chaque patch cible une ressource précise (kind + name) et applique une liste
+# d'opérations atomiques sur le manifest YAML vu comme un document JSON.
+# Opérations disponibles : add, remove, replace, copy, move, test.
+# Le "path" est un JSON Pointer : /a/b/0 = clé "a" → clé "b" → 1er élément.
+#
 patches:
-  # Deployment : image locale + pas de pull depuis registry
+
+  # ── Patch 1 : Deployment "chatbot-api" ──────────────────────────────────
+  # Cible : le Deployment de l'application (défini dans k8s/chatbot-deployment.yaml)
+  # Problème à résoudre en local : Kind (cluster K8S local) ne peut pas aller
+  # chercher l'image sur GHCR (internet). On lui dit d'utiliser l'image déjà
+  # présente dans son cache interne (chargée via `kind load docker-image`).
   - target:
       kind: Deployment
       name: chatbot-api
     patch: |-
+      # imagePullPolicy: Never
+      #   Par défaut K8S essaie toujours de vérifier/télécharger l'image depuis
+      #   le registry. "Never" lui dit de n'utiliser QUE ce qu'il a en cache local.
+      #   Sans ça : ErrImagePull / ImagePullBackOff même si l'image est chargée.
       - op: replace
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Never
+
+      # Suppression des imagePullSecrets
+      #   En prod le Deployment référence un Secret K8S contenant les credentials
+      #   GHCR pour que K8S puisse pull l'image privée. En local cette clé n'existe
+      #   pas (pas de pull réseau), la garder ferait échouer le scheduling du pod.
       - op: remove
         path: /spec/template/spec/imagePullSecrets
+
+      # Augmentation du timeout des probes
+      #   Les liveness/readiness probes vérifient que le pod est vivant et prêt.
+      #   En local le démarrage est plus lent (CPU partagé, no SSD NVMe dédié).
+      #   Sans ce patch K8S peut tuer le pod trop tôt (CrashLoopBackOff) avant
+      #   que l'app ait fini de démarrer.
       - op: add
         path: /spec/template/spec/containers/0/livenessProbe/timeoutSeconds
         value: 10
@@ -45,15 +136,29 @@ patches:
         path: /spec/template/spec/containers/0/readinessProbe/timeoutSeconds
         value: 10
 
-  # Ingress : supprime host et TLS (inutiles en local kind)
+  # ── Patch 2 : Ingress "chatbot-ingress" ─────────────────────────────────
+  # Cible : l'Ingress nginx (défini dans k8s/ingress.yaml)
+  # En prod l'Ingress gère le TLS (certificat Let's Encrypt) et un nom de
+  # domaine public. En local Kind n'a ni DNS public ni certificat — ces champs
+  # feraient échouer ou compliquer l'accès. On les supprime pour un accès HTTP
+  # simple via localhost / NodePort.
   - target:
       kind: Ingress
       name: chatbot-ingress
     patch: |-
+      # Supprime le bloc TLS entier (plus de HTTPS en local)
       - op: remove
         path: /spec/tls
+
+      # Supprime le host (ex: chatbot.example.com) de la première règle de routage.
+      # Sans host explicite nginx répond à toutes les requêtes entrantes, ce qui
+      # est exactement ce qu'on veut en local (accès via localhost).
       - op: remove
         path: /spec/rules/0/host
+
+      # Désactive les redirections HTTPS forcées.
+      # Le "~1" dans le path est l'encodage JSON Pointer du "/" dans le nom
+      # de l'annotation (nginx.ingress.kubernetes.io/ssl-redirect).
       - op: replace
         path: /metadata/annotations/nginx.ingress.kubernetes.io~1ssl-redirect
         value: "false"
