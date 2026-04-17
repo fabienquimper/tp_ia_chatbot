@@ -31,7 +31,7 @@ SYSTEM_PROMPT = (
 )
 
 
-def get_reply(message: str, history: List[MessageItem]) -> Tuple[str, int]:
+def get_reply(message: str, history: List[MessageItem]) -> Tuple[str, int, int]:
     """
     Envoie un message au LLM avec l'historique de la conversation.
 
@@ -40,7 +40,7 @@ def get_reply(message: str, history: List[MessageItem]) -> Tuple[str, int]:
         history: L'historique des messages précédents.
 
     Returns:
-        Tuple (réponse du LLM, nombre de tokens de complétion).
+        Tuple (réponse du LLM, tokens de complétion, tokens de prompt).
     """
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     for item in history:
@@ -55,5 +55,6 @@ def get_reply(message: str, history: List[MessageItem]) -> Tuple[str, int]:
     )
 
     reply = response.choices[0].message.content or ""
-    tokens = response.usage.completion_tokens if response.usage else 0
-    return reply, tokens
+    completion_tokens = response.usage.completion_tokens if response.usage else 0
+    prompt_tokens = response.usage.prompt_tokens if response.usage else 0
+    return reply, completion_tokens, prompt_tokens

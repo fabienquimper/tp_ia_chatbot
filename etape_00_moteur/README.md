@@ -12,6 +12,34 @@
 
 ## Installation
 
+```
+# Créer un environemnet virtuel
+python -m venv venv
+source venv/bin/active
+```
+
+```
+# Installer LM Studio
+./LM-Studio-0.4.4-1-x64.AppImage 
+# /!\ Attention parfois il faut modifier une option
+[50827:0417/124432.581745:FATAL:sandbox/linux/suid/client/setuid_sandbox_host.cc:166] The SUID sandbox helper binary was found, but is not configured correctly. Rather than run without sandboxing I'm aborting now. You need to make sure that /tmp/.mount_LM-Stu4qQ6d5/chrome-sandbox is owned by root and has mode 4755.
+Trappe pour point d'arrêt et de trace (core dumped)
+fabien@fabien-B760M-DS3H-AX-DDR4:~/Téléchargements$ 
+fabien@fabien-B760M-DS3H-AX-DDR4:~/Téléchargements$ sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+kernel.apparmor_restrict_unprivileged_userns = 0
+fabien@fabien-B760M-DS3H-AX-DDR4:~/Téléchargements$ ./LM-Studio-0.4.4-1-x64.AppImage 
+
+# Ou lancer LM Studio sans sandbox
+./LM-Studio-0.4.4-1-x64.AppImage --no-sandbox
+
+# Ou gérer via un "bouble click" sous Ubuntu
+sudo apt install libfuse2
+
+# Installer un modèle simple
+mistralai/ministral-3-3b
+```
+
+
 ```bash
 cd etape_00_moteur
 pip install -r requirements.txt

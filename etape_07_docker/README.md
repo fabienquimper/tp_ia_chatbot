@@ -62,10 +62,10 @@ curl http://localhost:8000/health
 4. Testez `/chat` avec "Comment je m'appelle ?"
 5. Vérifiez `/history/{session_id}`
 
-`
-Exemple http://localhost:8000/history/default
+```json
+// Exemple http://localhost:8000/history/default
 {"session_id":"default","messages":[{"role":"user","content":"Je m'appelle Fabien. "},{"role":"assistant","content":"Bonjour Fabien, comment puis-je vous aider aujourd'hui ?"},{"role":"user","content":"Comment est-ce que je m'appelle?"},{"role":"assistant","content":"Vous vous appelez Fabien."}],"count":4}
-`
+```
 
-6. Buildez et lancez avec Docker
+6. Buildez et lancez avec Docker (`docker build -t chatbot . && docker run -p 8000:8000 --env-file .env chatbot`)
 7. Ajoutez un endpoint `DELETE /history/{session_id}`

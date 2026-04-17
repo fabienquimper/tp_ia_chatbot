@@ -12,10 +12,10 @@ L'enjeu : prendre des décisions techniques basées sur des chiffres, pas des in
 
 ## ✅ Checklist de validation
 
-- [ ] J'ai lancé `mesurer_kpis.py` et posé au moins 5 questions
+- [ ] J'ai lancé `01_mesurer_kpis.py` et posé au moins 5 questions
 - [ ] J'ai tapé `stats` et lu le résumé de session
 - [ ] J'ai noté mon P95 personnel
-- [ ] J'ai lancé `kpis_comparatif.py` et obtenu des résultats chiffrés
+- [ ] J'ai lancé `02_kpis_comparatif.py` et obtenu des résultats chiffrés
 
 ---
 

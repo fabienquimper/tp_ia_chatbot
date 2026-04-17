@@ -3,6 +3,7 @@
 Ajoute l'instrumentation complète avec métriques Prometheus.
 """
 import os, time, asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
@@ -15,23 +16,11 @@ from .metrics import (
     APP_INFO, ACTIVE_SESSIONS, CONTEXT_SIZE
 )
 
-app = FastAPI(
-    title="TP Chatbot API — Monitoring",
-    description="Chatbot avec métriques Prometheus (Étape 08)",
-    version="2.0.0"
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 START_TIME = time.time()
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Gestionnaire de cycle de vie — remplace @app.on_event('startup')."""
     init_db()
     APP_INFO.info({
         "version": "2.0.0",
@@ -46,6 +35,21 @@ async def startup():
             ACTIVE_SESSIONS.set(len(sessions))
             await asyncio.sleep(15)
     asyncio.create_task(update_loop())
+    yield
+
+app = FastAPI(
+    title="TP Chatbot API — Monitoring",
+    description="Chatbot avec métriques Prometheus (Étape 08)",
+    version="2.0.0",
+    lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/health", response_model=HealthResponse, tags=["Monitoring"])
 async def health():
@@ -69,12 +73,8 @@ async def chat(req: ChatRequest):
     t0 = time.time()
 
     try:
-        reply, tokens_out = get_reply(req.message, history)
+        reply, tokens_out, tokens_in = get_reply(req.message, history)
         latency = time.time() - t0
-
-        # Estimation tokens input (approximation)
-        tokens_in = sum(len(m.content.split()) * 1.3 for m in history) + len(req.message.split()) * 1.3
-        tokens_in = int(tokens_in)
 
         record_request(MODEL, "success", latency, tokens_in, tokens_out)
 

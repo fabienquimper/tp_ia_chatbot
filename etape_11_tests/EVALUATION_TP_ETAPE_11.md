@@ -62,7 +62,7 @@ test_e2e         → vrai serveur HTTP       (vrai LLM, vraie DB)
 ## 🧪 Mini-expérience guidée
 
 Dans `tests/test_unit.py`, ajoute un test qui vérifie qu'un message contenant `<script>`
-est bien sanitisé par `sanitize_message()`. Lance-le avec `pytest tests/test_unit.py -v -k "xss"`.
+est bien bloqué par `sanitize()`. Lance-le avec `pytest tests/test_unit.py -v -k "xss"`.
 
 **Test ajouté :**
 ```python

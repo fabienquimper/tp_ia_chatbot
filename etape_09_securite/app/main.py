@@ -3,6 +3,7 @@
 Rate limiting, prompt guard, JWT authentication, CORS restrictif.
 """
 import os, time
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
@@ -21,10 +22,19 @@ ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8080"
 ).split(",")
 
+START_TIME = time.time()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Gestionnaire de cycle de vie — remplace @app.on_event('startup')."""
+    init_db()
+    yield
+
 app = FastAPI(
     title="TP Chatbot API — Sécurisée",
     description="Chatbot avec rate limiting, prompt guard et JWT (Étape 09)",
-    version="3.0.0"
+    version="3.0.0",
+    lifespan=lifespan,
 )
 
 # ── Rate Limiter ──────────────────────────────────────────────────────────
@@ -39,12 +49,6 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
-
-START_TIME = time.time()
-
-@app.on_event("startup")
-async def startup():
-    init_db()
 
 # ── Auth endpoints ────────────────────────────────────────────────────────
 

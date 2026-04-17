@@ -4,6 +4,7 @@ Combine : LangChain + RAG optionnel + Prometheus monitoring + JWT security.
 Version production-ready.
 """
 import os, time, asyncio, logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
@@ -34,34 +35,11 @@ ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8080"
 ).split(",")
 
-app = FastAPI(
-    title="TP Chatbot API — Deployable",
-    description=(
-        "Chatbot production-ready : LangChain + RAG + Prometheus + JWT\n\n"
-        "**Étape 13** — Version complète combinant toutes les fonctionnalités."
-    ),
-    version=VERSION,
-    docs_url="/docs",
-    redoc_url="/redoc",
-)
-
-# ── Middlewares ────────────────────────────────────────────────────────────
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Authorization", "Content-Type"],
-)
-
 START_TIME = time.time()
 
-
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Gestionnaire de cycle de vie — remplace @app.on_event('startup')."""
     init_db()
 
     # Initialisation RAG (optionnel)
@@ -84,6 +62,31 @@ async def startup():
 
     asyncio.create_task(_metrics_loop())
     logger.info("Démarrage — modèle: %s | RAG: %s", MODEL, rag_available)
+    yield
+
+app = FastAPI(
+    title="TP Chatbot API — Deployable",
+    description=(
+        "Chatbot production-ready : LangChain + RAG + Prometheus + JWT\n\n"
+        "**Étape 13** — Version complète combinant toutes les fonctionnalités."
+    ),
+    version=VERSION,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan,
+)
+
+# ── Middlewares ────────────────────────────────────────────────────────────
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
+)
 
 
 # ── Monitoring endpoints ───────────────────────────────────────────────────
@@ -92,7 +95,7 @@ async def startup():
 async def health():
     """Health check public (pas d'authentification requise)."""
     update_system_metrics()
-    llm_reachable = await asyncio.get_event_loop().run_in_executor(None, check_llm_reachable)
+    llm_reachable = await asyncio.to_thread(check_llm_reachable)
     return HealthResponse(
         status="ok",
         model=MODEL,

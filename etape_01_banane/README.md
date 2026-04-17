@@ -33,25 +33,37 @@ cp .env.example .env
 
 ## Utilisation
 
+### Version 1 — Sans historique (amnésie totale, même en session)
 ```bash
-python chatbot_naif.py
+python 01_chatbot_naif_no_message_stack.py
+```
+
+### Version 2 — Avec historique de session (amnésie au redémarrage)
+```bash
+python 02_chatbot_naif.py
 ```
 
 ## Expériences à faire
 
-### Expérience 1 — La mémoire en session
-1. Lancez le chatbot
+### Expérience 1 — Amnésie en session (version 1)
+1. Lancez `01_chatbot_naif_no_message_stack.py`
+2. Dites : `Je m'appelle [votre prénom]`
+3. Demandez : `Quel est mon prénom ?` → Il ne sait **déjà** plus ✗
+4. CONSTAT : chaque appel est indépendant, aucun historique côté client
+
+### Expérience 2 — Mémoire en session (version 2)
+1. Lancez `02_chatbot_naif.py`
 2. Dites : `Je m'appelle [votre prénom] et j'adore [un truc]`
 3. Demandez : `Quel est mon prénom ?` → Il répond correctement ✓
 4. Quittez avec `quit`
 
-### Expérience 2 — L'amnésie après redémarrage
-1. Relancez le chatbot
+### Expérience 3 — L'amnésie après redémarrage (version 2)
+1. Relancez `02_chatbot_naif.py`
 2. Demandez : `Quel est mon prénom ?` → Il ne sait plus ✗
-3. CONSTAT : La "mémoire" ne persiste pas entre les sessions
+3. CONSTAT : la "mémoire" ne persiste pas entre les sessions
 
-### Expérience 3 — Inspecter le code
-Regardez la liste `msgs` dans le code :
+### Expérience 4 — Inspecter le code
+Comparez les deux fichiers. Dans `02_chatbot_naif.py` :
 ```python
 msgs = [{"role": "system", "content": "..."}]
 # On ajoute user + assistant à chaque tour
@@ -64,8 +76,8 @@ C'est NOUS qui envoyons tout l'historique à chaque appel.
 
 ```
 etape_01_banane/
-├── chatbot_naif.py    ← Le chatbot minimal (~10 lignes de logique)
-├── prompts_demo.txt   ← Script de démo illustrant l'amnésie
+├── 01_chatbot_naif_no_message_stack.py  ← Amnésie totale (sans historique)
+├── 02_chatbot_naif.py                   ← Avec historique de session
 ├── .env.example       ← Template d'environnement
 ├── requirements.txt   ← Dépendances
 └── README.md          ← Ce fichier

@@ -13,10 +13,10 @@ Deux stratégies s'affrontent : fenêtre glissante (simple, prévisible) vs rés
 
 ## ✅ Checklist de validation
 
-- [ ] J'ai lancé `memory_window.py` avec `MAX_HISTORY=4`
+- [ ] J'ai lancé `01_memory_window.py` avec `MAX_HISTORY=4`
 - [ ] J'ai posé 10 questions sur des sujets différents et tapé `fenetre`
 - [ ] J'ai vérifié que les premières questions avaient disparu de la fenêtre
-- [ ] J'ai lancé `memory_summary.py` et comparé ce qu'il retient
+- [ ] J'ai lancé `02_memory_summary.py` et comparé ce qu'il retient
 - [ ] J'ai changé `MAX_HISTORY` à 2 et observé l'effet sur la cohérence
 
 ---

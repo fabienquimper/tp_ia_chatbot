@@ -38,8 +38,9 @@ class ChatUser(HttpUser):
         """Initialise la session de l'utilisateur."""
         self.session_id = f"locust-{uuid.uuid4().hex[:8]}"
         self.message_count = 0
-        network_timeout = 60.0
-        connection_timeout = 10.0
+        # Timeout généreux car le LLM peut être lent (cloud ou local)
+        self.client.timeout = 60.0
+
     @task(5)  # Tâche principale (poids 5 = 5x plus fréquente)
     def send_message(self):
         """Envoie un message aléatoire."""

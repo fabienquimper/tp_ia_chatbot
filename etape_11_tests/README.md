@@ -95,7 +95,7 @@ etape_11_tests/
 - Font de vrais appels à Claude API → peuvent être lents ou échouer si l'API est lente.
 - Le `ReadTimeout` que tu as vu est normal : Claude a mis > 30s à répondre.
 
-`pytest tests/test_unit.py`
+`pytest tests/test_e2e.py`
 
 ## conftest.py — La colle
 - `use_temp_db` (autouse) : chaque test utilise une DB SQLite isolée dans tmp_path.

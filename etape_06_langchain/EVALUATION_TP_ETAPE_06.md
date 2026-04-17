@@ -23,15 +23,15 @@ une complexité inutile ?
 ## 🔍 Questions de compréhension
 
 ### Niveau 1 — Observation
-1. Combien de lignes compte `chatbot_langchain.py` vs `memory_window.py` (étape 03) ? Quelle classe LangChain remplace la gestion manuelle de `msgs` ?
+1. Combien de lignes compte `chatbot_langchain.py` vs `01_memory_window.py` (étape 03) ? Quelle structure LangChain (prompt + chain LCEL) remplace la construction manuelle de `msgs` ?
 
    > _________________________________________________________
 
-2. Quel paramètre `k` est configuré dans `ConversationBufferWindowMemory` ? À quoi correspond-il par rapport à `MAX_HISTORY` ?
+2. Dans `chatbot_langchain.py`, la variable `K = 4` contrôle la fenêtre glissante. À quoi correspond-elle par rapport à `MAX_HISTORY` de l'étape 03 ? Retrouve la ligne où `history` est tronquée.
 
    > _________________________________________________________
 
-3. Dans `chatbot_langchain_rag.py`, quelle classe LangChain orchestre la recherche ChromaDB + la génération LLM en une seule ligne ?
+3. Dans `chatbot_langchain_rag.py`, quelle syntaxe LCEL orchestre la recherche ChromaDB + la génération LLM ? (Cherche la ligne avec `chain = prompt | llm | ...`)
 
    > _________________________________________________________
 
@@ -40,7 +40,7 @@ une complexité inutile ?
 
    > _________________________________________________________
 
-2. `ConversationalRetrievalChain` enchaîne deux appels LLM. Pourquoi deux ? Que fait chacun ? Quel impact sur la latence et le coût ?
+2. Dans `chatbot_langchain_rag.py`, on fait d'abord un `retrieve(q)` puis un `chain.invoke(...)`. Ce sont deux opérations distinctes. Quel est l'avantage de les séparer (vs une chaîne tout-en-un comme `ConversationalRetrievalChain`) ? Quel impact sur la lisibilité et le débogage ?
 
    > _________________________________________________________
 
@@ -54,10 +54,10 @@ une complexité inutile ?
 
 ## 🧪 Mini-expérience guidée
 
-Dans `chatbot_langchain.py`, change `k=4` en `k=1` dans `ConversationBufferWindowMemory`.
-Conduis 5 échanges et observe la cohérence. Remets `k=8` et compare.
+Dans `chatbot_langchain.py`, trouve la ligne `K = 4` et change-la en `K = 1`.
+Conduis 5 échanges et observe la cohérence. Remets `K = 4` et compare.
 
-**Comportement avec k=1 :**
+**Comportement avec K=1 :**
 ```
 _____________________________________________________________
 ```

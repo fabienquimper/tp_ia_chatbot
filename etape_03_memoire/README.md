@@ -20,23 +20,23 @@ cp .env.example .env
 
 ## Scripts
 
-### memory_window.py — Fenêtre glissante simple
+### `01_memory_window.py` — Fenêtre glissante simple
 ```bash
-python memory_window.py
+python 01_memory_window.py
 ```
 Commandes : `fenetre`, `reset`, `quit`
 
-### memory_summary.py — Résumé automatique (avancé)
+### `02_memory_summary.py` — Résumé automatique (avancé)
 ```bash
-MAX_HISTORY=6 python memory_summary.py
+MAX_HISTORY=6 python 02_memory_summary.py
 ```
 
 ## Exercice
-1. Lancez `memory_window.py` avec `MAX_HISTORY=4`
+1. Lancez `01_memory_window.py` avec `MAX_HISTORY=4`
 2. Posez 10 questions sur des sujets différents
 3. Tapez `fenetre` pour voir ce qui est retenu
 4. Vérifiez que les premières questions sont oubliées
-5. Comparez avec `memory_summary.py` : que retient-il ?
+5. Comparez avec `02_memory_summary.py` : que retient-il ?
 
 ## Variable d'environnement
 ```

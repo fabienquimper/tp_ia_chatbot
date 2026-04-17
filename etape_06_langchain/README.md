@@ -4,12 +4,13 @@
 Refactoriser le code précédent avec LangChain. Swap Cloud/Local en 1 ligne.
 
 ## Ce qui change
-| Avant (manuel) | Après (LangChain) |
-|----------------|-------------------|
-| `history[-8:]` | `ConversationBufferWindowMemory(k=4)` |
-| Boucle while + msgs | `chain.predict(input=q)` |
+| Avant (manuel) | Après (LangChain LCEL) |
+|----------------|------------------------|
+| `history[-MAX_HISTORY:]` | `K = 4` + `history[-K * 2:]` via LCEL |
+| Construction manuelle de `msgs` | `ChatPromptTemplate` + `MessagesPlaceholder` |
+| `client.chat.completions.create(...)` | `chain.invoke({"history": ..., "input": q})` |
 | Config OpenAI/Local | `ChatOpenAI` / `ChatOllama` en 1 ligne |
-| RAG manuel | `ConversationalRetrievalChain` |
+| RAG manuel (retrieve + inject) | `retrieve()` + `chain.invoke()` en LCEL |
 
 ## Installation
 ```bash

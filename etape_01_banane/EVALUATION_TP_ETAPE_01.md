@@ -12,7 +12,7 @@ est une illusion que tu crées en renvoyant tout l'historique à chaque requête
 
 ## ✅ Checklist de validation
 
-- [ ] J'ai lancé `chatbot_naif.py` et eu une vraie conversation
+- [ ] J'ai lancé `02_chatbot_naif.py` et eu une vraie conversation
 - [ ] J'ai dit mon prénom, puis demandé "Quel est mon prénom ?" → réponse correcte
 - [ ] J'ai quitté (`quit`) et relancé → vérifié que le bot ne se souvient plus
 - [ ] J'ai observé comment la liste `msgs` grandit à chaque tour dans le code

@@ -1,4 +1,5 @@
 import os, time
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -6,15 +7,16 @@ from .models import ChatRequest, ChatResponse, HealthResponse, HistoryResponse
 from .database import init_db, save_message, load_history
 from .llm import get_reply, MODEL
 
-app = FastAPI(title="TP Chatbot — Tests", version="1.0.0")
-
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-
 START_TIME = time.time()
 
-@app.on_event("startup")
-async def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
+    yield
+
+app = FastAPI(title="TP Chatbot — Tests", version="1.0.0", lifespan=lifespan)
+
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 @app.get("/health", response_model=HealthResponse)
 async def health():
