@@ -16,7 +16,8 @@ from config import CONFIG, choose_mode
 
 mode = choose_mode()
 cfg = CONFIG[mode]
-CHROMA_PATH = os.environ.get("CHROMA_PATH", "../etape_05_rag/chroma_db")
+_HERE = os.path.dirname(os.path.abspath(__file__))
+CHROMA_PATH = os.environ.get("CHROMA_PATH", os.path.join(_HERE, "..", "etape_05_rag", "chroma_db"))
 COLLECTION_NAME = "techcorp_docs"
 
 # ── LLM ──────────────────────────────────────────────────────────────────────

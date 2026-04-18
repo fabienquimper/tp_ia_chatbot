@@ -1,4 +1,4 @@
-version: "3.9"
+# version: "3.9"  # Obsolète depuis Docker Compose v2 — supprimé
 # ── Dev : stack locale complète ───────────────────────────────────────────
 # Usage : docker compose up --build
 # Accès : API http://localhost:8000/docs | Grafana http://localhost:3000

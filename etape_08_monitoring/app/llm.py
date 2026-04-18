@@ -16,7 +16,7 @@ MODEL = os.environ.get("CLOUD_MODEL", os.environ.get("MODEL", "gpt-4o-mini"))
 LOCAL_MODEL = os.environ.get("LOCAL_MODEL", "mistral-7b-instruct")
 LOCAL_BASE_URL = os.environ.get("LOCAL_BASE_URL", "http://localhost:1234/v1")
 
-if MODE == "local":
+if MODE != "cloud":
     _model = LOCAL_MODEL
     _client = OpenAI(base_url=LOCAL_BASE_URL, api_key="lm-studio")
 else:

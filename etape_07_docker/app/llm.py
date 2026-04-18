@@ -16,12 +16,14 @@ MAX_HISTORY = int(os.environ.get("MAX_HISTORY", "8"))
 
 SYSTEM_PROMPT = "Tu es un assistant utile et concis. Réponds en français."
 
-if MODE == "local":
+if MODE != "cloud":
     _model = LOCAL_MODEL
     _client = openai.OpenAI(base_url=LOCAL_BASE_URL, api_key="lm-studio")
 else:
     _model = MODEL
     _client = openai.OpenAI(api_key=API_KEY)
+
+MODEL = _model  # modèle effectivement utilisé (local ou cloud)
 
 
 def get_reply(message: str, history: List[MessageItem]) -> tuple[str, int]:

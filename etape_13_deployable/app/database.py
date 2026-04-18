@@ -7,7 +7,8 @@ import sqlite3
 from typing import List
 from .models import MessageItem
 
-DB_PATH = os.environ.get("DB_PATH", "/app/data/chat.db")
+_DEFAULT_DB = os.path.join(os.path.dirname(__file__), "..", "data", "chat.db")
+DB_PATH = os.environ.get("DB_PATH", _DEFAULT_DB)
 
 
 def get_connection() -> sqlite3.Connection:

@@ -39,7 +39,7 @@ C'est la syntaxe LCEL (LangChain Expression Language). Le | (pipe) connecte les 
 chain = prompt | llm
 
 print(f"\n=== Chatbot LangChain — Étape 06 ===")
-print(f"Mémoire : 4 échanges (ConversationBufferWindowMemory)")
+print(f"Mémoire : fenêtre glissante K={K} échanges (LCEL)")
 print("Commandes : 'memoire' (voir historique), 'reset' (vider), 'quit'\n")
 
 try:

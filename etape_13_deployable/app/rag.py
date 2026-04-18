@@ -10,7 +10,8 @@ from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
-CHROMA_PATH = os.environ.get("CHROMA_PATH", "/app/data/chroma_db")
+_DEFAULT_CHROMA = os.path.join(os.path.dirname(__file__), "..", "data", "chroma_db")
+CHROMA_PATH = os.environ.get("CHROMA_PATH", _DEFAULT_CHROMA)
 COLLECTION_NAME = os.environ.get("RAG_COLLECTION", "chatbot_docs")
 RAG_TOP_K = int(os.environ.get("RAG_TOP_K", "3"))
 

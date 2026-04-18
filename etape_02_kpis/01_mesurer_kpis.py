@@ -65,7 +65,7 @@ def print_session_summary():
     print(f"  ║ Latence P95     : {p95:.3f}s")
     print(f"  ║ Tokens totaux   : {session_stats['total_prompt_tokens']} in / {session_stats['total_completion_tokens']} out")
     print(f"  ║ Coût total      : {cost_str}")
-    print(f"  ╚{'='*42}╝\n")
+    print(f"  ╚{'═'*52}╝\n")
 
 
 print(f"=== Chatbot avec KPIs — Étape 02 ===")

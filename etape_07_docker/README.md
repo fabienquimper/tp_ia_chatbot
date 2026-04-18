@@ -36,6 +36,12 @@ docker build -t chatbot .
 docker run -p 8000:8000 --env-file .env chatbot
 ```
 
+Attention aussi à bien "stopper" les processus ou demander à docker de la faire par "défaut"
+
+```
+docker update --restart=no
+```
+
 ### Avec Docker Compose
 ```bash
 docker-compose up --build

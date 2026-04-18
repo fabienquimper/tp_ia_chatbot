@@ -6,7 +6,9 @@ Vérifier que le chatbot tient la charge avec 100 utilisateurs simultanés.
 ## Installation
 ```bash
 pip install -r requirements.txt
-# L'API doit être lancée (étape 07 ou suivantes)
+# L'API doit être lancée — utilisez étape 07 ou 08 (sans authentification)
+# ⚠ L'étape 09 requiert un token JWT : le locustfile ne gère pas le login,
+#   80% des requêtes échoueront avec HTTP 401 si vous pointez sur étape 09+.
 ```
 
 ## Scénarios de test

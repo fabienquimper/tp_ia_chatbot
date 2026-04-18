@@ -116,7 +116,7 @@ nodes:
         hostPort: 3000      # Grafana  → http://localhost:3000
         protocol: TCP
       - containerPort: 30090
-        hostPort: 9090      # Prometheus → http://localhost:9090
+        hostPort: 9093      # Prometheus → http://localhost:9093 (9090 occupé par process orphelin)
         protocol: TCP
 EOF
 )
@@ -151,14 +151,15 @@ cmd_setup() {
     kubectl rollout status deployment/ingress-nginx-controller -n ingress-nginx --timeout=120s
     success "Ingress Controller prêt"
 
-    # Install cert-manager (TLS local)
-    info "Installation de cert-manager..."
-    # v1.14.x = dernière version compatible avec Kubernetes 1.29
-    # (latest utilise selectableFields qui requiert K8s 1.31+)
-    kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.7/cert-manager.yaml
-    kubectl rollout status deployment/cert-manager -n cert-manager --timeout=120s
-    kubectl rollout status deployment/cert-manager-webhook -n cert-manager --timeout=120s
-    success "cert-manager prêt"
+    # Install cert-manager (TLS local — optionnel, peut échouer si GitHub injoignable)
+    info "Installation de cert-manager (optionnel)..."
+    if kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.7/cert-manager.yaml 2>/dev/null; then
+        kubectl rollout status deployment/cert-manager -n cert-manager --timeout=120s 2>/dev/null || true
+        kubectl rollout status deployment/cert-manager-webhook -n cert-manager --timeout=120s 2>/dev/null || true
+        success "cert-manager prêt"
+    else
+        warning "cert-manager non installé (GitHub injoignable ou timeout) — TLS désactivé, l'app fonctionne en HTTP"
+    fi
 
     success "Cluster '${CLUSTER_NAME}' opérationnel !"
     info "API sera accessible sur : http://127.0.0.1:8080  (port-forward auto si WSL2)"
